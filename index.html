@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ada Liu | AI SaaS 产品经理</title>
+  <meta name="description" content="Ada Liu — 聚焦 AI SaaS 的产品经理，擅长 AI 客服、RAG 知识库、低/零代码搭建 AI 应用，把 Demo 打磨成可持续创造业务价值的产品能力。" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC",
+        "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(99,102,241,.16), transparent 32%),
+        radial-gradient(circle at top right, rgba(236,72,153,.12), transparent 28%),
+        #fafafa;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+    }
+
+    .card {
+      transition: all .28s ease;
+    }
+
+    .card:hover,
+    .card:focus-visible {
+      transform: translateY(-6px);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+    }
+
+    .project-card {
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+      border: none;
+      font: inherit;
+      color: inherit;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .project-card:focus-visible {
+      outline: 2px solid #6366f1;
+      outline-offset: 3px;
+    }
+
+    .project-card .project-thumb {
+      transition: transform .35s ease, filter .35s ease;
+    }
+
+    .project-card:hover .project-thumb,
+    .project-card:focus-visible .project-thumb {
+      transform: scale(1.03);
+      filter: brightness(1.02);
+    }
+
+    .project-card .project-cta {
+      opacity: 0;
+      transform: translateX(-6px);
+      transition: opacity .25s ease, transform .25s ease;
+    }
+
+    .project-card:hover .project-cta,
+    .project-card:focus-visible .project-cta {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    #project-modal:not(.hidden) {
+      display: flex;
+    }
+
+    #project-modal.hidden {
+      display: none;
+    }
+
+    .fade-in {
+      animation: fadeIn .8s ease both;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .tag {
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+
+<body class="text-gray-900">
+
+  <!-- 顶部导航 -->
+  <header class="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-gray-100">
+    <nav class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
+      <a href="#" class="font-bold tracking-tight text-lg">Ada Liu</a>
+
+      <div class="hidden md:flex items-center gap-6 text-sm text-gray-600">
+        <a href="#about" class="hover:text-gray-950">关于我</a>
+        <a href="#work" class="hover:text-gray-950">作品案例</a>
+        <a href="#life" class="hover:text-gray-950">生活方式</a>
+        <a href="#contact" class="hover:text-gray-950">联系我</a>
+      </div>
+
+      <a href="#contact" class="text-sm font-semibold bg-gray-950 text-white px-4 py-2 rounded-full hover:bg-gray-800">
+        Let's Talk
+      </a>
+    </nav>
+  </header>
+
+  <!-- Hero 区域 -->
+  <main class="max-w-6xl mx-auto px-5">
+
+    <section class="pt-16 pb-12 md:pt-24 md:pb-20 grid md:grid-cols-[1.1fr_.9fr] gap-10 items-center fade-in">
+      <div>
+        <div class="inline-flex items-center gap-2 bg-white border border-gray-100 rounded-full px-4 py-2 text-sm text-gray-600 shadow-sm mb-6">
+          <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+          开放合作 · AI 产品 / 客服场景
+        </div>
+
+        <h1 class="text-5xl md:text-7xl font-black leading-[1.05] tracking-tight">
+          你好，我是 <br />
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-pink-500 to-orange-400">
+            Ada Liu
+          </span>
+        </h1>
+        <p class="mt-6 text-lg md:text-xl text-gray-600 leading-8 max-w-2xl">
+            我是 Ada Liu，一名聚焦 <span style="color:#4f46e5;font-weight:500;">AI SaaS 的产品经理</span>。
+            从 2023 年开始在低 / 零代码平台里通过 Prompt 搭建 AI 应用，系统理解了大模型的能力边界与典型坑点；
+            目前主要在落地 AI 客服项目（RAG 检索、embedding 策略、知识库结构化），
+            希望把「能跑起来的 Demo」打磨成「能持续创造业务价值的产品能力」。
+          </p>
+          
+          <div class="mt-8 flex flex-wrap gap-3">
+            <span class="tag bg-indigo-50 text-indigo-700">AI SaaS（AI 客服 / AI 外呼 / 人工坐席）</span>
+            <span class="tag bg-pink-50 text-pink-700">低 / 零代码 · Prompt 搭建 AI 应用</span>
+            <span class="tag bg-orange-50 text-orange-700">RAG / embedding / 知识库设计</span>
+            <span class="tag bg-green-50 text-green-700">大模型能力边界理解</span>
+          </div>
+
+        <div class="mt-9 flex flex-wrap gap-4">
+          <a href="#work" class="bg-gray-950 text-white px-6 py-3 rounded-full font-semibold hover:bg-gray-800">
+            查看作品
+          </a>
+          <a href="#contact" class="bg-white border border-gray-200 px-6 py-3 rounded-full font-semibold hover:bg-gray-50">
+            联系我
+          </a>
+        </div>
+      </div>
+
+      <div class="glass rounded-[2rem] p-5 md:p-7">
+        <div class="bg-gray-100 rounded-[1.5rem] overflow-hidden aspect-[4/5]">
+          <img src="avatar.jpg" alt="Ada Liu" class="w-full h-full object-cover" />
+        </div>
+
+        <div class="mt-5 grid grid-cols-3 gap-3 text-center">
+          <div class="bg-white rounded-2xl p-4">
+            <p class="text-2xl font-black">3+</p>
+            <p class="text-xs text-gray-500 mt-1">年 AI 实践</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4">
+            <p class="text-2xl font-black">RAG</p>
+            <p class="text-xs text-gray-500 mt-1">客服知识库</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4">
+            <p class="text-2xl font-black">0→1</p>
+            <p class="text-xs text-gray-500 mt-1">Demo 产品化</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 关于我 -->
+    <section id="about" class="py-16 border-t border-gray-100">
+      <div class="grid md:grid-cols-[.7fr_1.3fr] gap-10">
+        <div>
+          <p class="text-sm font-bold text-indigo-600 uppercase tracking-widest">About</p>
+          <h2 class="mt-3 text-3xl md:text-4xl font-black tracking-tight">关于我</h2>
+        </div>
+
+        <div class="glass rounded-[2rem] p-7 md:p-9">
+          <p class="text-lg text-gray-700 leading-9">
+            我长期在 AI SaaS 场景做产品工作，熟悉从需求澄清、方案设计到上线迭代的完整链路。
+            尤其关注 AI 客服里的检索质量、知识库治理，以及如何把 Prompt 搭出来的 Demo 变成团队能长期维护的产品能力。
+          </p>
+
+          <div class="mt-7 grid sm:grid-cols-2 gap-4">
+            <div class="bg-white rounded-2xl p-5">
+              <h3 class="font-bold text-lg">我擅长</h3>
+              <p class="mt-2 text-gray-600 leading-7">
+                场景拆解与 PRD、RAG / 知识库方案、Prompt 与低代码验证、指标定义、跨研发 / 运营协作推进落地。
+              </p>
+            </div>
+
+            <div class="bg-white rounded-2xl p-5">
+              <h3 class="font-bold text-lg">我关注</h3>
+              <p class="mt-2 text-gray-600 leading-7">
+                大模型能力边界、人机协作体验、可衡量的业务结果，以及 AI 产品从「能演示」到「能交付」的方法论。
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 作品案例 -->
+    <section id="work" class="py-16 border-t border-gray-100">
+      <div class="flex items-end justify-between gap-6 mb-8">
+        <div>
+          <p class="text-sm font-bold text-pink-600 uppercase tracking-widest">Selected Work</p>
+          <h2 class="mt-3 text-3xl md:text-4xl font-black tracking-tight">作品案例</h2>
+        </div>
+        <p class="hidden md:block text-gray-500 max-w-md">
+          以下是我近期在 AI 客服、低代码与知识库方向的代表性实践（细节可脱敏，突出方法与结果）。
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-5">
+        <button
+          type="button"
+          class="project-card card glass rounded-[1.8rem] p-6 group"
+          data-project="1"
+          aria-label="查看项目：AI 智能客服 · RAG 知识库"
+        >
+          <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-indigo-200 to-purple-100 mb-5 overflow-hidden relative">
+            <span class="absolute inset-0 flex items-center justify-center text-indigo-600/50 text-sm font-bold px-4 text-center select-none">RAG · 检索 · 坐席协同</span>
+          </div>
+          <p class="text-sm text-indigo-600 font-bold">AI 客服</p>
+          <h3 class="mt-2 text-xl font-black group-hover:text-indigo-700 transition-colors">智能客服 · RAG 知识库落地</h3>
+          <p class="mt-3 text-gray-600 leading-7">
+            从 FAQ 碎片到可检索知识库，优化 embedding 与召回策略，提升回答准确率与转人工体验。
+          </p>
+          <span class="project-cta mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600">
+            查看详情
+            <span aria-hidden="true">→</span>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="project-card card glass rounded-[1.8rem] p-6 group"
+          data-project="2"
+          aria-label="查看项目：低代码 Prompt 搭建 AI 应用"
+        >
+          <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-pink-200 to-orange-100 mb-5 overflow-hidden relative">
+            <span class="absolute inset-0 flex items-center justify-center text-pink-600/50 text-sm font-bold px-4 text-center select-none">Prompt · 低代码 · 快速验证</span>
+          </div>
+          <p class="text-sm text-pink-600 font-bold">低 / 零代码</p>
+          <h3 class="mt-2 text-xl font-black group-hover:text-pink-700 transition-colors">Prompt 搭建 AI 应用验证</h3>
+          <p class="mt-3 text-gray-600 leading-7">
+            在低 / 零代码平台用 Prompt 快速搭 Demo，验证场景价值后再推进工程化与产品化。
+          </p>
+          <span class="project-cta mt-4 inline-flex items-center gap-1 text-sm font-semibold text-pink-600">
+            查看详情
+            <span aria-hidden="true">→</span>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="project-card card glass rounded-[1.8rem] p-6 group"
+          data-project="3"
+          aria-label="查看项目：知识库结构化与治理"
+        >
+          <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-emerald-200 to-cyan-100 mb-5 overflow-hidden relative">
+            <span class="absolute inset-0 flex items-center justify-center text-emerald-600/50 text-sm font-bold px-4 text-center select-none">结构化 · 切片 · 更新机制</span>
+          </div>
+          <p class="text-sm text-emerald-600 font-bold">知识库</p>
+          <h3 class="mt-2 text-xl font-black group-hover:text-emerald-700 transition-colors">知识库结构化与治理</h3>
+          <p class="mt-3 text-gray-600 leading-7">
+            定义文档分层、切片规则与更新流程，让知识库可维护、可评估，支撑长期迭代。
+          </p>
+          <span class="project-cta mt-4 inline-flex items-center gap-1 text-sm font-semibold text-emerald-600">
+            查看详情
+            <span aria-hidden="true">→</span>
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 技能/亮点 -->
+    <section class="py-16 border-t border-gray-100">
+      <div class="glass rounded-[2rem] p-8 md:p-10">
+        <div class="grid md:grid-cols-2 gap-10 items-center">
+          <div>
+            <p class="text-sm font-bold text-orange-600 uppercase tracking-widest">Highlights</p>
+            <h2 class="mt-3 text-3xl md:text-4xl font-black tracking-tight">我的特点</h2>
+            <p class="mt-5 text-gray-600 leading-8">
+              我习惯用业务问题倒推产品方案：先厘清用户与指标，再选技术路径，最后用可验证的实验推动迭代。
+            </p>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="bg-white rounded-2xl p-5">
+              <p class="text-2xl mb-3">🎯</p>
+              <h3 class="font-bold">场景驱动</h3>
+              <p class="text-gray-600 mt-2 text-sm leading-6">从客服、外呼、坐席协同等真实业务出发定义需求。</p>
+            </div>
+            <div class="bg-white rounded-2xl p-5">
+              <p class="text-2xl mb-3">🔍</p>
+              <h3 class="font-bold">RAG 实战</h3>
+              <p class="text-gray-600 mt-2 text-sm leading-6">熟悉检索链路、知识切片与效果评估的常见坑点。</p>
+            </div>
+            <div class="bg-white rounded-2xl p-5">
+              <p class="text-2xl mb-3">⚡</p>
+              <h3 class="font-bold">快速验证</h3>
+              <p class="text-gray-600 mt-2 text-sm leading-6">用低代码 + Prompt 低成本试错，再决定要不要重度投入。</p>
+            </div>
+            <div class="bg-white rounded-2xl p-5">
+              <p class="text-2xl mb-3">📈</p>
+              <h3 class="font-bold">结果导向</h3>
+              <p class="text-gray-600 mt-2 text-sm leading-6">关注解决率、转人工率、满意度等可量化指标。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 生活方式 -->
+    <section id="life" class="py-16 border-t border-gray-100">
+      <div class="mb-8">
+        <p class="text-sm font-bold text-green-600 uppercase tracking-widest">Lifestyle</p>
+        <h2 class="mt-3 text-3xl md:text-4xl font-black tracking-tight">个人生活</h2>
+      </div>
+
+      <div class="grid md:grid-cols-4 gap-5">
+        <div class="card glass rounded-[1.8rem] p-6 md:col-span-2">
+          <h3 class="text-xl font-black">最近在关注</h3>
+          <p class="mt-3 text-gray-600 leading-7">
+            AI 工具、个人知识库、旅行记录、空间美学、长期主义和更自由的工作方式。
+          </p>
+        </div>
+
+        <div class="card glass rounded-[1.8rem] p-6">
+          <p class="text-3xl">📷</p>
+          <h3 class="mt-4 font-black">摄影</h3>
+          <p class="mt-2 text-gray-600 text-sm leading-6">记录城市、日常和灵感瞬间。</p>
+        </div>
+
+        <div class="card glass rounded-[1.8rem] p-6">
+          <p class="text-3xl">☕</p>
+          <h3 class="mt-4 font-black">咖啡</h3>
+          <p class="mt-2 text-gray-600 text-sm leading-6">喜欢安静、有光线的空间。</p>
+        </div>
+
+        <div class="card glass rounded-[1.8rem] p-6">
+          <p class="text-3xl">📚</p>
+          <h3 class="mt-4 font-black">阅读</h3>
+          <p class="mt-2 text-gray-600 text-sm leading-6">关注成长、心理和商业类内容。</p>
+        </div>
+
+        <div class="card glass rounded-[1.8rem] p-6 md:col-span-3">
+          <h3 class="text-xl font-black">我的一句话</h3>
+          <p class="mt-3 text-gray-600 leading-7">
+            “把生活过成作品，把经历整理成资产，把自己表达得更清楚。”
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 联系方式 -->
+    <section id="contact" class="py-16 border-t border-gray-100">
+      <div class="glass rounded-[2rem] p-8 md:p-12 text-center">
+        <p class="text-sm font-bold text-gray-500 uppercase tracking-widest">Contact</p>
+        <h2 class="mt-3 text-3xl md:text-5xl font-black tracking-tight">想进一步了解我？</h2>
+        <p class="mt-5 text-gray-600 leading-8 max-w-2xl mx-auto">
+          欢迎交流合作、AI 产品岗位机会，或一起聊聊 AI 客服、RAG 与产品化实践。下方任选一种方式联系即可。
+        </p>
+
+        <p id="contact-wechat-hint" class="mt-4 text-sm text-gray-500 hidden"></p>
+
+        <div class="mt-8 flex flex-wrap justify-center gap-4">
+          <a id="contact-email" href="#contact" class="bg-gray-950 text-white px-6 py-3 rounded-full font-semibold hover:bg-gray-800">
+            发送邮件
+          </a>
+          <button
+            type="button"
+            id="contact-copy-wechat"
+            class="bg-white border border-gray-200 px-6 py-3 rounded-full font-semibold hover:bg-gray-50"
+          >
+            复制微信号
+          </button>
+          <a
+            id="contact-xhs"
+            href="#contact"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="bg-white border border-gray-200 px-6 py-3 rounded-full font-semibold hover:bg-gray-50 hidden"
+          >
+            小红书
+          </a>
+        </div>
+        <p id="contact-copy-toast" class="mt-4 text-sm text-green-600 font-medium hidden" role="status">微信号已复制</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 项目详情弹窗 -->
+  <div
+    id="project-modal"
+    class="hidden fixed inset-0 z-[100] items-center justify-center p-5 bg-gray-950/50 backdrop-blur-sm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
+  >
+    <div class="glass rounded-[2rem] max-w-lg w-full p-7 md:p-9 relative shadow-2xl">
+      <button
+        type="button"
+        id="modal-close"
+        class="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/80 border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-white flex items-center justify-center text-xl leading-none"
+        aria-label="关闭"
+      >
+        ×
+      </button>
+      <p id="modal-label" class="text-sm font-bold"></p>
+      <h3 id="modal-title" class="mt-2 text-2xl md:text-3xl font-black tracking-tight"></h3>
+      <p id="modal-desc" class="mt-4 text-gray-600 leading-8"></p>
+      <ul id="modal-tags" class="mt-6 flex flex-wrap gap-2"></ul>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a
+          id="modal-link"
+          href="#contact"
+          class="bg-gray-950 text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800"
+        >
+          联系我了解
+        </a>
+        <button
+          type="button"
+          id="modal-close-secondary"
+          class="bg-white border border-gray-200 px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-50"
+        >
+          关闭
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部 -->
+  <footer class="border-t border-gray-100 py-8 text-center text-sm text-gray-500">
+    © 2026 Ada Liu · Personal Portfolio
+  </footer>
+
+  <script>
+    // 部署前请修改：填写你的邮箱、微信号；有小红书主页链接可填入 xiaohongshu
+    const SITE = {
+      email: "ada481131@gmail.com",
+      wechat: "wixd_eliauk",
+      xiaohongshu: "",
+    };
+
+    const projects = {
+      1: {
+        label: "AI 客服",
+        labelClass: "text-indigo-600",
+        title: "智能客服 · RAG 知识库落地",
+        desc: "负责 AI 客服场景的产品推进：梳理 FAQ 与业务文档，设计知识库分层与切片规则，协同研发调整 embedding 与召回策略，并建立回答质量、转人工率等评估方式，让检索增强问答稳定可用。",
+        tags: ["RAG", "embedding", "召回策略", "转人工", "效果评估"],
+        link: "#contact",
+        linkText: "交流此项目经验",
+      },
+      2: {
+        label: "低 / 零代码",
+        labelClass: "text-pink-600",
+        title: "Prompt 搭建 AI 应用验证",
+        desc: "自 2023 年起在低 / 零代码平台通过 Prompt 快速搭建 AI 应用原型，用于验证场景可行性与交互路径；在确认价值后，再输出 PRD、接口需求与迭代计划，推动工程化落地，避免「只会 Demo、无法交付」。",
+        tags: ["Prompt 工程", "快速验证", "PRD", "能力边界", "产品化"],
+        link: "#about",
+        linkText: "了解我的背景",
+      },
+      3: {
+        label: "知识库",
+        labelClass: "text-emerald-600",
+        title: "知识库结构化与治理",
+        desc: "针对文档来源杂、更新慢、检索飘等问题，建立知识入库规范、元数据字段、版本与过期机制，并配合运营侧维护流程，使知识库可持续迭代，支撑 AI 客服与外呼等场景的一致回答。",
+        tags: ["结构化", "切片规则", "治理流程", "可维护性", "多场景复用"],
+        link: "#contact",
+        linkText: "讨论知识库方案",
+      },
+    };
+
+    const modal = document.getElementById("project-modal");
+    const modalLabel = document.getElementById("modal-label");
+    const modalTitle = document.getElementById("modal-title");
+    const modalDesc = document.getElementById("modal-desc");
+    const modalTags = document.getElementById("modal-tags");
+    const modalLink = document.getElementById("modal-link");
+    let lastFocused = null;
+
+    function openProject(id) {
+      const p = projects[id];
+      if (!p) return;
+
+      lastFocused = document.activeElement;
+      modalLabel.textContent = p.label;
+      modalLabel.className = "text-sm font-bold " + p.labelClass;
+      modalTitle.textContent = p.title;
+      modalDesc.textContent = p.desc;
+      modalTags.innerHTML = p.tags
+        .map((t) => `<li class="tag bg-gray-100 text-gray-700">${t}</li>`)
+        .join("");
+      modalLink.href = p.link;
+      modalLink.textContent = p.linkText;
+
+      modal.classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+      document.getElementById("modal-close").focus();
+    }
+
+    function closeProject() {
+      modal.classList.add("hidden");
+      document.body.style.overflow = "";
+      if (lastFocused) lastFocused.focus();
+    }
+
+    document.querySelectorAll(".project-card").forEach((card) => {
+      card.addEventListener("click", () => openProject(card.dataset.project));
+    });
+
+    document.getElementById("modal-close").addEventListener("click", closeProject);
+    document.getElementById("modal-close-secondary").addEventListener("click", closeProject);
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeProject();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !modal.classList.contains("hidden")) closeProject();
+    });
+
+    (function initContact() {
+      const emailBtn = document.getElementById("contact-email");
+      const wechatBtn = document.getElementById("contact-copy-wechat");
+      const xhsLink = document.getElementById("contact-xhs");
+      const wechatHint = document.getElementById("contact-wechat-hint");
+      const toast = document.getElementById("contact-copy-toast");
+
+      if (SITE.email) {
+        emailBtn.href = "mailto:" + SITE.email;
+        emailBtn.textContent = "发送邮件";
+      } else {
+        emailBtn.href = "#contact";
+        emailBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          alert("请在 index.html 的 SITE.email 中填写你的邮箱后重新部署。");
+        });
+      }
+
+      if (SITE.wechat) {
+        wechatHint.textContent = "微信号：" + SITE.wechat;
+        wechatHint.classList.remove("hidden");
+        wechatBtn.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(SITE.wechat);
+            toast.classList.remove("hidden");
+            setTimeout(() => toast.classList.add("hidden"), 2000);
+          } catch {
+            prompt("请手动复制微信号：", SITE.wechat);
+          }
+        });
+      } else {
+        wechatBtn.textContent = "微信联系";
+        wechatBtn.addEventListener("click", () => {
+          alert("请在 index.html 的 SITE.wechat 中填写你的微信号后重新部署。");
+        });
+      }
+
+      if (SITE.xiaohongshu) {
+        xhsLink.href = SITE.xiaohongshu;
+        xhsLink.classList.remove("hidden");
+      }
+    })();
+  </script>
+
+</body>
+</html>

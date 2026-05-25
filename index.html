@@ -282,11 +282,11 @@
           <h2 class="mt-3 text-3xl md:text-4xl font-black tracking-tight">作品案例</h2>
         </div>
         <p class="hidden md:block text-gray-500 max-w-md">
-          以下是我近期在 AI 客服、低代码与知识库方向的代表性实践（细节可脱敏，突出方法与结果）。
+          涵盖对外客服、企业内部 HR 问答、低代码验证与知识库治理（细节可脱敏）。
         </p>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-5">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <button
           type="button"
           class="project-card card glass rounded-[1.8rem] p-6 group"
@@ -345,6 +345,27 @@
           </p>
           <p class="mt-2 text-sm font-semibold text-emerald-700/90">成果：可维护 SOP · 更新周期缩短</p>
           <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-emerald-600">
+            查看详情
+            <span aria-hidden="true">→</span>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="project-card card glass rounded-[1.8rem] p-6 group"
+          data-project="4"
+          aria-label="查看项目：HR 政策与入职手册智能问答"
+        >
+          <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-violet-200 to-amber-100 mb-5 overflow-hidden relative">
+            <span class="absolute inset-0 flex items-center justify-center text-violet-700/55 text-sm font-bold px-4 text-center select-none">权限 · 时效 · metadata</span>
+          </div>
+          <p class="text-sm text-violet-700 font-bold">企业内部 · HR</p>
+          <h3 class="mt-2 text-xl font-black group-hover:text-violet-800 transition-colors">HR 政策 / 入职手册问答</h3>
+          <p class="mt-3 text-gray-600 leading-7">
+            面向新同事「年假怎么算」「报销怎么走」等高频问题，基于政策与入职手册构建内部 RAG 问答助手。
+          </p>
+          <p class="mt-2 text-sm font-semibold text-violet-700/90">亮点：权限隔离 · 制度时效 · 元数据过滤</p>
+          <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-violet-700">
             查看详情
             <span aria-hidden="true">→</span>
           </span>
@@ -550,6 +571,21 @@
         tags: ["结构化", "切片规则", "治理流程", "可维护性", "多场景复用"],
         link: "#contact",
         linkText: "讨论知识库方案",
+      },
+      4: {
+        label: "企业内部 · HR",
+        labelClass: "text-violet-700",
+        title: "HR 政策 / 入职手册智能问答",
+        desc: "背景：新同事频繁询问「年假怎么算」「报销怎么走流程」等，而政策分散在入职手册、HR 制度与地区补充说明中。产品侧推动建设内部 RAG 问答助手，在检索前按员工所属地区、岗位类型过滤文档，并处理旧制度失效与版本切换，避免答错政策或泄露不适用的地区规则。",
+        outcomes: [
+          "梳理年假、报销等高频意图，将政策/手册入库并标注地区、岗位、生效日期等 metadata",
+          "检索链路增加权限与 metadata 过滤，不同国家/地区员工仅命中适用政策片段",
+          "建立制度版本与失效机制，旧版文档下线或降权，降低「按过期政策回答」风险",
+          "协同 HR 与研发迭代切片与 Prompt，提升内部自助解答率，减轻 HR 重复答疑压力",
+        ],
+        tags: ["内部 RAG", "权限隔离", "时效性", "metadata 过滤", "地区/岗位", "HR 场景"],
+        link: "#contact",
+        linkText: "交流 HR 问答方案",
       },
     };
 

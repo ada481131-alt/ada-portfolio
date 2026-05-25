@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR 政策问答 · 交互演示 | Ada Liu</title>
+  <meta name="description" content="企业内部 HR 政策 RAG 问答演示：权限隔离、metadata 过滤、制度时效版本切换。" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(139, 92, 246, 0.12), transparent 35%),
+        radial-gradient(circle at top right, rgba(251, 191, 36, 0.1), transparent 30%),
+        #f8fafc;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 16px 48px rgba(15, 23, 42, 0.06);
+    }
+    .chat-scroll {
+      max-height: 420px;
+      overflow-y: auto;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .msg-in { animation: fadeUp 0.35s ease both; }
+  </style>
+</head>
+<body class="text-gray-900 min-h-screen">
+
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-gray-100">
+    <div class="max-w-6xl mx-auto px-5 py-4 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <a href="index.html#work" class="text-sm font-semibold text-violet-700 hover:underline">← 返回主页</a>
+        <p class="mt-1 text-xs text-gray-500">产品演示 · 非真实公司政策，仅供作品集交互说明</p>
+      </div>
+      <span class="text-xs font-bold bg-violet-100 text-violet-800 px-3 py-1 rounded-full">内部 RAG 模拟</span>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-5 py-8 md:py-10">
+    <div class="mb-8">
+      <p class="text-sm font-bold text-violet-700 uppercase tracking-widest">Interactive Demo</p>
+      <h1 class="mt-2 text-3xl md:text-4xl font-black tracking-tight">HR 政策 / 入职手册智能问答</h1>
+      <p class="mt-3 text-gray-600 leading-8 max-w-3xl">
+        模拟真实 RAG 链路：先按<strong>地区、岗位</strong>做 metadata 过滤与权限隔离，再检索政策片段作答；
+        切换<strong>制度版本</strong>可体验时效性（旧版失效不再命中，除非刻意查看历史版本）。
+      </p>
+    </div>
+
+    <div class="grid lg:grid-cols-[320px_1fr] gap-6">
+      <!-- 左侧：员工身份 + 版本 -->
+      <aside class="glass rounded-2xl p-5 h-fit space-y-5">
+        <div>
+          <h2 class="font-bold text-sm text-gray-500 uppercase tracking-wider">Metadata 过滤</h2>
+          <label class="block mt-3 text-sm font-semibold">所在地区</label>
+          <select id="region" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm bg-white">
+            <option value="CN">中国大陆</option>
+            <option value="HK">中国香港</option>
+            <option value="SG">新加坡</option>
+          </select>
+
+          <label class="block mt-4 text-sm font-semibold">岗位类型</label>
+          <select id="jobType" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm bg-white">
+            <option value="正式">正式员工</option>
+            <option value="实习">实习生</option>
+          </select>
+        </div>
+
+        <div class="border-t border-gray-100 pt-4">
+          <h2 class="font-bold text-sm text-gray-500 uppercase tracking-wider">制度时效</h2>
+          <label class="mt-3 flex items-start gap-2 cursor-pointer">
+            <input type="radio" name="versionMode" value="current" checked class="mt-1" />
+            <span class="text-sm leading-6"><strong>仅生效政策（2024 版）</strong><br /><span class="text-gray-500">旧版自动降权，不进入检索</span></span>
+          </label>
+          <label class="mt-3 flex items-start gap-2 cursor-pointer">
+            <input type="radio" name="versionMode" value="all" class="mt-1" />
+            <span class="text-sm leading-6"><strong>含已失效文档（2023 版）</strong><br /><span class="text-gray-500">用于对比「过期政策」风险</span></span>
+          </label>
+        </div>
+
+        <div class="rounded-xl bg-violet-50 border border-violet-100 p-3 text-xs text-violet-900 leading-6">
+          <p class="font-bold">当前检索范围</p>
+          <p id="filter-summary" class="mt-1"></p>
+        </div>
+      </aside>
+
+      <!-- 右侧：对话 + 检索过程 -->
+      <div class="space-y-4">
+        <section class="glass rounded-2xl p-5 md:p-6">
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="text-sm font-semibold text-gray-700 mr-1">试试问：</span>
+            <button type="button" class="quick-q text-sm bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:border-violet-300 hover:text-violet-800" data-q="年假怎么算？">年假怎么算？</button>
+            <button type="button" class="quick-q text-sm bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:border-violet-300 hover:text-violet-800" data-q="报销怎么走流程？">报销怎么走流程？</button>
+            <button type="button" class="quick-q text-sm bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:border-violet-300 hover:text-violet-800" data-q="实习生有年假吗？">实习生有年假吗？</button>
+          </div>
+
+          <div id="chat" class="chat-scroll space-y-4 pr-1">
+            <div class="msg-in rounded-2xl bg-gray-100 px-4 py-3 text-sm text-gray-700 leading-7">
+              你好，我是内部 HR 政策助手。请先确认左侧<strong>地区</strong>与<strong>岗位</strong>，再提问；右侧可展开查看本次命中的知识片段（模拟 RAG 检索日志）。
+            </div>
+          </div>
+
+          <form id="ask-form" class="mt-4 flex gap-2">
+            <input
+              id="question"
+              type="text"
+              placeholder="例如：年假怎么算？"
+              class="flex-1 rounded-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
+              autocomplete="off"
+            />
+            <button type="submit" class="shrink-0 bg-gray-950 text-white px-5 py-3 rounded-full text-sm font-semibold hover:bg-gray-800">
+              提问
+            </button>
+          </form>
+        </section>
+
+        <details class="glass rounded-2xl p-5 group" open>
+          <summary class="cursor-pointer font-bold text-sm text-gray-800 select-none">
+            检索过程（RAG 模拟日志）
+            <span class="text-gray-400 font-normal ml-1">— 可见 metadata 过滤前后</span>
+          </summary>
+          <pre id="retrieval-log" class="mt-4 text-xs leading-6 text-gray-600 whitespace-pre-wrap break-words bg-gray-50 rounded-xl p-4 border border-gray-100">等待提问…</pre>
+        </details>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const KB = [
+      {
+        id: "cn-ft-leave-24",
+        keywords: ["年假", "假期", "休假", "带薪"],
+        region: "CN",
+        jobType: "正式",
+        version: "2024",
+        effective: true,
+        source: "《员工手册》§3.2 · 2024-01-01 生效",
+        answer:
+          "【中国大陆 · 正式员工 · 2024 版】工作满 1 年不满 10 年：年假 5 天；满 10 年不满 20 年：10 天；满 20 年：15 天。年假需提前在 OA 提交，经直属主管审批。",
+      },
+      {
+        id: "cn-intern-leave-24",
+        keywords: ["年假", "假期", "实习生"],
+        region: "CN",
+        jobType: "实习",
+        version: "2024",
+        effective: true,
+        source: "《实习生管理办法》§2 · 2024-01-01 生效",
+        answer:
+          "【中国大陆 · 实习生 · 2024 版】实习生不享受带薪年假；如遇考试、毕业答辩等，可申请事假，需导师与 HRBP 双审批。",
+      },
+      {
+        id: "hk-ft-leave-24",
+        keywords: ["年假", "假期", "休假"],
+        region: "HK",
+        jobType: "正式",
+        version: "2024",
+        effective: true,
+        source: "HK Employee Handbook §Annual Leave · 2024",
+        answer:
+          "【中国香港 · 正式员工 · 2024 版】按入职满 1 年起享 7–14 天有薪年假（随工龄递增），须至少提前 7 个工作日申请。",
+      },
+      {
+        id: "sg-ft-leave-24",
+        keywords: ["年假", "假期"],
+        region: "SG",
+        jobType: "正式",
+        version: "2024",
+        effective: true,
+        source: "SG Staff Policy Ch.4 · 2024",
+        answer:
+          "【新加坡 · 正式员工 · 2024 版】首年按比例折算年假；满 1 年后最低 14 天，具体以 Employment Pass 类型为准。",
+      },
+      {
+        id: "cn-ft-reimb-24",
+        keywords: ["报销", "发票", "费用", "差旅"],
+        region: "CN",
+        jobType: "正式",
+        version: "2024",
+        effective: true,
+        source: "《财务报销制度》§1–3 · 2024-03 修订",
+        answer:
+          "【中国大陆 · 正式员工 · 2024 版】流程：① OA 提交「费用报销」② 上传增值税发票 ③ 部门负责人审批 ④ 财务 5 个工作日内打款。单笔超 5000 元需附加说明。",
+      },
+      {
+        id: "hk-ft-reimb-24",
+        keywords: ["报销", "发票", "费用"],
+        region: "HK",
+        jobType: "正式",
+        version: "2024",
+        effective: true,
+        source: "HK Finance Policy · 2024",
+        answer:
+          "【中国香港 · 正式员工 · 2024 版】通过 Concur 提交，保留收据原件 7 年；餐饮补贴每日上限 HKD 120，不可与差旅津贴重复申领。",
+      },
+      {
+        id: "cn-ft-leave-23",
+        keywords: ["年假", "假期"],
+        region: "CN",
+        jobType: "正式",
+        version: "2023",
+        effective: false,
+        source: "《员工手册》§3.2 · 2023 版（已失效）",
+        answer:
+          "【⚠️ 已失效 · 2023 版】年假：工作满 1 年享 3 天（旧规，2024 年起已作废）。若系统仍命中本文档，说明时效过滤未生效。",
+      },
+    ];
+
+    const regionEl = document.getElementById("region");
+    const jobTypeEl = document.getElementById("jobType");
+    const filterSummary = document.getElementById("filter-summary");
+    const chat = document.getElementById("chat");
+    const logEl = document.getElementById("retrieval-log");
+    const form = document.getElementById("ask-form");
+    const questionEl = document.getElementById("question");
+
+    function getVersionMode() {
+      return document.querySelector('input[name="versionMode"]:checked').value;
+    }
+
+    function updateFilterSummary() {
+      const r = regionEl.options[regionEl.selectedIndex].text;
+      const j = jobTypeEl.options[jobTypeEl.selectedIndex].text;
+      const v = getVersionMode() === "current" ? "仅 2024 生效文档" : "含 2023 已失效文档";
+      filterSummary.textContent = `${r} · ${j} · ${v}`;
+    }
+
+    regionEl.addEventListener("change", updateFilterSummary);
+    jobTypeEl.addEventListener("change", updateFilterSummary);
+    document.querySelectorAll('input[name="versionMode"]').forEach((el) => {
+      el.addEventListener("change", updateFilterSummary);
+    });
+    updateFilterSummary();
+
+    function scoreChunk(chunk, question) {
+      const q = question.toLowerCase();
+      let score = 0;
+      chunk.keywords.forEach((kw) => {
+        if (question.includes(kw)) score += 3;
+      });
+      if (question.includes("年假") && chunk.keywords.includes("年假")) score += 2;
+      if (question.includes("报销") && chunk.keywords.includes("报销")) score += 2;
+      return score;
+    }
+
+    function retrieve(question) {
+      const region = regionEl.value;
+      const jobType = jobTypeEl.value;
+      const versionMode = getVersionMode();
+      const lines = [];
+      lines.push(`用户问题：${question}`);
+      lines.push(`metadata：region=${region}, jobType=${jobType}, versionMode=${versionMode}`);
+      lines.push("");
+
+      let pool = [...KB];
+      lines.push(`知识库总量：${pool.length} 片段`);
+      lines.push("");
+
+      const afterPermission = pool.filter((c) => c.region === region);
+      lines.push(`① 权限 / 地区过滤后：${afterPermission.length} 片段（仅保留 ${region}）`);
+      pool = afterPermission;
+
+      const afterJob = pool.filter((c) => c.jobType === jobType);
+      lines.push(`② 岗位 metadata 过滤后：${afterJob.length} 片段（仅保留 ${jobType}）`);
+      pool = afterJob;
+
+      if (versionMode === "current") {
+        const afterTime = pool.filter((c) => c.effective);
+        lines.push(`③ 时效过滤（仅 effective=true）：${afterTime.length} 片段`);
+        pool = afterTime;
+      } else {
+        lines.push(`③ 时效过滤：已关闭，允许命中失效文档`);
+      }
+
+      const scored = pool
+        .map((c) => ({ chunk: c, score: scoreChunk(c, question) }))
+        .filter((x) => x.score > 0)
+        .sort((a, b) => b.score - a.score);
+
+      lines.push("");
+      lines.push("④ 关键词召回排序：");
+      if (scored.length === 0) {
+        lines.push("   （无命中）");
+      } else {
+        scored.forEach((x, i) => {
+          lines.push(`   ${i + 1}. [${x.score}分] ${x.chunk.id} ← ${x.chunk.source}`);
+        });
+      }
+
+      return { lines, best: scored[0]?.chunk || null, poolSize: pool.length };
+    }
+
+    function appendMessage(html, isUser) {
+      const wrap = document.createElement("div");
+      wrap.className = "msg-in rounded-2xl px-4 py-3 text-sm leading-7 " +
+        (isUser ? "bg-gray-950 text-white ml-8" : "bg-violet-50 text-gray-800 border border-violet-100 mr-4");
+      wrap.innerHTML = html;
+      chat.appendChild(wrap);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function answer(question) {
+      const q = question.trim();
+      if (!q) return;
+
+      appendMessage(`<span class="opacity-80">你问：</span>${q}`, true);
+
+      const { lines, best, poolSize } = retrieve(q);
+      logEl.textContent = lines.join("\n");
+
+      if (!best) {
+        if (poolSize === 0) {
+          appendMessage(
+            "未检索到适用于你当前<strong>地区 + 岗位</strong>的政策片段（权限/metadata 过滤后为空）。请联系 HR 或检查身份配置。",
+            false
+          );
+        } else {
+          appendMessage(
+            "在适用政策范围内未匹配到相关条目。建议换个问法，或联系 HRBP；也可在 OA 提交「政策咨询」工单。",
+            false
+          );
+        }
+        return;
+      }
+
+      let warning = "";
+      if (!best.effective) {
+        warning =
+          '<p class="mt-2 text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs">⚠️ 命中<strong>已失效</strong>制度版本。生产环境应默认屏蔽此类文档。</p>';
+      }
+
+      appendMessage(
+        `<p class="font-semibold text-violet-900 mb-2">回答（基于 Top1 片段）</p>
+         <p>${best.answer}</p>
+         <p class="mt-3 text-xs text-gray-500">引用：${best.source}</p>
+         ${warning}`,
+        false
+      );
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const q = questionEl.value;
+      questionEl.value = "";
+      answer(q);
+    });
+
+    document.querySelectorAll(".quick-q").forEach((btn) => {
+      btn.addEventListener("click", () => answer(btn.dataset.q));
+    });
+  </script>
+</body>
+</html>

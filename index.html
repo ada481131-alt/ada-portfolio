@@ -350,26 +350,34 @@
           </span>
         </button>
 
-        <button
-          type="button"
-          class="project-card card glass rounded-[1.8rem] p-6 group"
-          data-project="4"
-          aria-label="查看项目：HR 政策与入职手册智能问答"
-        >
-          <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-violet-200 to-amber-100 mb-5 overflow-hidden relative">
-            <span class="absolute inset-0 flex items-center justify-center text-violet-700/55 text-sm font-bold px-4 text-center select-none">权限 · 时效 · metadata</span>
-          </div>
-          <p class="text-sm text-violet-700 font-bold">企业内部 · HR</p>
-          <h3 class="mt-2 text-xl font-black group-hover:text-violet-800 transition-colors">HR 政策 / 入职手册问答</h3>
-          <p class="mt-3 text-gray-600 leading-7">
-            面向新同事「年假怎么算」「报销怎么走」等高频问题，基于政策与入职手册构建内部 RAG 问答助手。
-          </p>
-          <p class="mt-2 text-sm font-semibold text-violet-700/90">亮点：权限隔离 · 制度时效 · 元数据过滤</p>
-          <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-violet-700">
-            查看详情
-            <span aria-hidden="true">→</span>
-          </span>
-        </button>
+        <div class="card glass rounded-[1.8rem] p-6 flex flex-col">
+          <button
+            type="button"
+            class="project-card group text-left flex-1"
+            data-project="4"
+            aria-label="查看项目说明：HR 政策与入职手册智能问答"
+          >
+            <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-violet-200 to-amber-100 mb-5 overflow-hidden relative">
+              <span class="absolute inset-0 flex items-center justify-center text-violet-700/55 text-sm font-bold px-4 text-center select-none">权限 · 时效 · metadata</span>
+            </div>
+            <p class="text-sm text-violet-700 font-bold">企业内部 · HR</p>
+            <h3 class="mt-2 text-xl font-black group-hover:text-violet-800 transition-colors">HR 政策 / 入职手册问答</h3>
+            <p class="mt-3 text-gray-600 leading-7">
+              面向新同事「年假怎么算」「报销怎么走」等高频问题，基于政策与入职手册构建内部 RAG 问答助手。
+            </p>
+            <p class="mt-2 text-sm font-semibold text-violet-700/90">可体验 · 权限 / 时效 / metadata</p>
+            <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-violet-700">
+              项目说明
+              <span aria-hidden="true">→</span>
+            </span>
+          </button>
+          <a
+            href="demo-hr-rag.html"
+            class="mt-4 w-full text-center bg-violet-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-violet-500 transition-colors"
+          >
+            立即体验问答 →
+          </a>
+        </div>
       </div>
     </section>
 
@@ -499,6 +507,13 @@
         >
           联系我了解
         </a>
+        <a
+          id="modal-link-secondary"
+          href="#contact"
+          class="hidden bg-violet-600 text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-violet-500"
+        >
+          体验演示
+        </a>
         <button
           type="button"
           id="modal-close-secondary"
@@ -584,8 +599,10 @@
           "协同 HR 与研发迭代切片与 Prompt，提升内部自助解答率，减轻 HR 重复答疑压力",
         ],
         tags: ["内部 RAG", "权限隔离", "时效性", "metadata 过滤", "地区/岗位", "HR 场景"],
+        demoLink: "demo-hr-rag.html",
+        demoLinkText: "体验交互演示",
         link: "#contact",
-        linkText: "交流 HR 问答方案",
+        linkText: "交流 HR 方案",
       },
     };
 
@@ -597,6 +614,7 @@
     const modalOutcomesWrap = document.getElementById("modal-outcomes-wrap");
     const modalOutcomes = document.getElementById("modal-outcomes");
     const modalLink = document.getElementById("modal-link");
+    const modalLinkSecondary = document.getElementById("modal-link-secondary");
     let lastFocused = null;
 
     function openProject(id) {
@@ -617,8 +635,28 @@
       modalTags.innerHTML = p.tags
         .map((t) => `<li class="tag bg-gray-100 text-gray-700">${t}</li>`)
         .join("");
-      modalLink.href = p.link;
-      modalLink.textContent = p.linkText;
+      modalLinkSecondary.classList.add("hidden");
+      if (p.demoLink) {
+        modalLink.href = p.demoLink;
+        modalLink.textContent = p.demoLinkText || "体验交互演示";
+        modalLink.target = "_blank";
+        modalLink.rel = "noopener noreferrer";
+        if (p.link) {
+          modalLinkSecondary.href = p.link;
+          modalLinkSecondary.textContent = p.linkText || "联系我";
+          modalLinkSecondary.classList.remove("hidden");
+        }
+      } else {
+        modalLink.href = p.link;
+        modalLink.textContent = p.linkText;
+        if (p.linkNewTab) {
+          modalLink.target = "_blank";
+          modalLink.rel = "noopener noreferrer";
+        } else {
+          modalLink.removeAttribute("target");
+          modalLink.removeAttribute("rel");
+        }
+      }
 
       modal.classList.remove("hidden");
       document.body.style.overflow = "hidden";

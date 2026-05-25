@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智能客服 RAG · 交互演示 | Ada Liu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: radial-gradient(circle at top left, rgba(99,102,241,.14), transparent 40%), #f8fafc; }
+    .glass { background: rgba(255,255,255,.88); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.8); box-shadow: 0 16px 48px rgba(15,23,42,.06); }
+    .chat-scroll { max-height: 380px; overflow-y: auto; }
+    .msg-in { animation: fadeUp .35s ease both; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  </style>
+</head>
+<body class="text-gray-900 min-h-screen">
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-gray-100">
+    <div class="max-w-6xl mx-auto px-5 py-4 flex justify-between items-center gap-3">
+      <div>
+        <a href="index.html#work" class="text-sm font-semibold text-indigo-600 hover:underline">← 返回主页</a>
+        <p class="mt-1 text-xs text-gray-500">对外 AI 客服场景 · 演示数据 fictitious</p>
+      </div>
+      <span class="text-xs font-bold bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">客服 RAG 模拟</span>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-5 py-8">
+    <p class="text-sm font-bold text-indigo-600 uppercase tracking-widest">Demo 01</p>
+    <h1 class="mt-2 text-3xl font-black">智能客服 · RAG 知识库落地</h1>
+    <p class="mt-3 text-gray-600 leading-8 max-w-3xl">
+      模拟对外客服：检索 FAQ → 生成回答 → 按<strong>置信度</strong>决定是否建议转人工；可切换售前/售后知识域，观察召回变化。
+    </p>
+
+    <div class="grid lg:grid-cols-[300px_1fr] gap-6 mt-8">
+      <aside class="glass rounded-2xl p-5 h-fit space-y-5">
+        <div>
+          <label class="text-sm font-semibold">业务场景</label>
+          <select id="scene" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm">
+            <option value="after">售后 · 退款/物流</option>
+            <option value="before">售前 · 功能/价格</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-semibold">转人工阈值 <span id="threshold-val" class="text-indigo-600">70</span>%</label>
+          <input id="threshold" type="range" min="40" max="90" value="70" class="mt-2 w-full accent-indigo-600" />
+          <p class="mt-1 text-xs text-gray-500">低于阈值时展示「建议转人工」按钮</p>
+        </div>
+        <div class="rounded-xl bg-indigo-50 border border-indigo-100 p-3 text-xs text-indigo-900 leading-6">
+          <p class="font-bold">模拟指标（本次会话）</p>
+          <p class="mt-1">解决率：<span id="stat-resolve">—</span></p>
+          <p>建议转人工：<span id="stat-handoff">0</span> 次</p>
+        </div>
+      </aside>
+
+      <div class="space-y-4">
+        <section class="glass rounded-2xl p-5">
+          <div class="flex flex-wrap gap-2 mb-3">
+            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-indigo-300" data-q="退款多久到账？">退款多久到账？</button>
+            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-indigo-300" data-q="怎么改收货地址？">怎么改收货地址？</button>
+            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-indigo-300" data-q="企业版有什么功能？">企业版有什么功能？</button>
+          </div>
+          <div id="chat" class="chat-scroll space-y-3">
+            <div class="msg-in rounded-2xl bg-gray-100 px-4 py-3 text-sm leading-7">你好，我是智能客服。选择左侧场景后提问；若置信度不足，我会建议转接人工坐席。</div>
+          </div>
+          <form id="form" class="mt-4 flex gap-2">
+            <input id="q" class="flex-1 rounded-full border border-gray-200 px-4 py-3 text-sm" placeholder="输入用户问题…" />
+            <button class="bg-gray-950 text-white px-5 py-3 rounded-full text-sm font-semibold">发送</button>
+          </form>
+          <button id="handoff" type="button" class="hidden mt-3 w-full border-2 border-amber-400 text-amber-900 py-2.5 rounded-full text-sm font-bold bg-amber-50">
+            转接人工坐席（模拟）
+          </button>
+        </section>
+        <details class="glass rounded-2xl p-5" open>
+          <summary class="font-bold text-sm cursor-pointer">检索日志 · 置信度计算</summary>
+          <pre id="log" class="mt-3 text-xs text-gray-600 whitespace-pre-wrap bg-gray-50 rounded-xl p-4 border border-gray-100">等待提问…</pre>
+        </details>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const KB = [
+      { scene: "after", keys: ["退款", "到账", "退钱"], q: 0.92, source: "FAQ/售后-退款", text: "退款提交后 3–7 个工作日原路退回；大额退款需人工复核，可在订单页查看进度。" },
+      { scene: "after", keys: ["地址", "收货", "改地址"], q: 0.88, source: "FAQ/物流-改址", text: "发货前可在 App 订单详情「修改地址」；已发货请联系在线客服拦截，成功率视承运商而定。" },
+      { scene: "before", keys: ["企业", "企业版", "功能"], q: 0.9, source: "FAQ/售前-企业版", text: "企业版含：多账号协作、审计日志、专属客服与 API 额度；支持 14 天试用，销售可安排演示。" },
+      { scene: "before", keys: ["价格", "多少钱", "收费"], q: 0.85, source: "FAQ/售前-定价", text: "标准版 ¥99/月/席位，企业版按年签约；具体报价以官网或销售方案为准。" },
+    ];
+
+    const chat = document.getElementById("chat");
+    const log = document.getElementById("log");
+    const handoffBtn = document.getElementById("handoff");
+    const threshold = document.getElementById("threshold");
+    const thresholdVal = document.getElementById("threshold-val");
+    let handoffCount = 0, asked = 0, resolved = 0;
+
+    threshold.addEventListener("input", () => { thresholdVal.textContent = threshold.value; });
+
+    function append(html, user) {
+      const d = document.createElement("div");
+      d.className = "msg-in rounded-2xl px-4 py-3 text-sm leading-7 " + (user ? "bg-gray-950 text-white ml-6" : "bg-indigo-50 border border-indigo-100 mr-4");
+      d.innerHTML = html;
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function answer(question) {
+      const scene = document.getElementById("scene").value;
+      const th = Number(threshold.value) / 100;
+      asked++;
+      append(`你问：${question}`, true);
+
+      const pool = KB.filter((c) => c.scene === scene);
+      let best = null, bestScore = 0;
+      pool.forEach((c) => {
+        let s = 0;
+        c.keys.forEach((k) => { if (question.includes(k)) s += 2; });
+        if (s > bestScore) { bestScore = s; best = c; }
+      });
+
+      const lines = [`场景过滤：${scene === "after" ? "售后" : "售前"} → ${pool.length} 片段`, ""];
+      if (!best || bestScore === 0) {
+        const conf = 0.35;
+        lines.push("未命中 FAQ，置信度 ≈ 35%");
+        log.textContent = lines.join("\n");
+        append("抱歉，暂未找到匹配答案。建议转人工或提交工单。", false);
+        handoffBtn.classList.remove("hidden");
+        if (conf < th) handoffCount++;
+        updateStats();
+        return;
+      }
+
+      const conf = best.q * (bestScore >= 2 ? 1 : 0.6);
+      lines.push(`命中：${best.source}`, `模型置信度（模拟）：${(conf * 100).toFixed(0)}%`, `阈值：${(th * 100).toFixed(0)}%`);
+      log.textContent = lines.join("\n");
+
+      append(`<p class="font-semibold text-indigo-900 mb-1">回答</p><p>${best.text}</p><p class="mt-2 text-xs text-gray-500">引用：${best.source}</p>`, false);
+      handoffBtn.classList.add("hidden");
+      if (conf >= th) resolved++;
+      else {
+        append('<p class="text-amber-800 text-xs mt-1">⚠️ 置信度低于阈值，建议转人工确认。</p>', false);
+        handoffBtn.classList.remove("hidden");
+        handoffCount++;
+      }
+      updateStats();
+    }
+
+    function updateStats() {
+      document.getElementById("stat-handoff").textContent = handoffCount;
+      document.getElementById("stat-resolve").textContent = asked ? Math.round((resolved / asked) * 100) + "%" : "—";
+    }
+
+    document.getElementById("form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const v = document.getElementById("q").value.trim();
+      if (!v) return;
+      document.getElementById("q").value = "";
+      answer(v);
+    });
+    document.querySelectorAll(".quick-q").forEach((b) => b.addEventListener("click", () => answer(b.dataset.q)));
+    handoffBtn.addEventListener("click", () => append("已为你排队人工坐席（模拟），预计等待 2 分钟。", false));
+  </script>
+</body>
+</html>

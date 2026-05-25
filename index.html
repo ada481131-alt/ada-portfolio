@@ -282,73 +282,58 @@
           <h2 class="mt-3 text-3xl md:text-4xl font-black tracking-tight">作品案例</h2>
         </div>
         <p class="hidden md:block text-gray-500 max-w-md">
-          涵盖对外客服、企业内部 HR 问答、低代码验证与知识库治理（细节可脱敏）。
+          四个案例均含可点击的交互演示（客服 / Prompt / 知识库 / HR）。
         </p>
       </div>
 
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <button
-          type="button"
-          class="project-card card glass rounded-[1.8rem] p-6 group"
-          data-project="1"
-          aria-label="查看项目：AI 智能客服 · RAG 知识库"
-        >
-          <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-indigo-200 to-purple-100 mb-5 overflow-hidden relative">
-            <span class="absolute inset-0 flex items-center justify-center text-indigo-600/50 text-sm font-bold px-4 text-center select-none">RAG · 检索 · 坐席协同</span>
-          </div>
-          <p class="text-sm text-indigo-600 font-bold">AI 客服</p>
-          <h3 class="mt-2 text-xl font-black group-hover:text-indigo-700 transition-colors">智能客服 · RAG 知识库落地</h3>
-          <p class="mt-3 text-gray-600 leading-7">
-            从 FAQ 碎片到可检索知识库，优化 embedding 与召回策略，提升回答准确率与转人工体验。
-          </p>
-          <p class="mt-2 text-sm font-semibold text-indigo-700/90">成果：准确率提升 · 转人工率下降</p>
-          <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600">
-            查看详情
-            <span aria-hidden="true">→</span>
-          </span>
-        </button>
+        <div class="card glass rounded-[1.8rem] p-6 flex flex-col">
+          <button type="button" class="project-card group text-left flex-1" data-project="1" aria-label="查看项目说明：智能客服 RAG">
+            <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-indigo-200 to-purple-100 mb-5 overflow-hidden relative">
+              <span class="absolute inset-0 flex items-center justify-center text-indigo-600/50 text-sm font-bold px-4 text-center select-none">RAG · 置信度 · 转人工</span>
+            </div>
+            <p class="text-sm text-indigo-600 font-bold">AI 客服</p>
+            <h3 class="mt-2 text-xl font-black group-hover:text-indigo-700 transition-colors">智能客服 · RAG 知识库落地</h3>
+            <p class="mt-3 text-gray-600 leading-7">
+              对外 FAQ 检索作答，按置信度建议转人工；区分售前/售后知识域，追踪解决率。
+            </p>
+            <p class="mt-2 text-sm font-semibold text-indigo-700/90">可体验 · 客服对话 + 检索日志</p>
+            <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600">项目说明 <span aria-hidden="true">→</span></span>
+          </button>
+          <a href="demo-ai-support.html" class="mt-4 w-full text-center bg-indigo-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-indigo-500">立即体验客服问答 →</a>
+        </div>
 
-        <button
-          type="button"
-          class="project-card card glass rounded-[1.8rem] p-6 group"
-          data-project="2"
-          aria-label="查看项目：低代码 Prompt 搭建 AI 应用"
-        >
-          <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-pink-200 to-orange-100 mb-5 overflow-hidden relative">
-            <span class="absolute inset-0 flex items-center justify-center text-pink-600/50 text-sm font-bold px-4 text-center select-none">Prompt · 低代码 · 快速验证</span>
-          </div>
-          <p class="text-sm text-pink-600 font-bold">低 / 零代码</p>
-          <h3 class="mt-2 text-xl font-black group-hover:text-pink-700 transition-colors">Prompt 搭建 AI 应用验证</h3>
-          <p class="mt-3 text-gray-600 leading-7">
-            在低 / 零代码平台用 Prompt 快速搭 Demo，验证场景价值后再推进工程化与产品化。
-          </p>
-          <p class="mt-2 text-sm font-semibold text-pink-700/90">成果：快速验证 · 筛选高价值场景</p>
-          <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-pink-600">
-            查看详情
-            <span aria-hidden="true">→</span>
-          </span>
-        </button>
+        <div class="card glass rounded-[1.8rem] p-6 flex flex-col">
+          <button type="button" class="project-card group text-left flex-1" data-project="2" aria-label="查看项目说明：Prompt 验证">
+            <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-pink-200 to-orange-100 mb-5 overflow-hidden relative">
+              <span class="absolute inset-0 flex items-center justify-center text-pink-600/50 text-sm font-bold px-4 text-center select-none">A/B Prompt · 评分</span>
+            </div>
+            <p class="text-sm text-pink-600 font-bold">低 / 零代码</p>
+            <h3 class="mt-2 text-xl font-black group-hover:text-pink-700 transition-colors">Prompt 搭建 AI 应用验证</h3>
+            <p class="mt-3 text-gray-600 leading-7">
+              对比两版 Prompt 的模拟输出与检查项得分，快速判断哪版值得写进 PRD。
+            </p>
+            <p class="mt-2 text-sm font-semibold text-pink-700/90">可体验 · Prompt 对比实验室</p>
+            <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-pink-600">项目说明 <span aria-hidden="true">→</span></span>
+          </button>
+          <a href="demo-prompt-lab.html" class="mt-4 w-full text-center bg-pink-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-pink-500">立即体验 Prompt 对比 →</a>
+        </div>
 
-        <button
-          type="button"
-          class="project-card card glass rounded-[1.8rem] p-6 group"
-          data-project="3"
-          aria-label="查看项目：知识库结构化与治理"
-        >
-          <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-emerald-200 to-cyan-100 mb-5 overflow-hidden relative">
-            <span class="absolute inset-0 flex items-center justify-center text-emerald-600/50 text-sm font-bold px-4 text-center select-none">结构化 · 切片 · 更新机制</span>
-          </div>
-          <p class="text-sm text-emerald-600 font-bold">知识库</p>
-          <h3 class="mt-2 text-xl font-black group-hover:text-emerald-700 transition-colors">知识库结构化与治理</h3>
-          <p class="mt-3 text-gray-600 leading-7">
-            定义文档分层、切片规则与更新流程，让知识库可维护、可评估，支撑长期迭代。
-          </p>
-          <p class="mt-2 text-sm font-semibold text-emerald-700/90">成果：可维护 SOP · 更新周期缩短</p>
-          <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-emerald-600">
-            查看详情
-            <span aria-hidden="true">→</span>
-          </span>
-        </button>
+        <div class="card glass rounded-[1.8rem] p-6 flex flex-col">
+          <button type="button" class="project-card group text-left flex-1" data-project="3" aria-label="查看项目说明：知识库治理">
+            <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-emerald-200 to-cyan-100 mb-5 overflow-hidden relative">
+              <span class="absolute inset-0 flex items-center justify-center text-emerald-600/50 text-sm font-bold px-4 text-center select-none">切片 · metadata · 失效</span>
+            </div>
+            <p class="text-sm text-emerald-600 font-bold">知识库</p>
+            <h3 class="mt-2 text-xl font-black group-hover:text-emerald-700 transition-colors">知识库结构化与治理</h3>
+            <p class="mt-3 text-gray-600 leading-7">
+              生成带 metadata 的切片，模拟标记失效，预览检索命中变化。
+            </p>
+            <p class="mt-2 text-sm font-semibold text-emerald-700/90">可体验 · 切片与检索预览</p>
+            <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-emerald-600">项目说明 <span aria-hidden="true">→</span></span>
+          </button>
+          <a href="demo-knowledge-base.html" class="mt-4 w-full text-center bg-emerald-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-emerald-500">立即体验知识库治理 →</a>
+        </div>
 
         <div class="card glass rounded-[1.8rem] p-6 flex flex-col">
           <button
@@ -549,41 +534,50 @@
         label: "AI 客服",
         labelClass: "text-indigo-600",
         title: "智能客服 · RAG 知识库落地",
-        desc: "负责 AI 客服场景的产品推进：梳理 FAQ 与业务文档，设计知识库分层与切片规则，协同研发调整 embedding 与召回策略，并建立回答质量、转人工率等评估方式，让检索增强问答稳定可用。",
+        desc: "负责对外 AI 客服场景：将 FAQ / 业务文档整理为可检索知识库，按售前/售后分域召回；结合置信度阈值触发转人工，并观测解决率、转人工率。演示页可体验完整问答与检索日志。",
         outcomes: [
-          "将分散 FAQ / 业务文档整理为可检索知识库（数百条级，持续扩充）",
-          "协同优化召回与回答策略，核心场景首轮回答准确率明显提升",
-          "建立转人工与满意度观测，转人工率下降、人工坐席承接更聚焦",
+          "梳理退款、物流、售前等高频意图，FAQ 入库并持续运营扩充",
+          "按场景过滤知识域，避免售前/售后文档互相干扰导致答非所问",
+          "置信度低于阈值时引导转人工，人工坐席承接更聚焦复杂工单",
+          "建立解决率与转人工观测，用于迭代 embedding / Prompt / 切片策略",
         ],
-        tags: ["RAG", "embedding", "召回策略", "转人工", "效果评估"],
+        tags: ["RAG", "置信度", "转人工", "售前/售后", "效果评估"],
+        demoLink: "demo-ai-support.html",
+        demoLinkText: "体验客服问答",
         link: "#contact",
-        linkText: "交流此项目经验",
+        linkText: "交流此项目",
       },
       2: {
         label: "低 / 零代码",
         labelClass: "text-pink-600",
         title: "Prompt 搭建 AI 应用验证",
-        desc: "自 2023 年起在低 / 零代码平台通过 Prompt 快速搭建 AI 应用原型，用于验证场景可行性与交互路径；在确认价值后，再输出 PRD、接口需求与迭代计划，推动工程化落地，避免「只会 Demo、无法交付」。",
+        desc: "在低 / 零代码阶段用 Prompt 快速搭 Demo：同一用户输入对比 A/B 两版 Prompt 的模拟输出与产品检查项得分，判断哪版更满足共情、结构化、转人工出口等要求，再决定是否投入 PRD 与研发。",
         outcomes: [
-          "2 周内完成多个业务场景 Demo，显著降低前期验证成本",
-          "通过用户访谈 + 数据反馈筛选高价值场景，减少无效研发投入",
-          "对验证通过的场景输出 PRD 与迭代计划，推动进入正式产品迭代",
+          "2 周内完成客服润色、工单分类、对话摘要等多场景 Prompt 验证",
+          "用检查项打分替代「感觉还行」，减少 Demo 主观判断带来的返工",
+          "得分更高的 Prompt 版本作为 PRD 基线，明确边界与评测样本",
+          "验证失败场景及时止损，避免直接进入高成本工程开发",
         ],
-        tags: ["Prompt 工程", "快速验证", "PRD", "能力边界", "产品化"],
+        tags: ["Prompt A/B", "检查项", "快速验证", "PRD", "低代码"],
+        demoLink: "demo-prompt-lab.html",
+        demoLinkText: "体验 Prompt 对比",
         link: "resume.html",
-        linkText: "查看完整简历",
+        linkText: "查看简历",
       },
       3: {
         label: "知识库",
         labelClass: "text-emerald-600",
         title: "知识库结构化与治理",
-        desc: "针对文档来源杂、更新慢、检索飘等问题，建立知识入库规范、元数据字段、版本与过期机制，并配合运营侧维护流程，使知识库可持续迭代，支撑 AI 客服与外呼等场景的一致回答。",
+        desc: "针对文档来源杂、更新慢、检索飘等问题，定义入库规范与 metadata（场景、负责人、版本、生效状态），支持按 Q&A / 章节 / 固定长度切片，并可标记片段失效以观察检索池变化。",
         outcomes: [
-          "制定入库规范、元数据与切片规则，降低「答非所问」与重复维护成本",
-          "建立运营侧更新 SOP，知识更新周期由周级缩短至天级",
-          "知识库能力复用于客服、外呼等多场景，回答口径更一致",
+          "统一 metadata 字段，运营与产品对同一片段可追溯、可问责",
+          "多种切片策略按文档类型选用，平衡召回粒度与维护成本",
+          "失效片段降权/剔除，降低过期政策进入 RAG 回答的风险",
+          "检索预览能力供运营自测，减少「上线后才发现搜不到」",
         ],
-        tags: ["结构化", "切片规则", "治理流程", "可维护性", "多场景复用"],
+        tags: ["切片策略", "metadata", "失效治理", "检索预览", "运营 SOP"],
+        demoLink: "demo-knowledge-base.html",
+        demoLinkText: "体验知识库治理",
         link: "#contact",
         linkText: "讨论知识库方案",
       },

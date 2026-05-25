@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prompt 验证实验室 · 交互演示 | Ada Liu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, "PingFang SC", sans-serif; background: radial-gradient(circle at top right, rgba(236,72,153,.12), transparent 35%), #fafafa; }
+    .glass { background: rgba(255,255,255,.9); border: 1px solid #fff; box-shadow: 0 16px 40px rgba(15,23,42,.06); }
+  </style>
+</head>
+<body class="text-gray-900 min-h-screen">
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-gray-100">
+    <div class="max-w-6xl mx-auto px-5 py-4 flex justify-between items-center">
+      <div>
+        <a href="index.html#work" class="text-sm font-semibold text-pink-600 hover:underline">← 返回主页</a>
+        <p class="mt-1 text-xs text-gray-500">低代码 Prompt 验证 · 模拟输出非真实 LLM</p>
+      </div>
+      <span class="text-xs font-bold bg-pink-100 text-pink-800 px-3 py-1 rounded-full">Prompt Lab</span>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-5 py-8">
+    <p class="text-sm font-bold text-pink-600 uppercase tracking-widest">Demo 02</p>
+    <h1 class="mt-2 text-3xl font-black">Prompt 搭建 AI 应用 · 快速验证</h1>
+    <p class="mt-3 text-gray-600 leading-8 max-w-3xl">
+      对比两版 Prompt 在同一用户输入下的<strong>模拟回复</strong>与<strong>产品检查项</strong>，用于 Demo 阶段快速判断哪版更值得进入 PRD。
+    </p>
+
+    <div class="glass rounded-2xl p-5 md:p-6 mt-8 space-y-5">
+      <div class="grid md:grid-cols-3 gap-4">
+        <div>
+          <label class="text-sm font-semibold">验证场景</label>
+          <select id="scenario" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm">
+            <option value="reply">客服回复润色</option>
+            <option value="ticket">工单意图分类</option>
+            <option value="summary">对话摘要</option>
+          </select>
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-sm font-semibold">模拟用户输入</label>
+          <input id="userIn" class="mt-1 w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm" value="你们的退款太慢了，我要投诉！" />
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="text-sm font-bold text-pink-700">Prompt A（简短）</label>
+          <textarea id="promptA" rows="4" class="mt-1 w-full rounded-xl border border-pink-200 px-3 py-2 text-sm leading-6"></textarea>
+        </div>
+        <div>
+          <label class="text-sm font-bold text-orange-600">Prompt B（结构化）</label>
+          <textarea id="promptB" rows="4" class="mt-1 w-full rounded-xl border border-orange-200 px-3 py-2 text-sm leading-6"></textarea>
+        </div>
+      </div>
+
+      <button id="run" type="button" class="w-full md:w-auto bg-gray-950 text-white px-8 py-3 rounded-full font-semibold hover:bg-gray-800">
+        运行对比（模拟）
+      </button>
+    </div>
+
+    <div id="results" class="hidden grid md:grid-cols-2 gap-5 mt-6">
+      <div class="glass rounded-2xl p-5">
+        <h3 class="font-bold text-pink-700">输出 A</h3>
+        <p id="outA" class="mt-3 text-sm leading-7 text-gray-700"></p>
+        <p class="mt-4 text-sm font-bold">检查项</p>
+        <ul id="checkA" class="mt-2 space-y-1 text-sm text-gray-600"></ul>
+        <p class="mt-3 text-2xl font-black text-pink-600"><span id="scoreA">0</span> 分</p>
+      </div>
+      <div class="glass rounded-2xl p-5">
+        <h3 class="font-bold text-orange-600">输出 B</h3>
+        <p id="outB" class="mt-3 text-sm leading-7 text-gray-700"></p>
+        <p class="mt-4 text-sm font-bold">检查项</p>
+        <ul id="checkB" class="mt-2 space-y-1 text-sm text-gray-600"></ul>
+        <p class="mt-3 text-2xl font-black text-orange-600"><span id="scoreB">0</span> 分</p>
+      </div>
+    </div>
+
+    <div id="verdict" class="hidden mt-6 glass rounded-2xl p-5 border-2 border-pink-100">
+      <p class="font-bold">产品建议（模拟）</p>
+      <p id="verdictText" class="mt-2 text-gray-700 leading-7"></p>
+    </div>
+
+    <div class="mt-8 flex flex-wrap gap-2 text-xs font-semibold text-gray-500">
+      <span class="px-3 py-1 bg-white rounded-full border">① 选场景</span>
+      <span>→</span>
+      <span class="px-3 py-1 bg-white rounded-full border">② 改 Prompt</span>
+      <span>→</span>
+      <span class="px-3 py-1 bg-white rounded-full border">③ 对比得分</span>
+      <span>→</span>
+      <span class="px-3 py-1 bg-pink-100 text-pink-800 rounded-full">④ 决定是否写 PRD</span>
+    </div>
+  </main>
+
+  <script>
+    const PRESETS = {
+      reply: {
+        a: "你是客服，回复用户问题，要礼貌。",
+        b: "你是客服助手。步骤：1) 共情 2) 说明处理时效 3) 给出可查进度方式 4) 若用户情绪激动，提示可转人工。禁止承诺具体到账日。",
+        run: (input) => ({
+          a: `您好，感谢您的反馈。关于「${input.slice(0, 20)}…」我们会尽快处理，请耐心等待。`,
+          b: `理解您对退款时效的焦虑。一般 3–7 个工作日原路退回，您可在 App 订单页查看进度；若仍有疑问，我可为您转接人工坐席进一步核查。`,
+          checks: ["共情", "时效说明", "行动指引", "转人工出口", "避免过度承诺"],
+        }),
+      },
+      ticket: {
+        a: "对用户消息分类。",
+        b: "对用户消息做意图分类，输出 JSON：{intent, urgency, need_human}。意图枚举：退款/物流/账号/其他。",
+        run: (input) => ({
+          a: `分类结果：投诉类`,
+          b: `{"intent":"退款","urgency":"高","need_human":true} · 依据：关键词「退款」「投诉」`,
+          checks: ["结构化输出", "意图枚举清晰", "是否建议人工", "可接入工单系统"],
+        }),
+      },
+      summary: {
+        a: "总结一下对话。",
+        b: "生成客服对话摘要：背景、用户诉求、已处理动作、待办；每项不超过 20 字。",
+        run: (input) => ({
+          a: `用户表达了不满，需要处理退款。`,
+          b: `背景：售后咨询｜诉求：催促退款｜已做：解释时效｜待办：人工复核订单`,
+          checks: ["字段完整", "长度可控", "便于坐席交接", "可入库 CRM"],
+        }),
+      },
+    };
+
+    const scenario = document.getElementById("scenario");
+    const promptA = document.getElementById("promptA");
+    const promptB = document.getElementById("promptB");
+
+    function loadPreset() {
+      const p = PRESETS[scenario.value];
+      promptA.value = p.a;
+      promptB.value = p.b;
+    }
+    scenario.addEventListener("change", loadPreset);
+    loadPreset();
+
+    function scoreOutput(text, checks, isB) {
+      let s = 0;
+      const items = checks.map((c) => {
+        let pass = false;
+        if (c === "共情" && /理解|抱歉|焦虑/.test(text)) pass = true;
+        if (c === "时效说明" && /3|7|工作日|时效/.test(text)) pass = true;
+        if (c === "行动指引" && /App|订单|查看|进度/.test(text)) pass = true;
+        if (c === "转人工出口" && /人工|坐席/.test(text)) pass = true;
+        if (c === "避免过度承诺" && !/一定|保证今天/.test(text)) pass = true;
+        if (c === "结构化输出" && /{|intent/.test(text)) pass = isB;
+        if (c === "意图枚举清晰" && /退款|物流/.test(text)) pass = isB;
+        if (c === "是否建议人工" && /human|人工|true/.test(text)) pass = true;
+        if (c === "可接入工单系统" && /JSON|intent/.test(text)) pass = isB;
+        if (c === "字段完整" && /背景|诉求|待办/.test(text)) pass = isB;
+        if (c === "长度可控" && text.length < 120) pass = true;
+        if (c === "便于坐席交接" && /待办|已做/.test(text)) pass = isB;
+        if (c === "可入库 CRM" && /｜/.test(text)) pass = isB;
+        if (!["共情","时效说明","行动指引","转人工出口","避免过度承诺","结构化输出","意图枚举清晰","是否建议人工","可接入工单系统","字段完整","长度可控","便于坐席交接","可入库 CRM"].includes(c)) pass = isB;
+        if (pass) s += 20;
+        return `<li>${pass ? "✅" : "⬜"} ${c}</li>`;
+      });
+      return { s: Math.min(100, s), items };
+    }
+
+    document.getElementById("run").addEventListener("click", () => {
+      const input = document.getElementById("userIn").value.trim() || "（空输入）";
+      const preset = PRESETS[scenario.value];
+      const { a, b, checks } = preset.run(input);
+      const rA = scoreOutput(a, checks, false);
+      const rB = scoreOutput(b, checks, true);
+
+      document.getElementById("results").classList.remove("hidden");
+      document.getElementById("outA").textContent = a;
+      document.getElementById("outB").textContent = b;
+      document.getElementById("checkA").innerHTML = rA.items.join("");
+      document.getElementById("checkB").innerHTML = rB.items.join("");
+      document.getElementById("scoreA").textContent = rA.s;
+      document.getElementById("scoreB").textContent = rB.s;
+
+      const verdict = document.getElementById("verdict");
+      verdict.classList.remove("hidden");
+      document.getElementById("verdictText").textContent =
+        rB.s > rA.s
+          ? `Prompt B 得分更高（${rB.s} vs ${rA.s}），结构化约束更有利于上线质量；建议以 B 为基线写 PRD，并补充边界用例与评测集。`
+          : `两版接近或 A 更高；建议补充更多测试样本后再决定是否进入 PRD，避免单次 Demo 误判。`;
+    });
+  </script>
+</body>
+</html>

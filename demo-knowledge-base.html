@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>知识库治理 · 交互演示 | Ada Liu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, "PingFang SC", sans-serif; background: radial-gradient(circle at top left, rgba(16,185,129,.12), transparent 40%), #f8fafc; }
+    .glass { background: rgba(255,255,255,.9); border: 1px solid #fff; box-shadow: 0 16px 40px rgba(15,23,42,.06); }
+    .chunk { transition: opacity .25s; }
+    .chunk.expired { opacity: .45; }
+  </style>
+</head>
+<body class="text-gray-900 min-h-screen">
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-gray-100">
+    <div class="max-w-6xl mx-auto px-5 py-4 flex justify-between items-center">
+      <div>
+        <a href="index.html#work" class="text-sm font-semibold text-emerald-600 hover:underline">← 返回主页</a>
+        <p class="mt-1 text-xs text-gray-500">入库 · 切片 · metadata · 检索预览</p>
+      </div>
+      <span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">Knowledge Base</span>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-5 py-8">
+    <p class="text-sm font-bold text-emerald-600 uppercase tracking-widest">Demo 03</p>
+    <h1 class="mt-2 text-3xl font-black">知识库结构化与治理</h1>
+    <p class="mt-3 text-gray-600 leading-8 max-w-3xl">
+      选择文档与切片策略，查看自动生成的<strong>片段 + metadata</strong>；可模拟「标记失效」并测试检索预览，理解治理如何影响 RAG 命中。
+    </p>
+
+    <div class="grid lg:grid-cols-[280px_1fr] gap-6 mt-8">
+      <aside class="glass rounded-2xl p-5 h-fit space-y-4">
+        <div>
+          <label class="text-sm font-semibold">源文档</label>
+          <select id="doc" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm">
+            <option value="refund">退款政策 v2.1</option>
+            <option value="member">会员权益说明</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-semibold">切片策略</label>
+          <div class="mt-2 space-y-2">
+            <label class="flex items-center gap-2 text-sm"><input type="radio" name="slice" value="qa" checked /> 按 Q&A 对</label>
+            <label class="flex items-center gap-2 text-sm"><input type="radio" name="slice" value="section" /> 按章节段落</label>
+            <label class="flex items-center gap-2 text-sm"><input type="radio" name="slice" value="fixed" /> 固定 120 字</label>
+          </div>
+        </div>
+        <button id="gen" type="button" class="w-full bg-emerald-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-emerald-500">
+          生成切片
+        </button>
+        <p class="text-xs text-gray-500 leading-6">生成后可点击片段「标记失效」，再在下方测试检索。</p>
+      </aside>
+
+      <div class="space-y-5">
+        <section class="glass rounded-2xl p-5">
+          <h2 class="font-bold text-sm text-gray-500 uppercase">片段列表 · metadata</h2>
+          <div id="chunks" class="mt-4 space-y-3 text-sm text-gray-500">点击「生成切片」开始</div>
+        </section>
+
+        <section class="glass rounded-2xl p-5">
+          <h2 class="font-bold text-sm text-gray-500 uppercase">检索预览</h2>
+          <div class="mt-3 flex gap-2">
+            <input id="preview-q" class="flex-1 rounded-full border border-gray-200 px-4 py-2.5 text-sm" placeholder="例如：退款多久到账" />
+            <button id="preview-run" type="button" class="bg-gray-950 text-white px-5 py-2.5 rounded-full text-sm font-semibold">检索</button>
+          </div>
+          <pre id="preview-log" class="mt-4 text-xs leading-6 text-gray-600 whitespace-pre-wrap bg-gray-50 rounded-xl p-4 border border-gray-100">—</pre>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const DOCS = {
+      refund: {
+        title: "退款政策 v2.1",
+        qa: [
+          { text: "Q: 退款多久到账？\nA: 提交后 3–7 个工作日原路退回。", meta: { scene: "售后", owner: "财务", version: "2.1", effective: true } },
+          { text: "Q: 退款被拒绝怎么办？\nA: 查看拒绝原因，补充材料后在工单重新提交。", meta: { scene: "售后", owner: "财务", version: "2.1", effective: true } },
+        ],
+        section: [
+          { text: "§1 适用范围：自营订单，第三方商家以店铺政策为准。", meta: { scene: "售后", owner: "法务", version: "2.1", effective: true } },
+          { text: "§2 时效说明：审核 1 个工作日，到账 3–7 个工作日。", meta: { scene: "售后", owner: "财务", version: "2.1", effective: true } },
+        ],
+        fixed: [
+          { text: "退款政策 v2.1（节选）提交退款后系统自动审核，大额需人工复核。审核通过后 3–7 个工作日到账。拒绝退款需查看原因并补充材料。", meta: { scene: "售后", owner: "运营", version: "2.1", effective: true } },
+        ],
+      },
+      member: {
+        title: "会员权益说明",
+        qa: [
+          { text: "Q: 会员有哪些权益？\nA: 免运费券、专属客服、生日礼券。", meta: { scene: "会员", owner: "增长", version: "1.0", effective: true } },
+        ],
+        section: [
+          { text: "第一章 会员等级：普通 / 银卡 / 金卡，权益逐级递增。", meta: { scene: "会员", owner: "增长", version: "1.0", effective: true } },
+        ],
+        fixed: [
+          { text: "会员权益说明：银卡及以上享专属客服与每月运费券；金卡额外享双倍积分。", meta: { scene: "会员", owner: "增长", version: "1.0", effective: true } },
+        ],
+      },
+    };
+
+    let chunks = [];
+
+    function metaTags(m, expired) {
+      const badge = expired ? '<span class="text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-xs font-bold">已失效</span>' : '<span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs font-bold">生效中</span>';
+      return `${badge} <span class="text-xs text-gray-500">scene=${m.scene} · owner=${m.owner} · v${m.version}</span>`;
+    }
+
+    function renderChunks() {
+      const box = document.getElementById("chunks");
+      if (!chunks.length) { box.textContent = "无片段"; return; }
+      box.innerHTML = chunks.map((c, i) => `
+        <div class="chunk rounded-xl border border-gray-100 p-4 ${c.expired ? "expired bg-gray-50" : "bg-white"}" data-i="${i}">
+          <div class="flex flex-wrap items-center gap-2 mb-2">${metaTags(c.meta, c.expired)}</div>
+          <p class="leading-7 text-gray-800 whitespace-pre-wrap">${c.text}</p>
+          <button type="button" class="toggle-exp mt-2 text-xs font-semibold text-emerald-700 hover:underline" data-i="${i}">
+            ${c.expired ? "恢复生效" : "标记失效"}
+          </button>
+        </div>
+      `).join("");
+      box.querySelectorAll(".toggle-exp").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const i = Number(btn.dataset.i);
+          chunks[i].expired = !chunks[i].expired;
+          renderChunks();
+        });
+      });
+    }
+
+    document.getElementById("gen").addEventListener("click", () => {
+      const docId = document.getElementById("doc").value;
+      const mode = document.querySelector('input[name="slice"]:checked').value;
+      const doc = DOCS[docId];
+      chunks = doc[mode].map((c) => ({ ...c, expired: false }));
+      renderChunks();
+      document.getElementById("preview-log").textContent = `已生成 ${chunks.length} 个片段（${doc.title} · ${mode}）`;
+    });
+
+    document.getElementById("preview-run").addEventListener("click", () => {
+      const q = document.getElementById("preview-q").value.trim();
+      if (!q) return;
+      const active = chunks.filter((c) => !c.expired);
+      const hits = active.filter((c) => c.text.includes(q) || (q.includes("退款") && c.text.includes("退款")) || (q.includes("会员") && c.text.includes("会员")));
+      const lines = [`查询：${q}`, `过滤失效后池：${active.length} 片段`, `命中：${hits.length} 条`, ""];
+      hits.forEach((h, i) => lines.push(`${i + 1}. [${h.meta.scene}] ${h.text.slice(0, 60)}…`));
+      if (!hits.length) lines.push("（无命中 — 检查切片策略或文档是否失效）");
+      document.getElementById("preview-log").textContent = lines.join("\n");
+    });
+  </script>
+</body>
+</html>

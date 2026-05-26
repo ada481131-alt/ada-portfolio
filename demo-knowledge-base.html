@@ -27,7 +27,11 @@
     <p class="text-sm font-bold text-emerald-600 uppercase tracking-widest">Demo 03</p>
     <h1 class="mt-2 text-3xl font-black">知识库结构化与治理</h1>
     <p class="mt-3 text-gray-600 leading-8 max-w-3xl">
-      选择文档与切片策略，查看自动生成的<strong>片段 + metadata</strong>；可模拟「标记失效」并测试检索预览，理解治理如何影响 RAG 命中。
+      完整 RAG 链路：<strong>切片入库</strong> → <strong>检索命中</strong> → <strong>基于片段生成回答</strong>（演示用规则拼接，非真实大模型）。
+      下方输入口语化问题（如「退款咋还没到」），即可看到最终回复与引用来源。
+    </p>
+    <p class="mt-2 text-sm text-emerald-800 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2 inline-block">
+      ① 生成切片 → ② 输入问题点「提问」→ ③ 看绿色高亮片段 + 客服式回答
     </p>
 
     <div class="grid lg:grid-cols-[280px_1fr] gap-6 mt-8">
@@ -70,12 +74,27 @@
         </section>
 
         <section class="glass rounded-2xl p-5">
-          <h2 class="font-bold text-sm text-gray-500 uppercase">检索预览</h2>
-          <div class="mt-3 flex gap-2">
-            <input id="preview-q" class="flex-1 rounded-full border border-gray-200 px-4 py-2.5 text-sm" placeholder="例如：退款多久到账" />
-            <button id="preview-run" type="button" class="bg-gray-950 text-white px-5 py-2.5 rounded-full text-sm font-semibold">检索</button>
+          <h2 class="font-bold text-sm text-gray-500 uppercase">RAG 问答 · 检索 + 生成</h2>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-emerald-400" data-q="退款咋还没到">退款咋还没到</button>
+            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-emerald-400" data-q="退款多久到账">退款多久到账</button>
+            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-emerald-400" data-q="会员有什么权益">会员有什么权益</button>
           </div>
-          <pre id="preview-log" class="mt-4 text-xs leading-6 text-gray-600 whitespace-pre-wrap bg-gray-50 rounded-xl p-4 border border-gray-100">—</pre>
+          <div class="mt-3 flex gap-2">
+            <input id="preview-q" class="flex-1 rounded-full border border-gray-200 px-4 py-2.5 text-sm" placeholder="口语化提问，例如：退款咋还没到" />
+            <button id="preview-run" type="button" class="bg-gray-950 text-white px-5 py-2.5 rounded-full text-sm font-semibold">提问</button>
+          </div>
+
+          <div id="rag-answer" class="hidden mt-4 rounded-2xl bg-emerald-50 border border-emerald-100 px-4 py-4 text-sm leading-8">
+            <p class="font-bold text-emerald-900">助手回答（基于 Top1 命中片段生成）</p>
+            <p id="rag-answer-text" class="mt-2 text-gray-800"></p>
+            <p id="rag-answer-cite" class="mt-3 text-xs text-gray-500"></p>
+          </div>
+
+          <details class="mt-4" open>
+            <summary class="text-xs font-bold text-gray-500 cursor-pointer select-none">展开：检索过程日志（给 PM / 研发看）</summary>
+            <pre id="preview-log" class="mt-2 text-xs leading-6 text-gray-600 whitespace-pre-wrap bg-gray-50 rounded-xl p-4 border border-gray-100">请先生成切片，再提问。</pre>
+          </details>
         </section>
       </div>
     </div>
@@ -152,25 +171,91 @@
       document.getElementById("preview-log").textContent = `已生成 ${chunks.length} 个片段（${doc.title} · ${mode}）`;
     });
 
+    function scoreChunk(chunk, q) {
+      let s = 0;
+      const t = chunk.text;
+      if (q.includes("退款") && t.includes("退款")) s += 4;
+      if (q.includes("会员") && t.includes("会员")) s += 4;
+      if (/没到|咋|为什么|多久|什么时候/.test(q) && /到账|工作日|时效/.test(t)) s += 5;
+      if (/拒绝|失败/.test(q) && /拒绝/.test(t)) s += 5;
+      if (q.includes("权益") && t.includes("权益")) s += 4;
+      if (t.includes(q)) s += 6;
+      chunk.text.split(/\s+/).forEach((w) => {
+        if (w.length >= 2 && q.includes(w)) s += 1;
+      });
+      return s;
+    }
+
+    function synthesizeAnswer(chunk, q) {
+      const t = chunk.text;
+      const aLine = t.match(/A:\s*(.+)/);
+      if (aLine) {
+        let reply = aLine[1].trim();
+        if (/没到|咋|为什么/.test(q)) {
+          reply += " 若已超过 7 个工作日仍未到账，请先在 App 订单页查看退款进度；仍无更新可联系人工客服核查。";
+        }
+        return reply;
+      }
+      if (/没到|多久|到账/.test(q) && /到账|工作日/.test(t)) {
+        return "提交退款后一般 3–7 个工作日原路退回。若超时未到账，请查看订单退款进度或联系客服。";
+      }
+      return `根据知识库：${t.replace(/\n/g, " ").slice(0, 160)}${t.length > 160 ? "…" : ""}`;
+    }
+
+    function runRagQuery(q) {
+      if (!chunks.length) {
+        alert("请先生成切片（或从自定义文本切片）");
+        return;
+      }
+      lastHitIds = new Set();
+      const scored = [];
+      chunks.forEach((c, realIdx) => {
+        if (c.expired) return;
+        const s = scoreChunk(c, q);
+        if (s > 0) scored.push({ realIdx, score: s, chunk: c });
+      });
+      scored.sort((a, b) => b.score - a.score);
+
+      const active = chunks.filter((c) => !c.expired);
+      const lines = [`用户问题：${q}`, `过滤失效后池：${active.length} 片段`, `召回候选：${scored.length} 条`, ""];
+      scored.forEach((x, i) => {
+        lastHitIds.add(x.realIdx);
+        lines.push(`${i + 1}. [${x.score}分] scene=${x.chunk.meta.scene} · ${x.chunk.text.slice(0, 50).replace(/\n/g, " ")}…`);
+      });
+
+      const answerBox = document.getElementById("rag-answer");
+      const answerText = document.getElementById("rag-answer-text");
+      const answerCite = document.getElementById("rag-answer-cite");
+
+      if (!scored.length) {
+        lines.push("", "（无命中 — 可换切片策略、检查片段是否被标记失效，或改问法）");
+        answerBox.classList.remove("hidden");
+        answerText.textContent =
+          "暂未在知识库中检索到足够相关的片段，无法生成可靠回答。建议转人工或补充 FAQ 后重试。";
+        answerCite.textContent = "";
+      } else {
+        const top = scored[0].chunk;
+        lines.push("", `④ 生成：取 Top1 片段拼成用户可见回答（模拟 LLM）`);
+        answerBox.classList.remove("hidden");
+        answerText.textContent = synthesizeAnswer(top, q);
+        answerCite.textContent = `引用片段 · scene=${top.meta.scene} · owner=${top.meta.owner} · v${top.meta.version} · 原文：${top.text.slice(0, 80).replace(/\n/g, " ")}…`;
+      }
+
+      document.getElementById("preview-log").textContent = lines.join("\n");
+      renderChunks();
+    }
+
     document.getElementById("preview-run").addEventListener("click", () => {
       const q = document.getElementById("preview-q").value.trim();
       if (!q) return;
-      lastHitIds = new Set();
-      const hitIndexes = [];
-      chunks.forEach((c, realIdx) => {
-        if (c.expired) return;
-        const match = c.text.includes(q) || (q.includes("退款") && c.text.includes("退款")) || (q.includes("会员") && c.text.includes("会员"));
-        if (match) { hitIndexes.push(realIdx); lastHitIds.add(realIdx); }
+      runRagQuery(q);
+    });
+
+    document.querySelectorAll(".quick-q").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.getElementById("preview-q").value = btn.dataset.q;
+        runRagQuery(btn.dataset.q);
       });
-      const active = chunks.filter((c) => !c.expired);
-      const lines = [`查询：${q}`, `过滤失效后池：${active.length} 片段`, `命中：${hitIndexes.length} 条`, ""];
-      hitIndexes.forEach((ri, i) => {
-        const h = chunks[ri];
-        lines.push(`${i + 1}. [${h.meta.scene}] ${h.text.slice(0, 60)}…`);
-      });
-      if (!hitIndexes.length) lines.push("（无命中 — 检查切片策略或文档是否失效）");
-      document.getElementById("preview-log").textContent = lines.join("\n");
-      renderChunks();
     });
 
     document.getElementById("gen-custom").addEventListener("click", () => {

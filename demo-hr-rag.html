@@ -106,6 +106,14 @@
             </div>
           </div>
 
+          <div class="flex flex-wrap gap-2 mb-3 text-xs">
+            <button type="button" id="clear-chat" class="px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50">清空对话</button>
+            <button type="button" id="copy-log-btn" class="px-3 py-1.5 rounded-full border border-violet-200 text-violet-700 hover:bg-violet-50">复制检索日志</button>
+            <button type="button" id="compare-region" class="px-3 py-1.5 rounded-full border border-amber-200 text-amber-800 hover:bg-amber-50" title="先大陆后香港，对比年假政策差异">
+              一键对比：大陆 vs 香港年假
+            </button>
+          </div>
+
           <form id="ask-form" class="mt-4 flex gap-2">
             <input
               id="question"
@@ -238,6 +246,28 @@
     });
     updateFilterSummary();
 
+    const PREFS_KEY = "demo-hr-rag-prefs";
+    try {
+      const p = JSON.parse(localStorage.getItem(PREFS_KEY) || "{}");
+      if (p.region) regionEl.value = p.region;
+      if (p.jobType) jobTypeEl.value = p.jobType;
+      if (p.versionMode) {
+        const radio = document.querySelector(`input[name="versionMode"][value="${p.versionMode}"]`);
+        if (radio) radio.checked = true;
+      }
+      updateFilterSummary();
+    } catch (_) {}
+
+    function savePrefs() {
+      localStorage.setItem(
+        PREFS_KEY,
+        JSON.stringify({ region: regionEl.value, jobType: jobTypeEl.value, versionMode: getVersionMode() })
+      );
+    }
+    regionEl.addEventListener("change", savePrefs);
+    jobTypeEl.addEventListener("change", savePrefs);
+    document.querySelectorAll('input[name="versionMode"]').forEach((el) => el.addEventListener("change", savePrefs));
+
     function scoreChunk(chunk, question) {
       const q = question.toLowerCase();
       let score = 0;
@@ -353,6 +383,32 @@
 
     document.querySelectorAll(".quick-q").forEach((btn) => {
       btn.addEventListener("click", () => answer(btn.dataset.q));
+    });
+
+    document.getElementById("clear-chat").addEventListener("click", () => {
+      chat.innerHTML = `<div class="msg-in rounded-2xl bg-gray-100 px-4 py-3 text-sm text-gray-700 leading-7">对话已清空。请确认左侧筛选条件后重新提问。</div>`;
+      logEl.textContent = "等待提问…";
+    });
+
+    document.getElementById("copy-log-btn").addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(logEl.textContent); alert("检索日志已复制"); }
+      catch { prompt("复制日志：", logEl.textContent); }
+    });
+
+    document.getElementById("compare-region").addEventListener("click", async () => {
+      const q = "年假怎么算？";
+      regionEl.value = "CN";
+      jobTypeEl.value = "正式";
+      document.querySelector('input[name="versionMode"][value="current"]').checked = true;
+      updateFilterSummary();
+      savePrefs();
+      appendMessage('<p class="text-xs font-bold text-amber-800">对比实验 · 同一问题，切换地区</p>', false);
+      answer(q);
+      await new Promise((r) => setTimeout(r, 400));
+      regionEl.value = "HK";
+      updateFilterSummary();
+      savePrefs();
+      answer(q);
     });
   </script>
 </body>

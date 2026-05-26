@@ -55,9 +55,14 @@
         </div>
       </div>
 
-      <button id="run" type="button" class="w-full md:w-auto bg-gray-950 text-white px-8 py-3 rounded-full font-semibold hover:bg-gray-800">
-        运行对比（模拟）
-      </button>
+      <div class="flex flex-wrap gap-3">
+        <button id="run" type="button" class="bg-gray-950 text-white px-8 py-3 rounded-full font-semibold hover:bg-gray-800">
+          运行对比（模拟）
+        </button>
+        <button id="save-prompts" type="button" class="border border-pink-200 text-pink-700 px-5 py-3 rounded-full text-sm font-semibold hover:bg-pink-50">
+          保存当前 Prompt
+        </button>
+      </div>
     </div>
 
     <div id="results" class="hidden grid md:grid-cols-2 gap-5 mt-6">
@@ -80,6 +85,15 @@
     <div id="verdict" class="hidden mt-6 glass rounded-2xl p-5 border-2 border-pink-100">
       <p class="font-bold">产品建议（模拟）</p>
       <p id="verdictText" class="mt-2 text-gray-700 leading-7"></p>
+      <div class="mt-4 flex flex-wrap gap-3">
+        <button type="button" id="copy-report" class="text-sm font-semibold text-pink-700 hover:underline">复制评测报告</button>
+        <span id="copy-ok" class="hidden text-sm text-emerald-600 font-medium">已复制</span>
+      </div>
+    </div>
+
+    <div id="history" class="hidden mt-6 glass rounded-2xl p-5">
+      <p class="font-bold text-sm text-gray-500 uppercase">最近 3 次对比记录（本页会话）</p>
+      <ul id="history-list" class="mt-3 space-y-2 text-sm text-gray-600"></ul>
     </div>
 
     <div class="mt-8 flex flex-wrap gap-2 text-xs font-semibold text-gray-500">
@@ -128,13 +142,33 @@
     const promptA = document.getElementById("promptA");
     const promptB = document.getElementById("promptB");
 
+    const PROMPT_KEY = "demo-prompt-lab-saved";
+    let lastReport = "";
+    const history = [];
+
     function loadPreset() {
-      const p = PRESETS[scenario.value];
+      const id = scenario.value;
+      try {
+        const saved = JSON.parse(localStorage.getItem(PROMPT_KEY) || "{}")[id];
+        if (saved) {
+          promptA.value = saved.a;
+          promptB.value = saved.b;
+          return;
+        }
+      } catch (_) {}
+      const p = PRESETS[id];
       promptA.value = p.a;
       promptB.value = p.b;
     }
     scenario.addEventListener("change", loadPreset);
     loadPreset();
+
+    document.getElementById("save-prompts").addEventListener("click", () => {
+      const all = JSON.parse(localStorage.getItem(PROMPT_KEY) || "{}");
+      all[scenario.value] = { a: promptA.value, b: promptB.value };
+      localStorage.setItem(PROMPT_KEY, JSON.stringify(all));
+      alert("已保存到本机（切换场景仍会保留你的 Prompt）");
+    });
 
     function scoreOutput(text, checks, isB) {
       let s = 0;
@@ -177,10 +211,41 @@
 
       const verdict = document.getElementById("verdict");
       verdict.classList.remove("hidden");
-      document.getElementById("verdictText").textContent =
+      const verdictStr =
         rB.s > rA.s
           ? `Prompt B 得分更高（${rB.s} vs ${rA.s}），结构化约束更有利于上线质量；建议以 B 为基线写 PRD，并补充边界用例与评测集。`
           : `两版接近或 A 更高；建议补充更多测试样本后再决定是否进入 PRD，避免单次 Demo 误判。`;
+      document.getElementById("verdictText").textContent = verdictStr;
+
+      lastReport = [
+        `# Prompt 对比报告 · ${new Date().toLocaleString("zh-CN")}`,
+        `场景：${scenario.options[scenario.selectedIndex].text}`,
+        `输入：${input}`,
+        `得分 A：${rA.s} · B：${rB.s}`,
+        `输出 A：${a}`,
+        `输出 B：${b}`,
+        `结论：${verdictStr}`,
+      ].join("\n");
+
+      history.unshift({ scene: scenario.value, sA: rA.s, sB: rB.s, t: new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }) });
+      if (history.length > 3) history.pop();
+      const histBox = document.getElementById("history");
+      histBox.classList.remove("hidden");
+      document.getElementById("history-list").innerHTML = history
+        .map((h) => `<li>${h.t} · ${h.scene} · A ${h.sA} vs B ${h.sB}</li>`)
+        .join("");
+    });
+
+    document.getElementById("copy-report").addEventListener("click", async () => {
+      if (!lastReport) return;
+      try {
+        await navigator.clipboard.writeText(lastReport);
+        const ok = document.getElementById("copy-ok");
+        ok.classList.remove("hidden");
+        setTimeout(() => ok.classList.add("hidden"), 2000);
+      } catch {
+        prompt("复制报告：", lastReport);
+      }
     });
   </script>
 </body>

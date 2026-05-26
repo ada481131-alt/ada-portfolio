@@ -50,12 +50,22 @@
         <button id="gen" type="button" class="w-full bg-emerald-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-emerald-500">
           生成切片
         </button>
-        <p class="text-xs text-gray-500 leading-6">生成后可点击片段「标记失效」，再在下方测试检索。</p>
+        <div class="border-t border-gray-100 pt-4">
+          <label class="text-sm font-semibold">或粘贴自定义短文</label>
+          <textarea id="custom-doc" rows="4" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-xs leading-6" placeholder="每段空行分隔，将自动生成片段…"></textarea>
+          <button id="gen-custom" type="button" class="mt-2 w-full border border-emerald-300 text-emerald-800 py-2 rounded-full text-xs font-semibold hover:bg-emerald-50">
+            从自定义文本切片
+          </button>
+        </div>
+        <p class="text-xs text-gray-500 leading-6">生成后可标记失效、导出 JSON、再检索预览。</p>
       </aside>
 
       <div class="space-y-5">
         <section class="glass rounded-2xl p-5">
-          <h2 class="font-bold text-sm text-gray-500 uppercase">片段列表 · metadata</h2>
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h2 class="font-bold text-sm text-gray-500 uppercase">片段列表 · metadata</h2>
+            <button type="button" id="export-json" class="hidden text-xs font-semibold text-emerald-700 hover:underline">复制片段 JSON</button>
+          </div>
           <div id="chunks" class="mt-4 space-y-3 text-sm text-gray-500">点击「生成切片」开始</div>
         </section>
 
@@ -102,6 +112,8 @@
     };
 
     let chunks = [];
+    let lastHitIds = new Set();
+    const exportBtn = document.getElementById("export-json");
 
     function metaTags(m, expired) {
       const badge = expired ? '<span class="text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-xs font-bold">已失效</span>' : '<span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs font-bold">生效中</span>';
@@ -111,8 +123,9 @@
     function renderChunks() {
       const box = document.getElementById("chunks");
       if (!chunks.length) { box.textContent = "无片段"; return; }
+      exportBtn.classList.toggle("hidden", !chunks.length);
       box.innerHTML = chunks.map((c, i) => `
-        <div class="chunk rounded-xl border border-gray-100 p-4 ${c.expired ? "expired bg-gray-50" : "bg-white"}" data-i="${i}">
+        <div class="chunk rounded-xl border p-4 ${c.expired ? "expired bg-gray-50 border-gray-100" : "bg-white border-gray-100"} ${lastHitIds.has(i) ? "ring-2 ring-emerald-400 border-emerald-200" : ""}" data-i="${i}">
           <div class="flex flex-wrap items-center gap-2 mb-2">${metaTags(c.meta, c.expired)}</div>
           <p class="leading-7 text-gray-800 whitespace-pre-wrap">${c.text}</p>
           <button type="button" class="toggle-exp mt-2 text-xs font-semibold text-emerald-700 hover:underline" data-i="${i}">
@@ -134,6 +147,7 @@
       const mode = document.querySelector('input[name="slice"]:checked').value;
       const doc = DOCS[docId];
       chunks = doc[mode].map((c) => ({ ...c, expired: false }));
+      lastHitIds = new Set();
       renderChunks();
       document.getElementById("preview-log").textContent = `已生成 ${chunks.length} 个片段（${doc.title} · ${mode}）`;
     });
@@ -141,12 +155,43 @@
     document.getElementById("preview-run").addEventListener("click", () => {
       const q = document.getElementById("preview-q").value.trim();
       if (!q) return;
+      lastHitIds = new Set();
+      const hitIndexes = [];
+      chunks.forEach((c, realIdx) => {
+        if (c.expired) return;
+        const match = c.text.includes(q) || (q.includes("退款") && c.text.includes("退款")) || (q.includes("会员") && c.text.includes("会员"));
+        if (match) { hitIndexes.push(realIdx); lastHitIds.add(realIdx); }
+      });
       const active = chunks.filter((c) => !c.expired);
-      const hits = active.filter((c) => c.text.includes(q) || (q.includes("退款") && c.text.includes("退款")) || (q.includes("会员") && c.text.includes("会员")));
-      const lines = [`查询：${q}`, `过滤失效后池：${active.length} 片段`, `命中：${hits.length} 条`, ""];
-      hits.forEach((h, i) => lines.push(`${i + 1}. [${h.meta.scene}] ${h.text.slice(0, 60)}…`));
-      if (!hits.length) lines.push("（无命中 — 检查切片策略或文档是否失效）");
+      const lines = [`查询：${q}`, `过滤失效后池：${active.length} 片段`, `命中：${hitIndexes.length} 条`, ""];
+      hitIndexes.forEach((ri, i) => {
+        const h = chunks[ri];
+        lines.push(`${i + 1}. [${h.meta.scene}] ${h.text.slice(0, 60)}…`);
+      });
+      if (!hitIndexes.length) lines.push("（无命中 — 检查切片策略或文档是否失效）");
       document.getElementById("preview-log").textContent = lines.join("\n");
+      renderChunks();
+    });
+
+    document.getElementById("gen-custom").addEventListener("click", () => {
+      const raw = document.getElementById("custom-doc").value.trim();
+      if (!raw) { alert("请先粘贴文本"); return; }
+      const parts = raw.split(/\n\s*\n/).filter(Boolean);
+      chunks = parts.map((text, i) => ({
+        text: text.trim(),
+        meta: { scene: "自定义", owner: "运营", version: "1.0", effective: true },
+        expired: false,
+      }));
+      lastHitIds = new Set();
+      renderChunks();
+      document.getElementById("preview-log").textContent = `已从自定义文本生成 ${chunks.length} 个片段（按空行分段）`;
+    });
+
+    exportBtn.addEventListener("click", async () => {
+      const payload = chunks.map((c) => ({ text: c.text, meta: c.meta, expired: c.expired }));
+      const json = JSON.stringify(payload, null, 2);
+      try { await navigator.clipboard.writeText(json); alert("片段 JSON 已复制"); }
+      catch { prompt("复制 JSON：", json); }
     });
   </script>
 </body>

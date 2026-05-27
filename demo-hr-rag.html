@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HR 政策问答 · 交互演示 | Ada Liu</title>
-  <meta name="description" content="企业内部 HR 政策 RAG 问答演示：权限隔离、metadata 过滤、制度时效版本切换。" />
+  <title>AI 外呼 · 拉新召回脚本 Demo | Ada Liu</title>
+  <meta name="description" content="海外游戏 AI 外呼：名单分层、活动脚本检索、拉新与流失召回话术演示。" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
@@ -37,19 +37,19 @@
     <div class="max-w-6xl mx-auto px-5 py-4 flex flex-wrap items-center justify-between gap-3">
       <div>
         <a href="index.html#work" class="text-sm font-semibold text-violet-700 hover:underline">← 返回主页</a>
-        <p class="mt-1 text-xs text-gray-500">产品演示 · 非真实公司政策，仅供作品集交互说明</p>
+        <p class="mt-1 text-xs text-gray-500">海外游戏 · AI 外呼脚本检索 · 演示数据</p>
       </div>
-      <span class="text-xs font-bold bg-violet-100 text-violet-800 px-3 py-1 rounded-full">内部 RAG 模拟</span>
+      <span class="text-xs font-bold bg-violet-100 text-violet-800 px-3 py-1 rounded-full">外呼策略模拟</span>
     </div>
   </header>
 
   <main class="max-w-6xl mx-auto px-5 py-8 md:py-10">
     <div class="mb-8">
       <p class="text-sm font-bold text-violet-700 uppercase tracking-widest">Interactive Demo</p>
-      <h1 class="mt-2 text-3xl md:text-4xl font-black tracking-tight">HR 政策 / 入职手册智能问答</h1>
+      <h1 class="mt-2 text-3xl md:text-4xl font-black tracking-tight">AI 外呼 · 拉新与流失召回</h1>
       <p class="mt-3 text-gray-600 leading-8 max-w-3xl">
-        模拟真实 RAG 链路：先按<strong>地区、岗位</strong>做 metadata 过滤与权限隔离，再检索政策片段作答；
-        切换<strong>制度版本</strong>可体验时效性（旧版失效不再命中，除非刻意查看历史版本）。
+        模拟外呼前<strong>名单分层 + 脚本检索</strong>：按市场、玩家分层、活动版本过滤话术库，再生成外呼要点（非长文客服回复）。
+        用于对齐运营、风控、本地化对外呼内容的共识。
       </p>
     </div>
 
@@ -57,30 +57,31 @@
       <!-- 左侧：员工身份 + 版本 -->
       <aside class="glass rounded-2xl p-5 h-fit space-y-5">
         <div>
-          <h2 class="font-bold text-sm text-gray-500 uppercase tracking-wider">Metadata 过滤</h2>
-          <label class="block mt-3 text-sm font-semibold">所在地区</label>
+          <h2 class="font-bold text-sm text-gray-500 uppercase tracking-wider">名单分层</h2>
+          <label class="block mt-3 text-sm font-semibold">市场</label>
           <select id="region" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm bg-white">
-            <option value="CN">中国大陆</option>
-            <option value="HK">中国香港</option>
-            <option value="SG">新加坡</option>
+            <option value="SEA">东南亚 SEA</option>
+            <option value="LATAM">拉美 LATAM</option>
+            <option value="NA">北美 NA</option>
           </select>
 
-          <label class="block mt-4 text-sm font-semibold">岗位类型</label>
+          <label class="block mt-4 text-sm font-semibold">玩家分层</label>
           <select id="jobType" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm bg-white">
-            <option value="正式">正式员工</option>
-            <option value="实习">实习生</option>
+            <option value="new">新注册 · 未付费</option>
+            <option value="churn7">流失 7 天</option>
+            <option value="whale">大 R · 活跃下滑</option>
           </select>
         </div>
 
         <div class="border-t border-gray-100 pt-4">
-          <h2 class="font-bold text-sm text-gray-500 uppercase tracking-wider">制度时效</h2>
+          <h2 class="font-bold text-sm text-gray-500 uppercase tracking-wider">活动脚本</h2>
           <label class="mt-3 flex items-start gap-2 cursor-pointer">
             <input type="radio" name="versionMode" value="current" checked class="mt-1" />
-            <span class="text-sm leading-6"><strong>仅生效政策（2024 版）</strong><br /><span class="text-gray-500">旧版自动降权，不进入检索</span></span>
+            <span class="text-sm leading-6"><strong>仅当前活动话术</strong><br /><span class="text-gray-500">已下线活动不进入检索</span></span>
           </label>
           <label class="mt-3 flex items-start gap-2 cursor-pointer">
             <input type="radio" name="versionMode" value="all" class="mt-1" />
-            <span class="text-sm leading-6"><strong>含已失效文档（2023 版）</strong><br /><span class="text-gray-500">用于对比「过期政策」风险</span></span>
+            <span class="text-sm leading-6"><strong>含已下线活动</strong><br /><span class="text-gray-500">对比误用旧脚本风险</span></span>
           </label>
         </div>
 
@@ -95,22 +96,22 @@
         <section class="glass rounded-2xl p-5 md:p-6">
           <div class="flex flex-wrap gap-2 mb-4">
             <span class="text-sm font-semibold text-gray-700 mr-1">试试问：</span>
-            <button type="button" class="quick-q text-sm bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:border-violet-300 hover:text-violet-800" data-q="年假怎么算？">年假怎么算？</button>
-            <button type="button" class="quick-q text-sm bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:border-violet-300 hover:text-violet-800" data-q="报销怎么走流程？">报销怎么走流程？</button>
-            <button type="button" class="quick-q text-sm bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:border-violet-300 hover:text-violet-800" data-q="实习生有年假吗？">实习生有年假吗？</button>
+            <button type="button" class="quick-q text-sm bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:border-violet-300 hover:text-violet-800" data-q="7天未登录怎么召回？">7天未登录召回</button>
+            <button type="button" class="quick-q text-sm bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:border-violet-300 hover:text-violet-800" data-q="新注册未付费拉新话术">新注册拉新</button>
+            <button type="button" class="quick-q text-sm bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:border-violet-300 hover:text-violet-800" data-q="大R活跃下降关怀">大R关怀</button>
           </div>
 
           <div id="chat" class="chat-scroll space-y-4 pr-1">
             <div class="msg-in rounded-2xl bg-gray-100 px-4 py-3 text-sm text-gray-700 leading-7">
-              你好，我是内部 HR 政策助手。请先确认左侧<strong>地区</strong>与<strong>岗位</strong>，再提问；右侧可展开查看本次命中的知识片段（模拟 RAG 检索日志）。
+              你好，我是外呼脚本助手。请先选<strong>市场</strong>与<strong>玩家分层</strong>，再问拉新/召回话术；右侧可看本次命中的脚本片段（模拟检索日志）。
             </div>
           </div>
 
           <div class="flex flex-wrap gap-2 mb-3 text-xs">
             <button type="button" id="clear-chat" class="px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50">清空对话</button>
             <button type="button" id="copy-log-btn" class="px-3 py-1.5 rounded-full border border-violet-200 text-violet-700 hover:bg-violet-50">复制检索日志</button>
-            <button type="button" id="compare-region" class="px-3 py-1.5 rounded-full border border-amber-200 text-amber-800 hover:bg-amber-50" title="先大陆后香港，对比年假政策差异">
-              一键对比：大陆 vs 香港年假
+            <button type="button" id="compare-region" class="px-3 py-1.5 rounded-full border border-amber-200 text-amber-800 hover:bg-amber-50" title="同一召回意图，切换市场对比脚本">
+              对比：SEA vs LATAM 召回脚本
             </button>
           </div>
 
@@ -118,7 +119,7 @@
             <input
               id="question"
               type="text"
-              placeholder="例如：年假怎么算？"
+              placeholder="例如：7天未登录怎么召回？"
               class="flex-1 rounded-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
               autocomplete="off"
             />
@@ -142,81 +143,70 @@
   <script>
     const KB = [
       {
-        id: "cn-ft-leave-24",
-        keywords: ["年假", "假期", "休假", "带薪"],
-        region: "CN",
-        jobType: "正式",
-        version: "2024",
+        id: "sea-new-welcome-25",
+        keywords: ["拉新", "新注册", "未付费", "首充"],
+        region: "SEA",
+        jobType: "new",
+        version: "2025",
         effective: true,
-        source: "《员工手册》§3.2 · 2024-01-01 生效",
+        source: "Outbound/SEA/NewPlayer-Welcome · 2025-03",
         answer:
-          "【中国大陆 · 正式员工 · 2024 版】工作满 1 年不满 10 年：年假 5 天；满 10 年不满 20 年：10 天；满 20 年：15 天。年假需提前在 OA 提交，经直属主管审批。",
+          "【SEA · 新注册未付费】开场 15 秒内说明身份与游戏名；强调新手 7 日礼包与首充双倍（勿承诺具体金额）；若玩家拒绝，记录「不感兴趣」并 7 日内不再外呼。",
       },
       {
-        id: "cn-intern-leave-24",
-        keywords: ["年假", "假期", "实习生"],
-        region: "CN",
-        jobType: "实习",
-        version: "2024",
+        id: "sea-churn7-winback-25",
+        keywords: ["召回", "流失", "7天", "未登录", "登录"],
+        region: "SEA",
+        jobType: "churn7",
+        version: "2025",
         effective: true,
-        source: "《实习生管理办法》§2 · 2024-01-01 生效",
+        source: "Outbound/SEA/Churn7-Winback · 2025-03",
         answer:
-          "【中国大陆 · 实习生 · 2024 版】实习生不享受带薪年假；如遇考试、毕业答辩等，可申请事假，需导师与 HRBP 双审批。",
+          "【SEA · 流失 7 天】先确认是否换设备/卸载；提供「回归登录礼」领取步骤（游戏内邮箱）；禁止口头承诺补偿钻石数量，引导回游戏查看活动页。",
       },
       {
-        id: "hk-ft-leave-24",
-        keywords: ["年假", "假期", "休假"],
-        region: "HK",
-        jobType: "正式",
-        version: "2024",
+        id: "latam-churn7-winback-25",
+        keywords: ["召回", "流失", "7天", "未登录"],
+        region: "LATAM",
+        jobType: "churn7",
+        version: "2025",
         effective: true,
-        source: "HK Employee Handbook §Annual Leave · 2024",
+        source: "Outbound/LATAM/Churn7-Winback · 2025-03",
         answer:
-          "【中国香港 · 正式员工 · 2024 版】按入职满 1 年起享 7–14 天有薪年假（随工龄递增），须至少提前 7 个工作日申请。",
+          "【LATAM · 流失 7 天】西语/葡语脚本需本地化称呼；强调赛季活动倒计时；若玩家提及充值问题，转客服工单号流程，外呼不处理到账。",
       },
       {
-        id: "sg-ft-leave-24",
-        keywords: ["年假", "假期"],
-        region: "SG",
-        jobType: "正式",
-        version: "2024",
+        id: "na-whale-care-25",
+        keywords: ["大R", "关怀", "活跃", "下滑", "VIP"],
+        region: "NA",
+        jobType: "whale",
+        version: "2025",
         effective: true,
-        source: "SG Staff Policy Ch.4 · 2024",
+        source: "Outbound/NA/Whale-Retention · 2025-03",
         answer:
-          "【新加坡 · 正式员工 · 2024 版】首年按比例折算年假；满 1 年后最低 14 天，具体以 Employment Pass 类型为准。",
+          "【NA · 大 R 活跃下滑】语气尊重、不施压；邀请专属客服通道与版本前瞻；禁止讨论其他玩家数据；若提及退款/提现，立即转支付客服队列。",
       },
       {
-        id: "cn-ft-reimb-24",
-        keywords: ["报销", "发票", "费用", "差旅"],
-        region: "CN",
-        jobType: "正式",
-        version: "2024",
+        id: "sea-whale-care-25",
+        keywords: ["大R", "关怀", "VIP", "活跃下降"],
+        region: "SEA",
+        jobType: "whale",
+        version: "2025",
         effective: true,
-        source: "《财务报销制度》§1–3 · 2024-03 修订",
+        source: "Outbound/SEA/Whale-Retention · 2025-03",
         answer:
-          "【中国大陆 · 正式员工 · 2024 版】流程：① OA 提交「费用报销」② 上传增值税发票 ③ 部门负责人审批 ④ 财务 5 个工作日内打款。单笔超 5000 元需附加说明。",
+          "【SEA · 大 R】可提及公会/排位赛季节点；提供预约回电时段；外呼时长控制在 3 分钟内，挂断后推送 App 内消息卡片。",
       },
       {
-        id: "hk-ft-reimb-24",
-        keywords: ["报销", "发票", "费用"],
-        region: "HK",
-        jobType: "正式",
+        id: "sea-churn7-old-event-24",
+        keywords: ["召回", "流失", "活动"],
+        region: "SEA",
+        jobType: "churn7",
         version: "2024",
-        effective: true,
-        source: "HK Finance Policy · 2024",
-        answer:
-          "【中国香港 · 正式员工 · 2024 版】通过 Concur 提交，保留收据原件 7 年；餐饮补贴每日上限 HKD 120，不可与差旅津贴重复申领。",
-      },
-      {
-        id: "cn-ft-leave-23",
-        keywords: ["年假", "假期"],
-        region: "CN",
-        jobType: "正式",
-        version: "2023",
         effective: false,
-        source: "《员工手册》§3.2 · 2023 版（已失效）",
+        source: "Outbound/SEA/2024-Summer-Event（已下线）",
         answer:
-          "【⚠️ 已失效 · 2023 版】年假：工作满 1 年享 3 天（旧规，2024 年起已作废）。若系统仍命中本文档，说明时效过滤未生效。",
+          "【⚠️ 已下线活动】2024 夏日返利口令已失效。若仍被命中，说明活动脚本过滤未生效，应改用当前赛季召回话术。",
       },
     ];
 
@@ -235,7 +225,7 @@
     function updateFilterSummary() {
       const r = regionEl.options[regionEl.selectedIndex].text;
       const j = jobTypeEl.options[jobTypeEl.selectedIndex].text;
-      const v = getVersionMode() === "current" ? "仅 2024 生效文档" : "含 2023 已失效文档";
+      const v = getVersionMode() === "current" ? "仅当前活动话术" : "含已下线活动";
       filterSummary.textContent = `${r} · ${j} · ${v}`;
     }
 
@@ -249,8 +239,10 @@
     const PREFS_KEY = "demo-hr-rag-prefs";
     try {
       const p = JSON.parse(localStorage.getItem(PREFS_KEY) || "{}");
-      if (p.region) regionEl.value = p.region;
-      if (p.jobType) jobTypeEl.value = p.jobType;
+      const validRegions = ["SEA", "LATAM", "NA"];
+      const validSegments = ["new", "churn7", "whale"];
+      if (p.region && validRegions.includes(p.region)) regionEl.value = p.region;
+      if (p.jobType && validSegments.includes(p.jobType)) jobTypeEl.value = p.jobType;
       if (p.versionMode) {
         const radio = document.querySelector(`input[name="versionMode"][value="${p.versionMode}"]`);
         if (radio) radio.checked = true;
@@ -274,8 +266,9 @@
       chunk.keywords.forEach((kw) => {
         if (question.includes(kw)) score += 3;
       });
-      if (question.includes("年假") && chunk.keywords.includes("年假")) score += 2;
-      if (question.includes("报销") && chunk.keywords.includes("报销")) score += 2;
+      if (question.includes("召回") && chunk.keywords.includes("召回")) score += 2;
+      if (question.includes("拉新") && chunk.keywords.includes("拉新")) score += 2;
+      if (question.includes("大R") && chunk.keywords.includes("大R")) score += 2;
       return score;
     }
 
@@ -285,7 +278,7 @@
       const versionMode = getVersionMode();
       const lines = [];
       lines.push(`用户问题：${question}`);
-      lines.push(`metadata：region=${region}, jobType=${jobType}, versionMode=${versionMode}`);
+      lines.push(`metadata：market=${region}, segment=${jobType}, scriptMode=${versionMode}`);
       lines.push("");
 
       let pool = [...KB];
@@ -293,16 +286,16 @@
       lines.push("");
 
       const afterPermission = pool.filter((c) => c.region === region);
-      lines.push(`① 权限 / 地区过滤后：${afterPermission.length} 片段（仅保留 ${region}）`);
+      lines.push(`① 市场过滤后：${afterPermission.length} 片段（仅保留 ${region}）`);
       pool = afterPermission;
 
       const afterJob = pool.filter((c) => c.jobType === jobType);
-      lines.push(`② 岗位 metadata 过滤后：${afterJob.length} 片段（仅保留 ${jobType}）`);
+      lines.push(`② 玩家分层过滤后：${afterJob.length} 片段（仅保留 ${jobType}）`);
       pool = afterJob;
 
       if (versionMode === "current") {
         const afterTime = pool.filter((c) => c.effective);
-        lines.push(`③ 时效过滤（仅 effective=true）：${afterTime.length} 片段`);
+        lines.push(`③ 活动时效过滤（仅 effective=true）：${afterTime.length} 片段`);
         pool = afterTime;
       } else {
         lines.push(`③ 时效过滤：已关闭，允许命中失效文档`);
@@ -347,12 +340,12 @@
       if (!best) {
         if (poolSize === 0) {
           appendMessage(
-            "未检索到适用于你当前<strong>地区 + 岗位</strong>的政策片段（权限/metadata 过滤后为空）。请联系 HR 或检查身份配置。",
+            "未检索到适用于当前<strong>市场 + 玩家分层</strong>的外呼脚本（过滤后为空）。请检查名单标签或联系运营配置。",
             false
           );
         } else {
           appendMessage(
-            "在适用政策范围内未匹配到相关条目。建议换个问法，或联系 HRBP；也可在 OA 提交「政策咨询」工单。",
+            "在适用脚本范围内未匹配到相关条目。建议换个问法，或让运营补充话术库；复杂支付问题请转客服队列。",
             false
           );
         }
@@ -362,11 +355,11 @@
       let warning = "";
       if (!best.effective) {
         warning =
-          '<p class="mt-2 text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs">⚠️ 命中<strong>已失效</strong>制度版本。生产环境应默认屏蔽此类文档。</p>';
+          '<p class="mt-2 text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs">⚠️ 命中<strong>已下线活动</strong>脚本。生产环境应默认屏蔽，避免对外承诺失效福利。</p>';
       }
 
       appendMessage(
-        `<p class="font-semibold text-violet-900 mb-2">回答（基于 Top1 片段）</p>
+        `<p class="font-semibold text-violet-900 mb-2">外呼要点（基于 Top1 脚本）</p>
          <p>${best.answer}</p>
          <p class="mt-3 text-xs text-gray-500">引用：${best.source}</p>
          ${warning}`,
@@ -396,16 +389,16 @@
     });
 
     document.getElementById("compare-region").addEventListener("click", async () => {
-      const q = "年假怎么算？";
-      regionEl.value = "CN";
-      jobTypeEl.value = "正式";
+      const q = "7天未登录怎么召回？";
+      regionEl.value = "SEA";
+      jobTypeEl.value = "churn7";
       document.querySelector('input[name="versionMode"][value="current"]').checked = true;
       updateFilterSummary();
       savePrefs();
-      appendMessage('<p class="text-xs font-bold text-amber-800">对比实验 · 同一问题，切换地区</p>', false);
+      appendMessage('<p class="text-xs font-bold text-amber-800">对比实验 · 同一召回意图，切换市场</p>', false);
       answer(q);
       await new Promise((r) => setTimeout(r, 400));
-      regionEl.value = "HK";
+      regionEl.value = "LATAM";
       updateFilterSummary();
       savePrefs();
       answer(q);

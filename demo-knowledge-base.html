@@ -27,8 +27,8 @@
     <p class="text-sm font-bold text-emerald-600 uppercase tracking-widest">Demo 03</p>
     <h1 class="mt-2 text-3xl font-black">知识库结构化与治理</h1>
     <p class="mt-3 text-gray-600 leading-8 max-w-3xl">
-      完整 RAG 链路：<strong>切片入库</strong> → <strong>检索命中</strong> → <strong>基于片段生成回答</strong>（演示用规则拼接，非真实大模型）。
-      下方输入口语化问题（如「退款咋还没到」），即可看到最终回复与引用来源。
+      海外游戏玩家 FAQ：<strong>切片入库</strong> → <strong>检索命中</strong> → <strong>生成回答</strong>（演示用规则拼接）。
+      可输入「充值没到」「活动礼包没收到」等口语化问题，查看引用来源与失效片段影响。
     </p>
     <p class="mt-2 text-sm text-emerald-800 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2 inline-block">
       ① 生成切片 → ② 输入问题点「提问」→ ③ 看绿色高亮片段 + 客服式回答
@@ -39,10 +39,11 @@
         <div>
           <label class="text-sm font-semibold">源文档</label>
           <select id="doc" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm">
-            <option value="mixed">综合 FAQ（售后 + 售前）· 推荐测多意图</option>
-            <option value="refund">退款政策 v2.1</option>
-            <option value="member">会员权益说明</option>
+            <option value="mixed">综合 FAQ（支付 + 玩法）· 推荐测多意图</option>
+            <option value="refund">支付 FAQ（充值/提现/退款）</option>
+            <option value="member">玩法活动 FAQ</option>
           </select>
+          <p id="doc-hint" class="mt-2 text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 leading-6"></p>
         </div>
         <div>
           <label class="text-sm font-semibold">切片策略</label>
@@ -77,10 +78,10 @@
         <section class="glass rounded-2xl p-5">
           <h2 class="font-bold text-sm text-gray-500 uppercase">RAG 问答 · 检索 + 生成</h2>
           <div class="mt-3 flex flex-wrap gap-2">
-            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-emerald-400" data-q="退款咋还没到">退款咋还没到</button>
-            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-emerald-400" data-q="退款多久到账">退款多久到账</button>
-            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-emerald-400" data-q="会员有什么权益">会员有什么权益</button>
-            <button type="button" class="quick-q text-sm border border-amber-200 bg-amber-50 px-3 py-1.5 rounded-full hover:border-amber-400 text-amber-900" data-q="退款还没到，另外你们新产品什么时候上线？">多意图：退款+新品</button>
+            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-emerald-400" data-q="充值咋还没到">充值咋还没到</button>
+            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-emerald-400" data-q="提现失败怎么办">提现失败</button>
+            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-emerald-400" data-q="活动奖励没收到">活动奖励</button>
+            <button type="button" class="quick-q text-sm border border-amber-200 bg-amber-50 px-3 py-1.5 rounded-full hover:border-amber-400 text-amber-900" data-q="充值没到，另外赛季奖励什么时候发？">多意图：支付+玩法</button>
           </div>
           <div class="mt-3 flex gap-2">
             <input id="preview-q" class="flex-1 rounded-full border border-gray-200 px-4 py-2.5 text-sm" placeholder="口语化提问，例如：退款咋还没到" />
@@ -100,44 +101,45 @@
         </section>
       </div>
     </div>
+    <p class="mt-8 text-center text-xs text-gray-400">Demo v3.1 · 单意图 Top1 / 多意图分段回答 · 见日志「② 意图识别」</p>
   </main>
 
   <script>
     const DOCS = {
       mixed: {
-        title: "综合 FAQ（售后 + 售前）",
+        title: "综合 FAQ（支付 + 玩法）",
         qa: [
-          { text: "Q: 退款多久到账？\nA: 提交后 3–7 个工作日原路退回。", meta: { scene: "售后", intent: "refund", owner: "财务", version: "2.1", effective: true } },
-          { text: "Q: 退款被拒绝怎么办？\nA: 查看拒绝原因，补充材料后在工单重新提交。", meta: { scene: "售后", intent: "refund", owner: "财务", version: "2.1", effective: true } },
-          { text: "Q: 新产品什么时候上线？\nA: 「智服 Pro」已于本季度开放预约演示，正式订购请咨询销售或官网「新品」频道。", meta: { scene: "售前", intent: "presale", owner: "产品", version: "1.0", effective: true } },
-          { text: "Q: 企业版有什么功能？\nA: 企业版含多账号、审计日志、API 额度与专属客服，支持 14 天试用。", meta: { scene: "售前", intent: "presale", owner: "销售", version: "1.0", effective: true } },
+          { text: "Q: 充值多久到账？\nA: Google Play 一般 24–48 小时；超 72 小时未到账请提供 GPA 订单号转人工。", meta: { scene: "支付", intent: "refund", owner: "支付运营", version: "2.1", effective: true } },
+          { text: "Q: 提现失败怎么办？\nA: 常见为信息不符或渠道维护，款项 3–7 个工作日原路退回，请保留提现单号。", meta: { scene: "支付", intent: "refund", owner: "支付运营", version: "2.1", effective: true } },
+          { text: "Q: 赛季奖励什么时候发？\nA: 结算后 2 小时内发至游戏内邮箱，请检查背包/邮箱是否已满。", meta: { scene: "玩法", intent: "presale", owner: "活动运营", version: "1.0", effective: true } },
+          { text: "Q: 活动礼包没收到？\nA: 确认活动是否已结束；若仍在期内，提供 UID 与活动名称转人工核查。", meta: { scene: "玩法", intent: "presale", owner: "活动运营", version: "1.0", effective: true } },
         ],
         section: [
-          { text: "§ 售后时效：退款审核 1 个工作日，到账 3–7 个工作日。", meta: { scene: "售后", intent: "refund", owner: "财务", version: "2.1", effective: true } },
-          { text: "§ 售前说明：新品功能以官网发布为准，未上线功能不提供具体承诺日期。", meta: { scene: "售前", intent: "presale", owner: "产品", version: "1.0", effective: true } },
+          { text: "§ 支付时效：渠道 pending 状态最长 48 小时，勿重复支付。", meta: { scene: "支付", intent: "refund", owner: "支付运营", version: "2.1", effective: true } },
+          { text: "§ 玩法说明：活动奖励以游戏内公告为准，外呼/营销不可口头承诺具体数量。", meta: { scene: "玩法", intent: "presale", owner: "活动运营", version: "1.0", effective: true } },
         ],
         fixed: [
-          { text: "综合节选：退款 3–7 工作日到账；新品智服 Pro 可预约演示，详情见官网或联系销售。", meta: { scene: "综合", intent: "general", owner: "运营", version: "1.0", effective: true } },
+          { text: "综合节选：充值 pending 见支付 FAQ；赛季/活动奖励见玩法 FAQ，到账类问题优先转人工。", meta: { scene: "综合", intent: "general", owner: "客服运营", version: "1.0", effective: true } },
         ],
       },
       refund: {
-        title: "退款政策 v2.1",
+        title: "支付 FAQ",
         qa: [
-          { text: "Q: 退款多久到账？\nA: 提交后 3–7 个工作日原路退回。", meta: { scene: "售后", intent: "refund", owner: "财务", version: "2.1", effective: true } },
-          { text: "Q: 退款被拒绝怎么办？\nA: 查看拒绝原因，补充材料后在工单重新提交。", meta: { scene: "售后", intent: "refund", owner: "财务", version: "2.1", effective: true } },
+          { text: "Q: 充值多久到账？\nA: Google Play 一般 24–48 小时；超 72 小时未到账请提供 GPA 订单号。", meta: { scene: "支付", intent: "refund", owner: "支付运营", version: "2.1", effective: true } },
+          { text: "Q: 能退款吗？\nA: 符合渠道政策可退；已消费虚拟货币一般不支持，以账单状态为准。", meta: { scene: "支付", intent: "refund", owner: "支付运营", version: "2.1", effective: true } },
         ],
         section: [
-          { text: "§1 适用范围：自营订单，第三方商家以店铺政策为准。", meta: { scene: "售后", owner: "法务", version: "2.1", effective: true } },
-          { text: "§2 时效说明：审核 1 个工作日，到账 3–7 个工作日。", meta: { scene: "售后", owner: "财务", version: "2.1", effective: true } },
+          { text: "§1 勿信非官方代充/代退，谨防诈骗。", meta: { scene: "支付", owner: "风控", version: "2.1", effective: true } },
+          { text: "§2 提现审核 1–3 个工作日，到账 3–7 个工作日。", meta: { scene: "支付", owner: "支付运营", version: "2.1", effective: true } },
         ],
         fixed: [
-          { text: "退款政策 v2.1（节选）提交退款后系统自动审核，大额需人工复核。审核通过后 3–7 个工作日到账。拒绝退款需查看原因并补充材料。", meta: { scene: "售后", owner: "运营", version: "2.1", effective: true } },
+          { text: "支付 FAQ 节选：充值 pending、提现失败、退款政策；复杂订单转人工并收集订单号。", meta: { scene: "支付", owner: "客服运营", version: "2.1", effective: true } },
         ],
       },
       member: {
-        title: "会员权益说明",
+        title: "玩法活动 FAQ",
         qa: [
-          { text: "Q: 会员有哪些权益？\nA: 免运费券、专属客服、生日礼券。", meta: { scene: "会员", owner: "增长", version: "1.0", effective: true } },
+          { text: "Q: 封号怎么申诉？\nA: 在设置-客服中心提交 UID 与时间，3 个工作日内回复。", meta: { scene: "玩法", owner: "社区运营", version: "1.0", effective: true } },
         ],
         section: [
           { text: "第一章 会员等级：普通 / 银卡 / 金卡，权益逐级递增。", meta: { scene: "会员", owner: "增长", version: "1.0", effective: true } },
@@ -179,6 +181,21 @@
       });
     }
 
+    function updateDocHint() {
+      const v = document.getElementById("doc").value;
+      const hint = document.getElementById("doc-hint");
+      if (v === "refund") {
+        hint.textContent = "⚠️ 当前库只有退款片段。问「新品」类问题无法命中，请改选「综合 FAQ」再点生成切片。";
+      } else if (v === "mixed") {
+        hint.textContent = "✓ 含支付到账 + 玩法活动，适合测多意图（如：充值没到，赛季奖励什么时候发？）";
+      } else {
+        hint.textContent = "";
+      }
+    }
+
+    document.getElementById("doc").addEventListener("change", updateDocHint);
+    updateDocHint();
+
     document.getElementById("gen").addEventListener("click", () => {
       const docId = document.getElementById("doc").value;
       const mode = document.querySelector('input[name="slice"]:checked').value;
@@ -186,21 +203,24 @@
       chunks = doc[mode].map((c) => ({ ...c, expired: false }));
       lastHitIds = new Set();
       renderChunks();
-      document.getElementById("preview-log").textContent = `已生成 ${chunks.length} 个片段（${doc.title} · ${mode}）`;
+      const presaleN = chunks.filter((c) => chunkIntent(c) === "presale").length;
+      document.getElementById("preview-log").textContent =
+        `已生成 ${chunks.length} 个片段（${doc.title} · ${mode}）\n其中玩法片段：${presaleN} 条 · 支付类：${chunks.length - presaleN} 条`;
     });
 
     function chunkIntent(chunk) {
       if (chunk.meta.intent) return chunk.meta.intent;
-      if (chunk.meta.scene === "售前") return "presale";
+      if (chunk.meta.scene === "售前" || chunk.meta.scene === "玩法") return "presale";
       if (chunk.meta.scene === "会员") return "member";
-      if (chunk.meta.scene === "售后") return "refund";
+      if (chunk.meta.scene === "售后" || chunk.meta.scene === "支付") return "refund";
       return "general";
     }
 
     function detectIntents(q) {
       const intents = [];
-      if (/退款|到账|没到|退钱|驳回/.test(q)) intents.push({ id: "refund", label: "售后 · 退款" });
-      if (/新品|新产品|上线|发布|咨询|企业版|功能|购买|什么时候上|演示|销售/.test(q)) intents.push({ id: "presale", label: "售前 · 产品咨询" });
+      const multiShortcut = /充值.*赛季|赛季.*充值|支付.*玩法|玩法.*支付/.test(q);
+      if (/充值|提现|退款|到账|没到|pending|扣款|支付/.test(q) || multiShortcut) intents.push({ id: "refund", label: "支付 · 到账/退款" });
+      if (/活动|奖励|赛季|礼包|封号|换绑|玩法/.test(q) || multiShortcut) intents.push({ id: "presale", label: "玩法 · 活动/账号" });
       if (/会员|权益/.test(q)) intents.push({ id: "member", label: "会员权益" });
       if (!intents.length) intents.push({ id: "general", label: "未分类" });
       return intents;
@@ -265,6 +285,11 @@
       const answerText = document.getElementById("rag-answer-text");
       const answerCite = document.getElementById("rag-answer-cite");
       answerBox.classList.remove("hidden");
+
+      const hasPresaleInKb = chunks.some((c) => !c.expired && chunkIntent(c) === "presale");
+      if (intents.length > 1 && intents.some((i) => i.id === "presale") && !hasPresaleInKb) {
+        lines.push("⚠️ 已识别「玩法」意图，但当前知识库无玩法片段 → 请切换「综合 FAQ」并重新生成切片");
+      }
 
       if (intents.length > 1) {
         lines.push("③ 分意图检索（每个意图各取 Top1，避免只答一半）：");

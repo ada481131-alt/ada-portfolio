@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ada Liu | AI SaaS 产品经理</title>
-  <meta name="description" content="Ada Liu — 聚焦 AI SaaS 的产品经理，擅长 AI 客服、RAG 知识库、低/零代码搭建 AI 应用，把 Demo 打磨成可持续创造业务价值的产品能力。" />
+  <title>Ada Liu | 海外游戏 · AI 产品经理</title>
+  <meta name="description" content="Ada Liu — 海外游戏 AI 产品：玩家客服（充值/提现）、AI 外呼拉新召回、AI 营销分群增收；RAG 知识库与可交互 Demo 作品集。" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Ada Liu | AI SaaS 产品经理" />
+  <meta property="og:title" content="Ada Liu | 海外游戏 · AI 产品经理" />
   <meta property="og:description" content="AI 客服 · RAG 知识库 · 低代码验证 · 把 Demo 打磨成可交付的产品能力" />
   <meta property="og:image" content="https://ada481131-alt.github.io/ada-portfolio/avatar.jpg" />
   <meta property="og:url" content="https://ada481131-alt.github.io/ada-portfolio/" />
@@ -87,6 +87,176 @@
       .project-card .project-cta {
         opacity: 1;
         transform: translateX(0);
+      }
+    }
+
+    .projects-scroll {
+      position: relative;
+      margin-left: -1.25rem;
+      margin-right: -1.25rem;
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+    }
+
+    @media (min-width: 768px) {
+      .projects-scroll {
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    .projects-track {
+      display: flex;
+      gap: 1.25rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .projects-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .projects-fade {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 5rem;
+      pointer-events: none;
+      z-index: 2;
+      transition: opacity 0.35s ease;
+    }
+
+    .projects-fade-right {
+      right: 0;
+      background: linear-gradient(
+        to left,
+        #fafafa 0%,
+        rgba(250, 250, 250, 0.92) 35%,
+        transparent 100%
+      );
+    }
+
+    .projects-fade-left {
+      left: 0;
+      background: linear-gradient(
+        to right,
+        #fafafa 0%,
+        rgba(250, 250, 250, 0.92) 35%,
+        transparent 100%
+      );
+    }
+
+    .projects-fade.is-hidden {
+      opacity: 0;
+    }
+
+    .scroll-arrow {
+      position: absolute;
+      top: 50%;
+      z-index: 3;
+      width: 2.75rem;
+      height: 2.75rem;
+      margin: 0;
+      padding: 0;
+      border: 1px solid rgba(99, 102, 241, 0.22);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.6) inset,
+        0 8px 28px rgba(99, 102, 241, 0.22),
+        0 0 20px rgba(139, 92, 246, 0.12);
+      color: #4f46e5;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: translateY(-50%);
+      transition: opacity 0.3s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .scroll-arrow svg {
+      width: 1.15rem;
+      height: 1.15rem;
+    }
+
+    .scroll-arrow-next {
+      right: 0.5rem;
+      animation: scroll-arrow-float-right 2.2s ease-in-out infinite;
+    }
+
+    .scroll-arrow-prev {
+      left: 0.5rem;
+      animation: scroll-arrow-float-left 2.2s ease-in-out infinite;
+    }
+
+    .scroll-arrow:hover {
+      animation: none;
+      border-color: rgba(99, 102, 241, 0.45);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.8) inset,
+        0 12px 36px rgba(99, 102, 241, 0.32),
+        0 0 28px rgba(139, 92, 246, 0.2);
+      transform: translateY(-50%) scale(1.06);
+    }
+
+    .scroll-arrow:active {
+      transform: translateY(-50%) scale(0.96);
+    }
+
+    .scroll-arrow.is-hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @keyframes scroll-arrow-float-right {
+      0%,
+      100% {
+        transform: translateY(-50%) translateX(0);
+      }
+      50% {
+        transform: translateY(-50%) translateX(5px);
+      }
+    }
+
+    @keyframes scroll-arrow-float-left {
+      0%,
+      100% {
+        transform: translateY(-50%) translateX(0);
+      }
+      50% {
+        transform: translateY(-50%) translateX(-5px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .scroll-arrow {
+        animation: none;
+      }
+    }
+
+    .project-slide {
+      flex: 0 0 auto;
+      width: min(85vw, 300px);
+      scroll-snap-align: start;
+    }
+
+    @media (min-width: 768px) {
+      .project-slide {
+        width: 300px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .project-slide {
+        width: 320px;
       }
     }
 
@@ -180,7 +350,7 @@
       <div>
         <div class="inline-flex items-center gap-2 bg-white border border-gray-100 rounded-full px-4 py-2 text-sm text-gray-600 shadow-sm mb-6">
           <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-          开放合作 · AI 产品 / 客服场景
+          开放合作 · 海外游戏 · AI 增长
         </div>
 
         <h1 class="text-5xl md:text-7xl font-black leading-[1.05] tracking-tight">
@@ -190,20 +360,23 @@
           </span>
         </h1>
         <p class="mt-4 text-base md:text-lg font-bold text-gray-800 max-w-2xl">
-          AI SaaS 产品经理 · 专注 AI 客服与 RAG 知识库 · 2023 至今
+          海外游戏 · AI 产品经理 · 客服 / 外呼 / 营销 · 2023 至今
         </p>
         <p class="mt-4 text-lg md:text-xl text-gray-600 leading-8 max-w-2xl">
-            我是 Ada Liu，一名聚焦 <span style="color:#4f46e5;font-weight:500;">AI SaaS 的产品经理</span>。
-            从 2023 年开始在低 / 零代码平台里通过 Prompt 搭建 AI 应用，系统理解了大模型的能力边界与典型坑点；
-            目前主要在落地 AI 客服项目（RAG 检索、embedding 策略、知识库结构化），
-            希望把「能跑起来的 Demo」打磨成「能持续创造业务价值的产品能力」。
+            我是 Ada Liu，聚焦<strong class="text-indigo-600 font-semibold">海外游戏</strong>场景的 AI 产品工作：
+            <strong>AI 玩家客服</strong>替代传统 Bot 处理充值/提现未到账等问题；
+            <strong>AI 外呼</strong>服务拉新与流失召回；
+            <strong>AI 营销</strong>基于玩家数据分析促进收入增长；
+            平台另含<strong>人工坐席</strong>（实时对话、历史、报表、监控与配置），形成客户运营一体化。
+            2025 年 7 月起在海外游戏初创 AI 公司负责上述模块产品工作。
           </p>
           
           <div class="mt-8 flex flex-wrap gap-3">
-            <span class="tag bg-indigo-50 text-indigo-700">AI SaaS（AI 客服 / AI 外呼 / 人工坐席）</span>
-            <span class="tag bg-pink-50 text-pink-700">低 / 零代码 · Prompt 搭建 AI 应用</span>
-            <span class="tag bg-orange-50 text-orange-700">RAG / embedding / 知识库设计</span>
-            <span class="tag bg-green-50 text-green-700">大模型能力边界理解</span>
+            <span class="tag bg-amber-50 text-amber-800">人工坐席 · 运营一体化</span>
+            <span class="tag bg-indigo-50 text-indigo-700">AI 玩家客服 · RAG / 转人工</span>
+            <span class="tag bg-violet-50 text-violet-700">AI 外呼 · 拉新 / 召回</span>
+            <span class="tag bg-sky-50 text-sky-700">AI 营销 · 分群 / ROI</span>
+            <span class="tag bg-pink-50 text-pink-700">Prompt · 知识库治理</span>
           </div>
 
         <div class="mt-9 flex flex-wrap gap-4">
@@ -251,22 +424,22 @@
 
         <div class="glass rounded-[2rem] p-7 md:p-9">
           <p class="text-lg text-gray-700 leading-9">
-            我长期在 AI SaaS 场景做产品工作，熟悉从需求澄清、方案设计到上线迭代的完整链路。
-            尤其关注 AI 客服里的检索质量、知识库治理，以及如何把 Prompt 搭出来的 Demo 变成团队能长期维护的产品能力。
+            我长期在海外游戏业务做 AI 产品，熟悉从需求澄清、方案设计到上线迭代的完整链路。
+            尤其关注客户运营一体化：AI 客服与人工坐席同平台接力、外呼脚本合规、营销分群增收，以及坐席侧的监控与敏感词治理。
           </p>
 
           <div class="mt-7 grid sm:grid-cols-2 gap-4">
             <div class="bg-white rounded-2xl p-5">
               <h3 class="font-bold text-lg">我擅长</h3>
               <p class="mt-2 text-gray-600 leading-7">
-                场景拆解与 PRD、RAG / 知识库方案、Prompt 与低代码验证、指标定义、跨研发 / 运营协作推进落地。
+                场景拆解与 PRD、RAG / 知识库（支付 vs 玩法）、外呼名单与脚本、营销分群与 ROI、跨研发 / 运营 / 风控协作。
               </p>
             </div>
 
             <div class="bg-white rounded-2xl p-5">
               <h3 class="font-bold text-lg">我关注</h3>
               <p class="mt-2 text-gray-600 leading-7">
-                大模型能力边界、人机协作体验、可衡量的业务结果，以及 AI 产品从「能演示」到「能交付」的方法论。
+                到账类问题的回答边界、外呼频次与合规、营销触达与客诉的平衡，以及 AI 从 Demo 到可运营产品的路径。
               </p>
             </div>
           </div>
@@ -281,29 +454,78 @@
           <p class="text-sm font-bold text-pink-600 uppercase tracking-widest">Selected Work</p>
           <h2 class="mt-3 text-3xl md:text-4xl font-black tracking-tight">作品案例</h2>
         </div>
-        <p class="hidden md:block text-gray-500 max-w-md">
-          四个案例均含可点击的交互演示（客服 / Prompt / 知识库 / HR）。
+        <p class="hidden md:block text-gray-500 max-w-md text-right">
+          含 AI 客服、坐席、外呼、营销及 AI PM 简历助手等可交互演示。
         </p>
       </div>
 
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div class="card glass rounded-[1.8rem] p-6 flex flex-col">
-          <button type="button" class="project-card group text-left flex-1" data-project="1" aria-label="查看项目说明：智能客服 RAG">
+      <div class="projects-scroll">
+        <div class="projects-fade projects-fade-left is-hidden" id="projects-fade-left" aria-hidden="true"></div>
+        <div class="projects-fade projects-fade-right" id="projects-fade-right" aria-hidden="true"></div>
+        <button
+          type="button"
+          class="scroll-arrow scroll-arrow-prev is-hidden"
+          id="projects-scroll-prev"
+          aria-label="向左浏览更多案例"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="scroll-arrow scroll-arrow-next"
+          id="projects-scroll-next"
+          aria-label="向右浏览更多案例"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" />
+          </svg>
+        </button>
+      <div class="projects-track" id="projects-track">
+        <div class="project-slide card glass rounded-[1.8rem] p-6 flex flex-col">
+          <button type="button" class="project-card group text-left flex-1" data-project="1" aria-label="查看项目说明：AI 玩家客服">
             <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-indigo-200 to-purple-100 mb-5 overflow-hidden relative">
-              <span class="absolute inset-0 flex items-center justify-center text-indigo-600/50 text-sm font-bold px-4 text-center select-none">RAG · 置信度 · 转人工</span>
+              <span class="absolute inset-0 flex items-center justify-center text-indigo-600/50 text-sm font-bold px-4 text-center select-none">充值/提现 · RAG · 转人工</span>
             </div>
-            <p class="text-sm text-indigo-600 font-bold">AI 客服</p>
-            <h3 class="mt-2 text-xl font-black group-hover:text-indigo-700 transition-colors">智能客服 · RAG 知识库落地</h3>
+            <p class="text-sm text-indigo-600 font-bold">AI 玩家客服</p>
+            <h3 class="mt-2 text-xl font-black group-hover:text-indigo-700 transition-colors">替代传统 Bot · 玩家进线问答</h3>
             <p class="mt-3 text-gray-600 leading-7">
-              对外 FAQ 检索作答，按置信度建议转人工；区分售前/售后知识域，追踪解决率。
+              处理充值未到账、提现失败、活动奖励等；支付/玩法分库检索，低置信度转人工坐席。
             </p>
             <p class="mt-2 text-sm font-semibold text-indigo-700/90">可体验 · 客服对话 + 检索日志</p>
             <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600">项目说明 <span aria-hidden="true">→</span></span>
           </button>
-          <a href="demo-ai-support.html" class="mt-4 w-full text-center bg-indigo-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-indigo-500">立即体验客服问答 →</a>
+          <div class="mt-4 space-y-2">
+            <a href="demo-ai-support.html" class="block w-full text-center bg-indigo-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-indigo-500">立即体验客服问答 →</a>
+            <div class="flex gap-2 text-xs">
+              <a href="demo-metrics.html" class="flex-1 text-center py-2 rounded-full border border-indigo-200 text-indigo-700 font-semibold hover:bg-indigo-50">指标看板</a>
+              <a href="prd.html?p=1" class="flex-1 text-center py-2 rounded-full border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50">PRD 摘要</a>
+            </div>
+          </div>
         </div>
 
-        <div class="card glass rounded-[1.8rem] p-6 flex flex-col">
+        <div class="project-slide card glass rounded-[1.8rem] p-6 flex flex-col ring-2 ring-amber-200/80">
+          <button type="button" class="project-card group text-left flex-1" data-project="6" aria-label="查看项目说明：人工坐席工作台">
+            <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-amber-200 to-orange-100 mb-5 overflow-hidden relative">
+              <span class="absolute top-2 right-2 text-[10px] font-bold bg-white/90 text-amber-900 px-2 py-0.5 rounded-full">2025.7 至今</span>
+              <span class="absolute inset-0 flex items-center justify-center text-amber-800/55 text-sm font-bold px-4 text-center select-none">实时对话 · 监控 · 配置</span>
+            </div>
+            <p class="text-sm text-amber-800 font-bold">客户运营一体化 · Aireach</p>
+            <h3 class="mt-2 text-xl font-black group-hover:text-amber-900 transition-colors">人工坐席工作台</h3>
+            <p class="mt-3 text-gray-600 leading-7">
+              三栏坐席界面：会话列表、实时对话、访客资料/常用回答；含转接、快捷发送、敏感词与监控报表。
+            </p>
+            <p class="mt-2 text-sm font-semibold text-amber-800/90">可体验 · 坐席全链路演示</p>
+            <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-amber-700">项目说明 <span aria-hidden="true">→</span></span>
+          </button>
+          <div class="mt-4 space-y-2">
+            <a href="demo-agent-workbench.html" class="block w-full text-center bg-amber-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-amber-500">体验坐席工作台 →</a>
+            <a href="prd.html?p=6" class="block w-full text-center py-2 rounded-full border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50">PRD 摘要 →</a>
+          </div>
+        </div>
+
+        <div class="project-slide card glass rounded-[1.8rem] p-6 flex flex-col">
           <button type="button" class="project-card group text-left flex-1" data-project="2" aria-label="查看项目说明：Prompt 验证">
             <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-pink-200 to-orange-100 mb-5 overflow-hidden relative">
               <span class="absolute inset-0 flex items-center justify-center text-pink-600/50 text-sm font-bold px-4 text-center select-none">A/B Prompt · 评分</span>
@@ -316,53 +538,114 @@
             <p class="mt-2 text-sm font-semibold text-pink-700/90">可体验 · Prompt 对比实验室</p>
             <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-pink-600">项目说明 <span aria-hidden="true">→</span></span>
           </button>
-          <a href="demo-prompt-lab.html" class="mt-4 w-full text-center bg-pink-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-pink-500">立即体验 Prompt 对比 →</a>
+          <div class="mt-4 space-y-2">
+            <a href="demo-prompt-lab.html" class="block w-full text-center bg-pink-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-pink-500">立即体验 Prompt 对比 →</a>
+            <a href="prd.html?p=2" class="block w-full text-center py-2 rounded-full border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50">PRD 摘要 →</a>
+          </div>
         </div>
 
-        <div class="card glass rounded-[1.8rem] p-6 flex flex-col">
+        <div class="project-slide card glass rounded-[1.8rem] p-6 flex flex-col">
           <button type="button" class="project-card group text-left flex-1" data-project="3" aria-label="查看项目说明：知识库治理">
             <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-emerald-200 to-cyan-100 mb-5 overflow-hidden relative">
               <span class="absolute inset-0 flex items-center justify-center text-emerald-600/50 text-sm font-bold px-4 text-center select-none">切片 · metadata · 失效</span>
             </div>
             <p class="text-sm text-emerald-600 font-bold">知识库</p>
-            <h3 class="mt-2 text-xl font-black group-hover:text-emerald-700 transition-colors">知识库结构化与治理</h3>
+            <h3 class="mt-2 text-xl font-black group-hover:text-emerald-700 transition-colors">玩家 FAQ 知识库治理</h3>
             <p class="mt-3 text-gray-600 leading-7">
-              生成带 metadata 的切片，模拟标记失效，预览检索命中变化。
+              支付渠道、玩法活动 FAQ 切片入库；按市场/版本标记失效，预览检索变化。
             </p>
             <p class="mt-2 text-sm font-semibold text-emerald-700/90">可体验 · 切片与检索预览</p>
             <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-emerald-600">项目说明 <span aria-hidden="true">→</span></span>
           </button>
-          <a href="demo-knowledge-base.html" class="mt-4 w-full text-center bg-emerald-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-emerald-500">立即体验知识库治理 →</a>
+          <div class="mt-4 space-y-2">
+            <a href="demo-knowledge-base.html" class="block w-full text-center bg-emerald-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-emerald-500">立即体验知识库治理 →</a>
+            <a href="prd.html?p=3" class="block w-full text-center py-2 rounded-full border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50">PRD 摘要 →</a>
+          </div>
         </div>
 
-        <div class="card glass rounded-[1.8rem] p-6 flex flex-col">
+        <div class="project-slide card glass rounded-[1.8rem] p-6 flex flex-col">
           <button
             type="button"
             class="project-card group text-left flex-1"
             data-project="4"
-            aria-label="查看项目说明：HR 政策与入职手册智能问答"
+            aria-label="查看项目说明：AI 外呼拉新召回"
           >
             <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-violet-200 to-amber-100 mb-5 overflow-hidden relative">
-              <span class="absolute inset-0 flex items-center justify-center text-violet-700/55 text-sm font-bold px-4 text-center select-none">权限 · 时效 · metadata</span>
+              <span class="absolute inset-0 flex items-center justify-center text-violet-700/55 text-sm font-bold px-4 text-center select-none">拉新 · 召回 · 脚本检索</span>
             </div>
-            <p class="text-sm text-violet-700 font-bold">企业内部 · HR</p>
-            <h3 class="mt-2 text-xl font-black group-hover:text-violet-800 transition-colors">HR 政策 / 入职手册问答</h3>
+            <p class="text-sm text-violet-700 font-bold">AI 外呼</p>
+            <h3 class="mt-2 text-xl font-black group-hover:text-violet-800 transition-colors">拉新与流失召回 · 外呼脚本</h3>
             <p class="mt-3 text-gray-600 leading-7">
-              面向新同事「年假怎么算」「报销怎么走」等高频问题，基于政策与入职手册构建内部 RAG 问答助手。
+              按市场与玩家分层检索外呼话术，区分当前活动与已下线脚本，降低合规与承诺风险。
             </p>
-            <p class="mt-2 text-sm font-semibold text-violet-700/90">可体验 · 权限 / 时效 / metadata</p>
+            <p class="mt-2 text-sm font-semibold text-violet-700/90">可体验 · 名单分层 / 活动版本</p>
             <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-violet-700">
               项目说明
               <span aria-hidden="true">→</span>
             </span>
           </button>
-          <a
-            href="demo-hr-rag.html"
-            class="mt-4 w-full text-center bg-violet-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-violet-500 transition-colors"
-          >
-            立即体验问答 →
-          </a>
+          <div class="mt-4 space-y-2">
+            <a
+              href="demo-hr-rag.html"
+              class="block w-full text-center bg-violet-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-violet-500 transition-colors"
+            >
+              立即体验外呼脚本 →
+            </a>
+            <a href="prd.html?p=4" class="block w-full text-center py-2 rounded-full border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50">PRD 摘要 →</a>
+          </div>
         </div>
+
+        <div class="project-slide card glass rounded-[1.8rem] p-6 flex flex-col">
+          <button
+            type="button"
+            class="project-card group text-left flex-1"
+            data-project="5"
+            aria-label="查看项目说明：AI 营销增收"
+          >
+            <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-slate-200 to-sky-100 mb-5 overflow-hidden relative">
+              <span class="absolute inset-0 flex items-center justify-center text-slate-600/60 text-sm font-bold px-4 text-center select-none">分群 · ROI · 策略建议</span>
+            </div>
+            <p class="text-sm text-sky-700 font-bold">AI 营销</p>
+            <h3 class="mt-2 text-xl font-black group-hover:text-sky-800 transition-colors">玩家数据分析 · 驱动增收</h3>
+            <p class="mt-3 text-gray-600 leading-7">
+              按市场与分群查看付费/留存指标，生成活动与外呼联动建议，估算营销 ROI（演示）。
+            </p>
+            <p class="mt-2 text-sm font-semibold text-sky-700/90">可体验 · 分群看板 + 策略输出</p>
+            <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-sky-700">
+              项目说明
+              <span aria-hidden="true">→</span>
+            </span>
+          </button>
+          <div class="mt-4 space-y-2">
+            <a
+              href="demo-marketing.html"
+              class="block w-full text-center bg-sky-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-sky-500 transition-colors"
+            >
+              立即体验营销分析 →
+            </a>
+            <a href="prd.html?p=5" class="block w-full text-center py-2 rounded-full border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50">PRD 摘要 →</a>
+          </div>
+        </div>
+
+        <div class="project-slide card glass rounded-[1.8rem] p-6 flex flex-col">
+          <button type="button" class="project-card group text-left flex-1" data-project="7" aria-label="查看项目说明：AI PM 简历助手">
+            <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-teal-200 to-cyan-100 mb-5 overflow-hidden relative">
+              <span class="absolute inset-0 flex items-center justify-center text-teal-800/55 text-sm font-bold px-4 text-center select-none">AI PM · SaaS · 硬件</span>
+            </div>
+            <p class="text-sm text-teal-700 font-bold">求职工具 · AI</p>
+            <h3 class="mt-2 text-xl font-black group-hover:text-teal-800 transition-colors">AI 产品经理 · 简历助手</h3>
+            <p class="mt-3 text-gray-600 leading-7">
+              上传/粘贴招聘 JD（含岗位名与薪资），自动匹配简历、改稿建议、面试题、竞争力与薪资对比。
+            </p>
+            <p class="mt-2 text-sm font-semibold text-teal-700/90">可体验 · 全流程分析</p>
+            <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-teal-700">项目说明 <span aria-hidden="true">→</span></span>
+          </button>
+          <div class="mt-4 space-y-2">
+            <a href="demo-resume-assistant.html" class="block w-full text-center bg-teal-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-teal-500">立即体验简历助手 →</a>
+            <a href="prd.html?p=7" class="block w-full text-center py-2 rounded-full border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50">PRD 摘要 →</a>
+          </div>
+        </div>
+      </div>
       </div>
     </section>
 
@@ -414,6 +697,7 @@
         <p class="text-gray-600 leading-8">
           工作之余关注 AI 工具、阅读与摄影，相信好的产品也需要对生活有感知。
           <span class="block mt-2 text-gray-800 font-medium">「把经历整理成资产，把自己表达得更清楚。」</span>
+          <a href="moments.html" class="inline-block mt-3 text-sm font-semibold text-green-700 hover:underline">看看朋友圈原型 Demo →</a>
         </p>
       </div>
     </section>
@@ -424,7 +708,7 @@
         <p class="text-sm font-bold text-gray-500 uppercase tracking-widest">Contact</p>
         <h2 class="mt-3 text-3xl md:text-5xl font-black tracking-tight">想进一步了解我？</h2>
         <p class="mt-5 text-gray-600 leading-8 max-w-2xl mx-auto">
-          欢迎交流合作、AI 产品岗位机会，或一起聊聊 AI 客服、RAG 与产品化实践。下方任选一种方式联系即可。
+          欢迎交流合作、AI 产品岗位机会，或一起聊聊海外游戏的 AI 客服、外呼与营销增长。下方任选一种方式联系即可。
         </p>
 
         <p id="contact-wechat-hint" class="mt-4 text-sm text-gray-500 hidden"></p>
@@ -499,6 +783,20 @@
         >
           体验演示
         </a>
+        <a
+          id="modal-link-metrics"
+          href="demo-metrics.html"
+          class="hidden bg-indigo-100 text-indigo-800 px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-indigo-200"
+        >
+          指标看板
+        </a>
+        <a
+          id="modal-link-prd"
+          href="prd.html"
+          class="hidden bg-white border border-gray-200 text-gray-800 px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-50"
+        >
+          PRD 摘要
+        </a>
         <button
           type="button"
           id="modal-close-secondary"
@@ -512,7 +810,7 @@
 
   <!-- 底部 -->
   <footer class="border-t border-gray-100 py-8 text-center text-sm text-gray-500 px-5">
-    <p>© 2026 Ada Liu · AI SaaS Product Manager</p>
+    <p>© 2026 Ada Liu · 海外游戏 · AI Product Manager</p>
     <p class="mt-2 flex flex-wrap justify-center gap-4">
       <button type="button" id="copy-site-link" class="hover:text-gray-800 underline-offset-2 hover:underline">复制主页链接</button>
       <a href="#" class="hover:text-gray-800">返回顶部</a>
@@ -531,19 +829,23 @@
 
     const projects = {
       1: {
-        label: "AI 客服",
+        label: "AI 玩家客服",
         labelClass: "text-indigo-600",
-        title: "智能客服 · RAG 知识库落地",
-        desc: "负责对外 AI 客服场景：将 FAQ / 业务文档整理为可检索知识库，按售前/售后分域召回；结合置信度阈值触发转人工，并观测解决率、转人工率。演示页可体验完整问答与检索日志。",
+        title: "替代传统 Bot · 玩家进线问答",
+        desc: "海外游戏玩家进线：充值/提现未到账、活动奖励、账号问题等。将 FAQ 整理为可检索知识库，按支付/玩法分域召回；置信度低于阈值转人工，观测解决率与转人工率。",
         outcomes: [
-          "梳理退款、物流、售前等高频意图，FAQ 入库并持续运营扩充",
-          "按场景过滤知识域，避免售前/售后文档互相干扰导致答非所问",
-          "置信度低于阈值时引导转人工，人工坐席承接更聚焦复杂工单",
-          "建立解决率与转人工观测，用于迭代 embedding / Prompt / 切片策略",
+          "梳理充值未到账、提现失败、退款政策等支付类高频意图并入库",
+          "支付与玩法知识域隔离，避免活动 FAQ 干扰到账类回答",
+          "低置信度或敏感承诺场景转人工，坐席承接复杂工单与申诉",
+          "指标看板跟踪解决率/转人工，迭代切片、Prompt 与渠道差异 FAQ",
         ],
-        tags: ["RAG", "置信度", "转人工", "售前/售后", "效果评估"],
+        tags: ["海外游戏", "RAG", "充值/提现", "转人工", "支付/玩法"],
         demoLink: "demo-ai-support.html",
         demoLinkText: "体验客服问答",
+        metricsLink: "demo-metrics.html",
+        metricsLinkText: "指标看板",
+        prdLink: "prd.html?p=1",
+        prdLinkText: "PRD 摘要",
         link: "#contact",
         linkText: "交流此项目",
       },
@@ -561,42 +863,105 @@
         tags: ["Prompt A/B", "检查项", "快速验证", "PRD", "低代码"],
         demoLink: "demo-prompt-lab.html",
         demoLinkText: "体验 Prompt 对比",
+        prdLink: "prd.html?p=2",
+        prdLinkText: "PRD 摘要",
         link: "resume.html",
         linkText: "查看简历",
       },
       3: {
         label: "知识库",
         labelClass: "text-emerald-600",
-        title: "知识库结构化与治理",
-        desc: "针对文档来源杂、更新慢、检索飘等问题，定义入库规范与 metadata（场景、负责人、版本、生效状态），支持按 Q&A / 章节 / 固定长度切片，并可标记片段失效以观察检索池变化。",
+        title: "玩家 FAQ 知识库治理",
+        desc: "支付渠道说明、玩法活动规则等文档来源杂、更新快。定义 metadata（市场、场景、版本、生效状态），支持切片入库与失效治理，供客服 RAG 稳定召回。",
         outcomes: [
-          "统一 metadata 字段，运营与产品对同一片段可追溯、可问责",
-          "多种切片策略按文档类型选用，平衡召回粒度与维护成本",
-          "失效片段降权/剔除，降低过期政策进入 RAG 回答的风险",
-          "检索预览能力供运营自测，减少「上线后才发现搜不到」",
+          "统一支付/玩法 FAQ 的 metadata，运营可追溯每条片段来源",
+          "按文档类型选择切片策略，平衡召回粒度与多语言维护成本",
+          "下线活动与过期渠道说明及时失效，降低答错福利或到账时间",
+          "检索预览供运营自测，减少版本上线后玩家侧才暴露的检索问题",
         ],
-        tags: ["切片策略", "metadata", "失效治理", "检索预览", "运营 SOP"],
+        tags: ["FAQ 治理", "metadata", "支付/玩法", "失效", "多市场"],
         demoLink: "demo-knowledge-base.html",
         demoLinkText: "体验知识库治理",
+        prdLink: "prd.html?p=3",
+        prdLinkText: "PRD 摘要",
         link: "#contact",
         linkText: "讨论知识库方案",
       },
       4: {
-        label: "企业内部 · HR",
+        label: "AI 外呼",
         labelClass: "text-violet-700",
-        title: "HR 政策 / 入职手册智能问答",
-        desc: "背景：新同事频繁询问「年假怎么算」「报销怎么走流程」等，而政策分散在入职手册、HR 制度与地区补充说明中。产品侧推动建设内部 RAG 问答助手，在检索前按员工所属地区、岗位类型过滤文档，并处理旧制度失效与版本切换，避免答错政策或泄露不适用的地区规则。",
+        title: "拉新与流失召回 · 外呼脚本",
+        desc: "AI 外呼用于拉新与拉回：按市场、玩家分层（新注册/流失 7 天/大 R 等）检索活动脚本，过滤已下线活动话术，避免对外承诺失效福利；支付类问题引导转客服。",
         outcomes: [
-          "梳理年假、报销等高频意图，将政策/手册入库并标注地区、岗位、生效日期等 metadata",
-          "检索链路增加权限与 metadata 过滤，不同国家/地区员工仅命中适用政策片段",
-          "建立制度版本与失效机制，旧版文档下线或降权，降低「按过期政策回答」风险",
-          "协同 HR 与研发迭代切片与 Prompt，提升内部自助解答率，减轻 HR 重复答疑压力",
+          "梳理拉新、7 日未登录召回、大 R 关怀等意图与脚本库 metadata",
+          "名单分层 + 市场过滤，不同区域仅命中本地化话术",
+          "活动版本与失效机制，降低误用旧活动口令或返利描述",
+          "与外呼供应商、运营、风控对齐频次、勿扰时段与转客服规则",
         ],
-        tags: ["内部 RAG", "权限隔离", "时效性", "metadata 过滤", "地区/岗位", "HR 场景"],
+        tags: ["外呼", "拉新", "召回", "脚本检索", "合规", "分群"],
         demoLink: "demo-hr-rag.html",
-        demoLinkText: "体验交互演示",
+        demoLinkText: "体验外呼脚本 Demo",
+        prdLink: "prd.html?p=4",
+        prdLinkText: "PRD 摘要",
         link: "#contact",
-        linkText: "交流 HR 方案",
+        linkText: "交流外呼方案",
+      },
+      5: {
+        label: "AI 营销",
+        labelClass: "text-sky-700",
+        title: "玩家数据分析 · 驱动增收",
+        desc: "基于玩家行为与付费数据做分群分析，输出活动、礼包、外呼联动建议，并跟踪 ROI。演示页展示分群 KPI、对比全服均值与策略清单（脱敏模拟）。",
+        outcomes: [
+          "定义新注册、流失付费、大 R/中 R 等分群口径，与数仓/运营对齐",
+          "分群看板观测付费转化、D7 留存、ARPU 等，支撑增收实验优先级",
+          "策略建议联动外呼与客服，避免营销话术与到账 FAQ 冲突",
+          "实验记录渠道、分群、ROI，形成可复用的增长 playbook",
+        ],
+        tags: ["分群", "ROI", "留存", "付费转化", "增收实验"],
+        demoLink: "demo-marketing.html",
+        demoLinkText: "体验营销分析 Demo",
+        prdLink: "prd.html?p=5",
+        prdLinkText: "PRD 摘要",
+        link: "#contact",
+        linkText: "交流营销方案",
+      },
+      6: {
+        label: "客户运营一体化",
+        labelClass: "text-amber-800",
+        title: "人工坐席工作台（Aireach）",
+        desc: "海外游戏初创 AI 公司（2025.7 至今）· Aireach 客户运营一体化坐席端：左侧会话列表（我的/同事、排队、AI 接待），中间实时对话（转接/关闭、AI 摘要、已读回执），右侧访客资料与常用回答（多语言充值话术）；另含对话记录、工单、报表、监控与敏感词配置。",
+        outcomes: [
+          "设计 AI→人工无缝接力：会话上下文、订单号、AI 置信度与检索摘要一并带入坐席屏",
+          "队列与技能组：支付 / 玩法 / VIP 分流，监控排队时长与 SLA 告警",
+          "坐席报表：接入量、首响、一次解决率；主管侧团队下钻（本期先做个人视图）",
+          "敏感词拦截 + 常用问答：降低坐席误承诺与重复打字，配置与 FAQ 知识库分工明确",
+        ],
+        tags: ["人工坐席", "客户运营一体化", "2025.7", "监控", "敏感词", "转人工"],
+        demoLink: "demo-agent-workbench.html",
+        demoLinkText: "体验坐席工作台",
+        prdLink: "prd.html?p=6",
+        prdLinkText: "PRD 摘要",
+        link: "#contact",
+        linkText: "交流坐席方案",
+      },
+      7: {
+        label: "求职工具 · AI",
+        labelClass: "text-teal-700",
+        title: "AI 产品经理 · 简历助手",
+        desc: "主投 AI 产品及相关岗（SaaS、硬件、客服、大模型应用等不限模板）：从 JD 原文识别岗位名与薪资，对照简历给优化、匹配分、面试题、竞争力与市场薪资对比。支持 JD 截图上传（演示需粘贴文字）。",
+        outcomes: [
+          "解析 JD：岗位名称、薪资区间、能力画像标签（可多标签重叠）",
+          "关键词从 JD 全文抽取，不锁死少数岗位模板",
+          "薪资页优先展示 JD 写明待遇，另给市场区间作谈判参考",
+          "本机处理；正式版可 OCR 截图 + 大模型改写",
+        ],
+        tags: ["AI 产品", "JD 解析", "面试题", "简历优化", "薪资"],
+        demoLink: "demo-resume-assistant.html",
+        demoLinkText: "体验简历助手",
+        prdLink: "prd.html?p=7",
+        prdLinkText: "PRD 摘要",
+        link: "resume.html",
+        linkText: "查看我的简历",
       },
     };
 
@@ -609,6 +974,8 @@
     const modalOutcomes = document.getElementById("modal-outcomes");
     const modalLink = document.getElementById("modal-link");
     const modalLinkSecondary = document.getElementById("modal-link-secondary");
+    const modalLinkMetrics = document.getElementById("modal-link-metrics");
+    const modalLinkPrd = document.getElementById("modal-link-prd");
     let lastFocused = null;
 
     function openProject(id) {
@@ -630,11 +997,25 @@
         .map((t) => `<li class="tag bg-gray-100 text-gray-700">${t}</li>`)
         .join("");
       modalLinkSecondary.classList.add("hidden");
+      modalLinkMetrics.classList.add("hidden");
+      modalLinkPrd.classList.add("hidden");
       if (p.demoLink) {
         modalLink.href = p.demoLink;
         modalLink.textContent = p.demoLinkText || "体验交互演示";
         modalLink.target = "_blank";
         modalLink.rel = "noopener noreferrer";
+        if (p.metricsLink) {
+          modalLinkMetrics.href = p.metricsLink;
+          modalLinkMetrics.textContent = p.metricsLinkText || "指标看板";
+          modalLinkMetrics.classList.remove("hidden");
+        }
+        if (p.prdLink) {
+          modalLinkPrd.href = p.prdLink;
+          modalLinkPrd.textContent = p.prdLinkText || "PRD 摘要";
+          modalLinkPrd.target = "_blank";
+          modalLinkPrd.rel = "noopener noreferrer";
+          modalLinkPrd.classList.remove("hidden");
+        }
         if (p.link) {
           modalLinkSecondary.href = p.link;
           modalLinkSecondary.textContent = p.linkText || "联系我";
@@ -751,6 +1132,41 @@
           prompt("请复制主页链接：", url);
         }
       });
+    })();
+
+    (function initProjectsScroll() {
+      const track = document.getElementById("projects-track");
+      const nextBtn = document.getElementById("projects-scroll-next");
+      const prevBtn = document.getElementById("projects-scroll-prev");
+      const fadeRight = document.getElementById("projects-fade-right");
+      const fadeLeft = document.getElementById("projects-fade-left");
+      if (!track || !nextBtn || !prevBtn) return;
+
+      const scrollStep = () => Math.min(track.clientWidth * 0.85, 340);
+
+      function updateScrollUi() {
+        const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth - 2);
+        const atStart = track.scrollLeft <= 2;
+        const atEnd = track.scrollLeft >= maxScroll;
+        const noOverflow = maxScroll <= 0;
+
+        nextBtn.classList.toggle("is-hidden", atEnd || noOverflow);
+        prevBtn.classList.toggle("is-hidden", atStart || noOverflow);
+        if (fadeRight) fadeRight.classList.toggle("is-hidden", atEnd || noOverflow);
+        if (fadeLeft) fadeLeft.classList.toggle("is-hidden", atStart || noOverflow);
+      }
+
+      nextBtn.addEventListener("click", () => {
+        track.scrollBy({ left: scrollStep(), behavior: "smooth" });
+      });
+
+      prevBtn.addEventListener("click", () => {
+        track.scrollBy({ left: -scrollStep(), behavior: "smooth" });
+      });
+
+      track.addEventListener("scroll", updateScrollUi, { passive: true });
+      window.addEventListener("resize", updateScrollUi);
+      updateScrollUi();
     })();
   </script>
 

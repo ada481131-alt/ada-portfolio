@@ -1,6 +1,6 @@
 # Ada Liu · Personal Portfolio
 
-单页个人主页，聚焦 AI SaaS 产品经理定位。
+单页个人主页，聚焦**海外游戏**场景的 AI 产品（玩家客服 / AI 外呼 / AI 营销）。
 
 ## 上线前可改（约 1 分钟）
 
@@ -19,12 +19,54 @@ const SITE = {
 
 **简历**：`resume.html` 可浏览器打印为 PDF；改经历后同步更新 `index.html` 与 `resume.html`，再上传到 GitHub。
 
+## 交互演示页
+
+| 文件 | 说明 |
+|------|------|
+| `demo-ai-support.html` | AI 玩家客服（充值/提现/玩法 · RAG + 转人工） |
+| `demo-metrics.html` | 玩家客服指标看板（读取本机 Demo 数据） |
+| `prd.html` | 五个项目的 PRD 摘要（海外游戏业务语境） |
+| `demo-prompt-lab.html` | Prompt A/B 对比与检查项打分 |
+| `demo-knowledge-base.html` | 玩家 FAQ 知识库切片 / metadata / 检索预览 |
+| `demo-hr-rag.html` | AI 外呼脚本检索（市场 / 分群 / 活动版本） |
+| `demo-marketing.html` | AI 营销分群看板 + 增收策略建议 |
+| `demo-agent-workbench.html` | 人工坐席工作台（实时对话 / 监控 / 配置） |
+| `demo-resume-assistant.html` | AI PM 简历助手（JD 匹配 / 面试题 / 薪资） |
+| `moments.html` | 生活向 · 朋友圈原型（非主案例） |
+
+各 Demo 已对齐海外游戏：支付/玩法双库客服、外呼拉新召回、营销 ROI 分群等。
+
 ## 更新线上版本（网页上传）
 
-1. 打开 GitHub 仓库 → 进入要更新的文件（如 `index.html`）→ **Edit**
-2. 用本地最新文件内容替换 → **Commit changes**
-3. 或 **Add file → Upload files** 拖入覆盖
-4. 等 1～2 分钟刷新主页
+打开 [GitHub 上传页](https://github.com/ada481131-alt/ada-portfolio/upload)（把用户名换成你的），**可以一次拖入下面全部文件**覆盖旧版，然后点 **Commit changes**。等 1～2 分钟强刷页面（`Cmd+Shift+R`）。
+
+### 建议上传的完整文件清单（共 15 个）
+
+| 文件 | 说明 |
+|------|------|
+| `index.html` | 主页（横滑作品、弹窗、PRD/看板入口） |
+| `resume.html` | 简历页 |
+| `avatar.jpg` | 头像（约 650KB，必传） |
+| `demo-ai-support.html` | 玩家客服 Demo |
+| `demo-metrics.html` | 客服指标看板 |
+| `demo-prompt-lab.html` | Prompt 对比 |
+| `demo-knowledge-base.html` | 知识库治理 |
+| `demo-hr-rag.html` | AI 外呼脚本 Demo |
+| `demo-marketing.html` | AI 营销分群 Demo |
+| `demo-agent-workbench.html` | 人工坐席工作台 Demo |
+| `demo-resume-assistant.html` | AI PM 简历助手 |
+| `moments.html` | 朋友圈原型（可选） |
+| `prd.html` | 五项目 PRD 摘要（完善版） |
+| `README.md` | 说明文档 |
+| `.nojekyll` | GitHub Pages 需要（空文件即可） |
+
+**不必上传**：`.git` 文件夹、`.DS_Store`。
+
+上传后自检：
+
+- 主页 → 作品横滑 → 点「PRD 摘要」「指标看板」
+- `prd.html?p=1` 能打开且章节完整
+- `moments.html` 封面、发动态正常
 
 ## 本地预览
 

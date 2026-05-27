@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRD · Ada Liu · 海外游戏 AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f4f4f5; color: #18181b; }
+    .doc { background: #fff; border: 1px solid #e4e4e7; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    .nav-link.active { background: #f4f4f5; font-weight: 600; border-left: 3px solid #4f46e5; }
+    h2 { font-size: 15px; font-weight: 700; margin: 28px 0 10px; color: #09090b; }
+    h2:first-child { margin-top: 0; }
+    p { font-size: 14px; line-height: 1.85; color: #3f3f46; margin: 0 0 12px; }
+    .meta-grid { display: grid; grid-template-columns: 108px 1fr; gap: 6px 16px; font-size: 13px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #f4f4f5; }
+    .meta-grid dt { color: #71717a; }
+    .meta-grid dd { color: #27272a; margin: 0; }
+    .callout { border-left: 3px solid #4f46e5; background: #fafafa; padding: 12px 14px; margin: 16px 0; font-size: 14px; line-height: 1.75; color: #3f3f46; }
+    .callout.warn { border-left-color: #f59e0b; background: #fffbeb; }
+    .callout.ok { border-left-color: #10b981; background: #ecfdf5; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0 16px; }
+    th, td { border: 1px solid #e4e4e7; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #fafafa; font-weight: 600; color: #52525b; }
+    .decision { background: #fafafa; border: 1px solid #e4e4e7; border-radius: 8px; padding: 14px; margin: 12px 0; }
+    .decision strong { display: block; font-size: 13px; color: #09090b; margin-bottom: 6px; }
+    .decision p { margin: 0; font-size: 13px; }
+    .scenario { border: 1px dashed #d4d4d8; border-radius: 8px; padding: 14px; margin: 14px 0; }
+    .scenario .label { font-size: 11px; font-weight: 700; color: #71717a; letter-spacing: .04em; }
+    .scenario h3 { font-size: 14px; font-weight: 700; margin: 6px 0 8px; }
+    ul.compact { margin: 8px 0 12px; padding-left: 18px; font-size: 14px; line-height: 1.75; color: #3f3f46; }
+    .changelog { font-size: 12px; color: #71717a; }
+    .demo-link { font-size: 13px; font-weight: 600; }
+    @media print { .no-print { display: none !important; } .doc { box-shadow: none; } article { page-break-before: always; } article:first-of-type { page-break-before: auto; } }
+  </style>
+</head>
+<body>
+  <header class="no-print sticky top-0 z-30 bg-white border-b border-zinc-200">
+    <div class="max-w-3xl mx-auto px-6 py-3 flex justify-between items-center">
+      <a href="index.html#work" class="text-sm text-zinc-600 hover:text-zinc-900">← 作品集</a>
+      <button type="button" onclick="window.print()" class="text-sm border border-zinc-300 px-3 py-1.5 rounded-md hover:bg-zinc-50">打印 / PDF</button>
+    </div>
+  </header>
+
+  <div class="max-w-5xl mx-auto px-5 py-8 grid md:grid-cols-[200px_1fr] gap-8">
+    <nav class="no-print space-y-0.5 text-sm" id="nav"></nav>
+    <div>
+      <p class="no-print text-sm text-zinc-500 mb-6 leading-relaxed max-w-2xl">
+        按<strong>海外游戏 · 客户运营一体化</strong>与<strong>求职工具</strong>整理的 PRD 节选（脱敏）。与作品集 Demo 对应，面试时可按章节展开。
+      </p>
+      <main class="space-y-8" id="content"></main>
+    </div>
+  </div>
+
+  <script>
+    const PRDS = [
+      {
+        id: 1,
+        nav: "01 玩家客服",
+        title: "海外游戏 · AI 玩家客服（替代传统 Bot）",
+        accent: "#4f46e5",
+        demo: [{ t: "客服 Demo", h: "demo-ai-support.html" }, { t: "指标看板", h: "demo-metrics.html" }],
+        blocks: [
+          { t: "meta", rows: [
+            ["业务", "海外发行手游 · 多区服、多渠道支付"],
+            ["现状", "传统关键词 Bot + 少量人工，英语/西语/葡语混线"],
+            ["本期目标", "用 RAG 客服承接充值/提现/账号类高频，降低 Bot 误判与升级人工量"],
+            ["协作", "客服运营、本地化、支付渠道对接、研发 1 后端 + 1 算法"],
+          ]},
+          { t: "html", html: `<h2>0. 为什么要换掉传统 Bot</h2>
+<p>玩家进线里<strong>充值未到账、提现失败、礼包未到账</strong>能占到我们工单的大头（约 55%，按标签抽样）。老 Bot 靠关键词和同义词表，常见问题：</p>
+<ul class="compact">
+<li>「top up」「recharge」「payment pending」多套说法，维护成本高</li>
+<li>玩家带 Order ID + 截图一句话进来，Bot 只匹配到「充值」给通用话术，<strong>没区分渠道（Google / 三方支付 / 代充）</strong></li>
+<li>活动期政策一天一换，运营改完 FAQ，Bot 经常还在答昨天的返利规则</li>
+</ul>
+<p>客服主管的底线：<strong>不能承诺到账时间、不能要玩家明文密码</strong>。所以方案必须是「检索到哪条支付政策就答到哪」，不确定就升级人工，而不是编故事。</p>` },
+          { t: "callout", kind: "warn", html: `<strong>典型事故（推动立项）</strong>：东南亚某渠道结算延迟 48h，Bot 仍按「即时到账」话术回复，当天 NPS 差评集中爆发。复盘后要求：支付类 FAQ 必须带<strong>渠道 + 生效日期</strong>，且低置信度禁止给具体小时数。` },
+          { t: "html", html: `<h2>1. 场景拆分（Demo 左侧下拉）</h2>
+<table>
+<tr><th>场景</th><th>玩家问什么</th><th>知识库</th></tr>
+<tr><td><strong>支付 · 到账</strong></td><td>充值/提现未到账、扣款成功没钻石、退款</td><td>各渠道 SLA、查询路径、需玩家提供的信息</td></tr>
+<tr><td><strong>玩法 · 账号</strong></td><td>封号申诉、换绑、进度丢失、活动规则</td><td>用户协议节选、活动页、版本公告</td></tr>
+</table>
+<p>两个索引库物理隔离——和「售前售后分两库」是同一逻辑，只是我们的「售前」是玩法咨询，「售后」是资金与账号。</p>` },
+          { t: "decision", title: "D-01 仍用「转人工」而不是「工单」", body: "支付未到账类，玩家情绪高。产品定：<strong>置信度 &lt; 阈值时给检索摘要 + 一键转人工</strong>，本期不接 Zendesk 自动建单（研发估 3 周，排 Q3）。人工坐席侧先看会话里的 Order ID 与渠道（玩家粘贴即可）。" },
+          { t: "decision", title: "D-02 多语言：先检索后翻译", body: "曾讨论「每种语言一套向量库」，成本翻倍。选定：<strong>主库英文 FAQ + 回答时按玩家语言润色</strong>，西/葡由本地化抽检；支付类数字与日期不允许模型改写，只能原文引用片段。" },
+          { t: "scenario", title: "Case · 充值未到账（Google Play）", body: `<p><strong>玩家：</strong>「I paid but didn't receive gems, order GPA.1234」</p>
+<p><strong>期望：</strong>命中 <code>FAQ/Payment/GooglePlay-Pending</code>，说明 24–48h 结算窗口、如何查订单状态、<strong>不承诺</strong>已到账。</p>
+<p><strong>转人工：</strong>玩家坚持已超 72h、或涉及代充/黑卡关键词 → 强制升级 fraud 队列。</p>` },
+          { t: "scenario", title: "Case · 提现失败", body: `<p><strong>玩家：</strong>「withdraw failed, money gone」</p>
+<p><strong>期望：</strong>区分「提现处理中」与「失败退回」，引用对应渠道说明；若检索分低 → 收集 UID + 提现单号模板后转人工。</p>` },
+          { t: "html", html: `<h2>2. 指标（与 demo-metrics 对齐）</h2>
+<ul class="compact">
+<li>玩家问题<strong>解决率</strong>：Bot/AI 一次对话内未转人工即结案（支付类单独统计）</li>
+<li><strong>转人工率</strong>：按场景看，支付类允许略高于玩法类</li>
+<li><strong>误承诺率</strong>：抽检「到账时间/退款承诺」违规句，目标 0</li>
+<li>平均置信度、各渠道命中率：供运营调 FAQ</li>
+</ul>` },
+          { t: "callout", kind: "ok", html: `<strong>遗留：</strong>① 游戏内嵌客服 SDK 与网页客服会话未打通；② 阿拉伯语玩家等待专门库；③ 大促期间是否临时调高阈值——待东南亚峰值数据。` },
+          { t: "changelog", items: ["v1.0 对齐海外游戏支付/玩法双库", "v0.8 通用 SaaS 版废弃"] },
+        ],
+      },
+      {
+        id: 2,
+        nav: "02 Prompt",
+        title: "玩家向回复 Prompt · 合规与语气验证",
+        accent: "#db2777",
+        demo: [{ t: "Prompt 实验室", h: "demo-prompt-lab.html" }],
+        blocks: [
+          { t: "meta", rows: [
+            ["用途", "AI 客服上线前的回复话术定稿"],
+            ["约束", "未成年人、博彩表述、虚假承诺渠道到账"],
+            ["周期", "2 周，与本地化并行"],
+          ]},
+          { t: "html", html: `<h2>背景</h2>
+<p>模型能力够了，但玩家一眼能看出「翻译腔」或「像银行客服」。更麻烦的是：Prompt 一松就会出现 <strong>「保证 1 小时内到账」</strong> 这类我们承担不起的句子。法务给了一份<strong>禁用承诺清单</strong>，检查项里占 30% 权重。</p>
+<p>验证样本来自真实工单脱敏：30 条英语 + 10 条西语，覆盖充值、提现、活动、封号。</p>` },
+          { t: "html", html: `<h2>A/B 结论（摘录）</h2>
+<table>
+<tr><th>维度</th><th>A（旧 Bot 润色）</th><th>B（游戏客服模板）</th></tr>
+<tr><td>结构</td><td>一段话</td><td>致歉 + 原因说明 + 玩家要做的 1–2 步 + 预计处理窗口（仅引用 FAQ）</td></tr>
+<tr><td>语气</td><td>生硬</td><td>可配置「竞技向 / 休闲向」两款游戏 IP</td></tr>
+<tr><td>合规</td><td>偶发 guarantee</td><td>Negative prompt + 抽检 0 违规</td></tr>
+</table>
+<p>定稿 B 为 v2.1，进入客服大 PRD 的生成环节。</p>` },
+        ],
+      },
+      {
+        id: 3,
+        nav: "03 知识库",
+        title: "游戏 FAQ 知识库 · 支付渠道与版本治理",
+        accent: "#059669",
+        demo: [{ t: "知识库 Demo", h: "demo-knowledge-base.html" }],
+        blocks: [
+          { t: "html", html: `<h2>运营在维护什么</h2>
+<p>不是「公司制度 PDF」，而是三类内容：</p>
+<ul class="compact">
+<li><strong>支付</strong>：Google/Apple/本地钱包/代充风险说明，每条带 <code>channel</code>、<code>region</code>、<code>effective_date</code></li>
+<li><strong>活动</strong>：版本活动页切片，活动结束后必须失效</li>
+<li><strong>玩法</strong>：常驻系统说明（抽卡概率、赛季规则）——变更频率低</li>
+</ul>
+<p>大促前运营最怕「去年双十一 FAQ 还被搜出来」。Demo 里「标记失效」对应生产上的 <code>expired_at</code>，检索侧硬过滤。</p>` },
+          { t: "decision", title: "支付类 chunk 不允许跨渠道合并", body: "曾把「到账时间」合成一条万能答案，结果 Google 24h 和某钱包 72h 混在一起。现在<strong>一渠道一条主 chunk</strong>，检索 Top-K 允许多条并列展示给玩家。" },
+        ],
+      },
+      {
+        id: 4,
+        nav: "04 AI 外呼",
+        title: "AI 外呼 · 拉新与流失召回",
+        accent: "#6d28d9",
+        demo: [{ t: "外呼策略 Demo", h: "demo-hr-rag.html" }],
+        blocks: [
+          { t: "meta", rows: [
+            ["场景", "① 注册未付费拉新 ② 7/14/30 天未登录召回 ③ 大版本回流活动"],
+            ["市场", "东南亚 / 拉美为主，需本地语言外呼脚本"],
+            ["合规", "勿扰时段、退订、未成年人过滤"],
+          ]},
+          { t: "html", html: `<h2>和外呼业务的关系</h2>
+<p>这不是客服进线，是<strong>我们主动打给玩家</strong>。核心矛盾：运营要触达率，合规要限制频次；策划要强调版本福利，风控要识别「已投诉勿扰」用户。</p>
+<p>产品上做两件事：<strong>名单分层</strong>（Demo 左侧 metadata：市场、玩家分层、活动类型）+ <strong>脚本检索</strong>（像 RAG，但输出是外呼话术要点，不是长文客服回复）。</p>` },
+          { t: "html", html: `<h2>名单与脚本（Demo 映射说明）</h2>
+<table>
+<tr><th>左侧字段</th><th>实际含义</th></tr>
+<tr><td>市场 / 地区</td><td>SEA、LATAM、NA…</td></tr>
+<tr><td>玩家类型</td><td>新注册 / 流失 7 天 / 大 R…</td></tr>
+<tr><td>脚本版本</td><td>当前活动话术 vs 含已下线活动（对比用）</td></tr>
+</table>
+<p>快捷问题在 Demo 里已改成外呼场景，如「7 天未登录召回怎么说」「注册未付费拉新要点」。</p>` },
+          { t: "decision", title: "拉新 vs 拉回脚本分库", body: "拉回可提「你上次抽到 XX 角色」，拉新不能剧透。两套脚本库，<strong>campaign_type</strong> 写入 metadata，检索前过滤，避免运营选错活动。" },
+          { t: "callout", kind: "warn", html: `<strong>合规底线：</strong>当地勿扰时段（如 LATAM 晚 9 点后禁呼）、每周同一玩家最多 1 次主动外呼（可配置）、语音里必须带退订说明。名单与客服黑名单打通——排 Q3。` },
+        ],
+      },
+      {
+        id: 5,
+        nav: "05 AI 营销",
+        title: "AI 营销增长 · 玩家数据分析与促收",
+        accent: "#0369a1",
+        demo: [{ t: "增长分析 Demo", h: "demo-marketing.html" }],
+        blocks: [
+          { t: "meta", rows: [
+            ["目标", "用玩家行为数据驱动活动与付费，不是单纯多打电话"],
+            ["数据", "登录、付费、关卡、礼包曝光（脱敏聚合）"],
+            ["产出", "分群 → 活动推荐 → 效果复盘"],
+          ]},
+          { t: "html", html: `<h2>问题定义</h2>
+<p>策划常问：「这 5 万流失用户该发什么礼包？」以前靠 Excel + 经验。AI 营销方向是：<strong>把分群、预测、活动配置串起来</strong>，让「谁、在什么时间、看到什么 offer」可解释、可回溯。</p>
+<p>和 AI 外呼的区别：外呼是<strong>触达通道</strong>；营销分析是<strong>决定触达什么内容、值不值得触达</strong>。两者在名单层汇合。</p>` },
+          { t: "html", html: `<h2>本期能力（Demo 展示）</h2>
+<ul class="compact">
+<li>玩家分群：新进未付、沉睡 7/14 天、高 LTV 下滑、付费频次下降</li>
+<li>每群推荐：活动类型、礼包档位区间、是否适合外呼/仅 Push</li>
+<li>简单预测：7 日回流概率、14 日付费概率（演示为规则+权重，生产接模型）</li>
+<li>活动复盘：发送 → 打开 → 付费 漏斗（示意数据）</li>
+</ul>` },
+          { t: "decision", title: "先规则分群，再模型", body: "数据标注不完整，直接上 ML 会被 challenge。MVP：<strong>可配置规则引擎 + 运营可改阈值</strong>，模型只做排序加分；验证有效后再接训练好的 churn/LTV 模型。" },
+          { t: "callout", html: `<strong>指标：</strong>活动付费率 uplift、ARPPU、营销成本 ROI；<strong>护栏</strong>：投诉率、退订率、大 R 体验（避免过度打扰）。` },
+        ],
+      },
+      {
+        id: 6,
+        nav: "06 人工坐席",
+        title: "客户运营一体化 · 人工坐席工作台（Aireach）",
+        accent: "#7c5cfc",
+        demo: [{ t: "坐席工作台 Demo", h: "demo-agent-workbench.html" }, { t: "AI 客服", h: "demo-ai-support.html" }],
+        blocks: [
+          { t: "meta", rows: [
+            ["公司/周期", "海外游戏领域 AI 初创 · 2025 年 7 月至今（脱敏）"],
+            ["产品", "Aireach · 客户运营一体化 AI SaaS"],
+            ["平台定位", "AI 客服 + 人工坐席 + 外呼/营销同后台；坐席为三栏工作台"],
+            ["本期范围", "坐席端核心链路 + 主管监控 + 运营配置（敏感词、常用问答）"],
+            ["用户", "一线客服坐席、客服主管、客服运营"],
+          ]},
+          { t: "html", html: `<h2>0. 为什么必须和 AI 客服在同一平台</h2>
+<p>玩家侧只有<strong>一个入口</strong>：先 Bot/AI，搞不定再转人工。若坐席系统与 AI 割裂，会出现：</p>
+<ul class="compact">
+<li>坐席看不到 AI 已收集的 Order ID、渠道、语言，玩家重复描述三遍</li>
+<li>AI 已给过错误承诺，人工不知道，二次投诉升级</li>
+<li>运营在 A 系统改 FAQ，坐席在 B 系统改快捷回复，话术不一致</li>
+</ul>
+<p>产品原则：<strong>一条会话 ID 贯穿 AI 与人工</strong>；配置层区分「AI 检索 FAQ」与「坐席常用回复」，但同属一个运营后台。</p>` },
+          { t: "html", html: `<h2>1. 功能模块（与 Demo 左侧导航对应）</h2>
+<table>
+<tr><th>模块</th><th>能力</th><th>说明</th></tr>
+<tr><td><strong>实时对话</strong></td><td>队列、接入、回复、转队列、结案</td><td>展示 AI 摘要与置信度；支持常用问答一键插入</td></tr>
+<tr><td><strong>历史记录</strong></td><td>按 UID/时间/类型检索</td><td>含「仅 AI」「AI→人工」「纯人工」标签，供纠纷复核</td></tr>
+<tr><td><strong>工作报表</strong></td><td>个人/团队 KPI</td><td>接入量、首响时长、一次解决率、敏感词拦截次数</td></tr>
+<tr><td><strong>监控中心</strong></td><td>在线人数、排队、SLA</td><td>队列级告警；与排班系统对接（排 Q4）</td></tr>
+<tr><td><strong>其他配置</strong></td><td>敏感词、常用问答</td><td>运营可配；支付类额外规则集</td></tr>
+</table>` },
+          { t: "decision", title: "D-01 敏感词：发送前硬拦截，不是事后抽检", body: "支付客诉里一句「保证 1 小时到账」可能引发批量纠纷。坐席输入框<strong>发送前正则匹配</strong>，命中则禁止发送并高亮规则；主管可审计拦截日志。AI 侧另有 Prompt 约束，两边都要守。" },
+          { t: "decision", title: "D-02 常用问答 ≠ RAG 知识库", body: "FAQ 库给 AI 检索，片段长、带 metadata。坐席「常用」是<strong>短句模板</strong>，按队列/语言分组，一键插入可编辑后再发。避免坐席误把整段 FAQ 粘贴给玩家。" },
+          { t: "decision", title: "D-03 队列：支付专线优先于玩法", body: "东南亚峰值时支付进线暴涨。MVP 设<strong>支付 / 玩法 / VIP</strong>三队列，VIP 与大 R 标签玩家可溢出到专属技能组；监控里单独看支付队列 SLA。" },
+          { t: "scenario", title: "Case · AI 转人工（充值未到账）", body: `<p><strong>玩家：</strong>Google Play 充值未到账，AI 置信度 48%。</p>
+<p><strong>坐席屏：</strong>自动展示 AI 摘要、GPA 订单号、市场=SEA；进入支付队列。</p>
+<p><strong>坐席：</strong>点常用「核查到账」→ 微调发送；禁止口头保证具体到账小时数。</p>
+<p><strong>结案：</strong>标签「支付-核查中」，同步工单状态（若已接工单系统）。</p>` },
+          { t: "scenario", title: "Case · 敏感词拦截", body: `<p>坐席情急输入「保证你今天就能到账」→ 命中规则 <code>保证.*到账</code>，发送失败，提示改写为「正在核查渠道状态，一般 24–48 小时」类模板。</p>` },
+          { t: "html", html: `<h2>2. 与 AI 外呼 / 营销的关系</h2>
+<p>坐席工作台<strong>不负责外呼拨号</strong>，但监控可看「外呼回拨进线」标签；营销活动在坐席屏只做只读展示（玩家参与的礼包），避免坐席私自加码。黑名单、勿扰名单三模块共用（排期与数据对齐）。</p>` },
+          { t: "html", html: `<h2>3. 指标</h2>
+<ul class="compact">
+<li><strong>首响时长</strong>：分配坐席 → 第一条人工消息</li>
+<li><strong>一次解决率</strong>：同会话 24h 内无二次进线（支付类单独看）</li>
+<li><strong>转人工后满意度</strong>：抽样或会话结束评价</li>
+<li><strong>敏感词拦截率</strong>：用于培训与规则迭代，不是越低越好</li>
+<li>监控：<strong>排队 &gt; N 人、SLA 超时占比</strong></li>
+</ul>` },
+          { t: "callout", kind: "ok", html: `<strong>本期不做：</strong>① 视频客服；② 坐席辅助大模型自动写回复（仅做摘要只读）；③ 多品牌租户自定义皮肤。` },
+          { t: "callout", kind: "warn", html: `<strong>协作方：</strong>与 AI 客服、支付渠道工单、外呼黑名单的数据接口需在联调清单里单列；本地化团队维护多语言常用问答模板。` },
+          { t: "changelog", items: ["v1.0 2025 Q3 坐席 MVP + 监控 + 配置", "v0.9 仅网页客服，无报表"] },
+        ],
+      },
+      {
+        id: 7,
+        nav: "07 简历助手",
+        title: "AI 产品经理简历助手 · 以 JD 为准",
+        accent: "#0d9488",
+        demo: [{ t: "简历助手 Demo", h: "demo-resume-assistant.html" }, { t: "我的简历", h: "resume.html" }],
+        blocks: [
+          { t: "meta", rows: [
+            ["定位", "AI 产品方向求职 Copilot；主方向含 AI PM、SaaS、硬件等，但不限固定模板"],
+            ["输入", "简历全文 + 招聘 JD（截图可上传，演示需粘贴文字；正式版 OCR）"],
+            ["输出", "岗位名/薪资识别、匹配分、改稿建议、面试题、竞争力、JD vs 市场薪资"],
+            ["Demo 边界", "本机规则解析；竞争力/市场薪资为示意"],
+          ]},
+          { t: "html", html: `<h2>0. 产品原则：JD 是第一性原理</h2>
+<p>不以「三选一岗位类型」限制用户。从 JD 全文自动抽取<strong>岗位名称</strong>、<strong>薪资</strong>与关键词；能力画像用可多标签重叠的提示（SaaS/硬件/客服/大模型等），辅助写建议而非互斥门禁。</p>` },
+          { t: "html", html: `<h2>0. 用户痛点</h2>
+<ul class="compact">
+<li>同一份简历投 AI 客服 / 增长 / 平台 PM，关键词不匹配 HR 筛选</li>
+<li>不会用「指标 + 动作」写项目，面试深挖时讲成流水账</li>
+<li>不清楚自己的市场价位，谈薪缺乏依据</li>
+<li>面试题准备散，缺少针对 JD 的模拟</li>
+</ul>` },
+          { t: "html", html: `<h2>1. 功能模块（与 Demo Tab 对应）</h2>
+<table>
+<tr><th>模块</th><th>输入</th><th>输出</th></tr>
+<tr><td><strong>简历优化</strong></td><td>经历 + JD</td><td>STAR 示例、关键词补缺、排版与作品集建议</td></tr>
+<tr><td><strong>JD 匹配</strong></td><td>同上</td><td>匹配分、已覆盖/待补充词、投递建议</td></tr>
+<tr><td><strong>模拟面试</strong></td><td>同上</td><td>业务 / 项目 / AI / 行为题 + 回答提示</td></tr>
+<tr><td><strong>竞争力评估</strong></td><td>同上</td><td>五维得分 + 提升优先级（需标注非官方测评）</td></tr>
+<tr><td><strong>薪资预估</strong></td><td>JD 写明待遇 + 城市/年限</td><td>优先展示 JD 薪资；另给市场区间作谈判参考</td></tr>
+</table>` },
+          { t: "decision", title: "D-01 不做「必选赛道」下拉", body: "主方向在品牌文案说明即可；分析逻辑<strong>读 JD 说什么</strong>，关键词从全文抽取。" },
+          { t: "decision", title: "D-02 薪资：JD 优先，市场其次", body: "BOSS/猎聘截图常含明确待遇；解析结果置顶，市场区间仅作谈判参考。" },
+          { t: "decision", title: "D-03 截图 → 文字", body: "MVP：上传截图 + 用户粘贴；V1 OCR；V2 LLM 结构化 JD。" },
+          { t: "decision", title: "D-04 隐私：默认本机处理", body: "作品集 Demo 不上传简历；正式产品可选加密上传后删除。" },
+          { t: "scenario", title: "Case · BOSS 截图 JD", body: `<p>上传截图并对照粘贴「岗位+薪资+职责」→ 识别岗位与 30-45K → 匹配简历 → 薪资页对比 JD 与市场。</p>` },
+          { t: "html", html: `<h2>2. 指标（产品上线后）</h2>
+<ul class="compact">
+<li>完成率：粘贴 JD + 简历 → 至少查看 2 个模块</li>
+<li>改简历转化率：导出/复制优化建议的比例</li>
+<li>用户自评：面试邀请是否增加（问卷）</li>
+<li>付费：深度报告 / 无限次分析 / 1v1 点评（若商业化）</li>
+</ul>` },
+          { t: "callout", kind: "warn", html: `<strong>合规：</strong>不得承诺「保证拿 offer」；薪资预测避免精确到千元除非有数据源；面试题需注意不生成歧视性或泄露原公司机密的话术模板。` },
+          { t: "callout", kind: "ok", html: `<strong>演进：</strong>MVP 规则引擎 → 接 LLM 做段落级改写 → 接薪酬与技能图谱 API → 与 Notion/飞书简历模板导出联动。` },
+          { t: "changelog", items: ["v0.1 作品集 Demo · 五模块 + 本机存储", "规划 v1.0 LLM 改写 + PDF 导出"] },
+        ],
+      },
+    ];
+
+    function esc(s) {
+      return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function renderBlock(b) {
+      switch (b.t) {
+        case "meta":
+          return `<dl class="meta-grid">${b.rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join("")}</dl>`;
+        case "html":
+          return b.html;
+        case "callout":
+          return `<div class="callout ${b.kind || ""}">${b.html}</div>`;
+        case "decision":
+          return `<div class="decision"><strong>${esc(b.title)}</strong><p>${b.body}</p></div>`;
+        case "scenario":
+          return `<div class="scenario"><div class="label">Scenario</div><h3>${esc(b.title)}</h3>${b.body}</div>`;
+        case "changelog":
+          return `<h2>修订记录</h2><ul class="compact changelog">${b.items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`;
+        default:
+          return "";
+      }
+    }
+
+    function renderArticle(p) {
+      const links = (p.demo || [])
+        .map((d) => `<a href="${d.h}" class="demo-link no-print" style="color:${p.accent}">${d.t} →</a>`)
+        .join('<span class="text-zinc-300 mx-2">|</span>');
+      return `<article id="prd-${p.id}" class="doc rounded-lg p-6 md:p-10 scroll-mt-20">
+        <p class="text-xs font-medium text-zinc-400">PRD · 海外游戏 · 脱敏</p>
+        <h1 class="text-xl md:text-2xl font-bold text-zinc-900 mt-2 leading-snug">${p.title}</h1>
+        ${links ? `<p class="mt-4 no-print">${links}</p>` : ""}
+        <div class="mt-6">${p.blocks.map(renderBlock).join("")}</div>
+      </article>`;
+    }
+
+    function render() {
+      const focus = Number(new URLSearchParams(location.search).get("p")) || 0;
+      document.getElementById("nav").innerHTML = PRDS.map(
+        (p) =>
+          `<a href="prd.html?p=${p.id}" class="nav-link block px-3 py-2 rounded text-zinc-600 hover:bg-zinc-100 ${focus === p.id ? "active" : ""}">${p.nav}</a>`
+      ).join("");
+      document.getElementById("content").innerHTML = PRDS.map(renderArticle).join("");
+      if (focus) {
+        const el = document.getElementById("prd-" + focus);
+        if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 80);
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>客服指标看板 · Ada Liu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: radial-gradient(circle at top left, rgba(99,102,241,.12), transparent 42%), #f8fafc; }
+    .glass { background: rgba(255,255,255,.9); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.85); box-shadow: 0 16px 48px rgba(15,23,42,.06); }
+    .bar-track { height: 8px; background: #e5e7eb; border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; transition: width .5s ease; }
+  </style>
+</head>
+<body class="text-gray-900 min-h-screen">
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-gray-100">
+    <div class="max-w-6xl mx-auto px-5 py-4 flex flex-wrap justify-between items-center gap-3">
+      <div>
+        <a href="index.html#work" class="text-sm font-semibold text-indigo-600 hover:underline">← 返回主页</a>
+        <p class="mt-1 text-xs text-gray-500">数据来自客服 Demo 本机会话 · 演示脱敏</p>
+      </div>
+      <div class="flex flex-wrap gap-2 text-xs">
+        <a href="demo-ai-support.html" class="font-semibold bg-indigo-600 text-white px-3 py-2 rounded-full hover:bg-indigo-500">去客服 Demo 产生数据</a>
+        <button type="button" id="seed-demo" class="px-3 py-2 rounded-full border border-gray-200 hover:bg-gray-50">加载示例数据</button>
+        <button type="button" id="clear-data" class="px-3 py-2 rounded-full border border-rose-200 text-rose-700 hover:bg-rose-50">清空看板数据</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-5 py-8">
+    <p class="text-sm font-bold text-indigo-600 uppercase tracking-widest">Metrics</p>
+    <h1 class="mt-2 text-3xl font-black">AI 玩家客服 · 指标看板</h1>
+    <p class="mt-3 text-gray-600 leading-8 max-w-3xl">
+      汇总<strong>解决率、转人工建议、置信度分布</strong>（海外游戏玩家进线场景），用于 PM 复盘 Demo 或评审阈值策略。先在
+      <a href="demo-ai-support.html" class="text-indigo-600 font-semibold hover:underline">客服问答页</a>
+      多提几轮问题，再回到本页刷新（或自动读取本机记录）。
+    </p>
+
+    <div id="empty-hint" class="hidden mt-8 glass rounded-2xl p-8 text-center text-gray-600">
+      <p class="font-semibold text-gray-900">暂无会话数据</p>
+      <p class="mt-2 text-sm">请打开客服 Demo 提问后返回，或点击「加载示例数据」。</p>
+    </div>
+
+    <div id="dashboard" class="mt-8 space-y-6">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass rounded-2xl p-5">
+          <p class="text-xs text-gray-500 font-semibold">累计会话</p>
+          <p id="kpi-sessions" class="mt-2 text-3xl font-black text-indigo-600">0</p>
+        </div>
+        <div class="glass rounded-2xl p-5">
+          <p class="text-xs text-gray-500 font-semibold">平均解决率</p>
+          <p id="kpi-resolve" class="mt-2 text-3xl font-black text-emerald-600">—</p>
+        </div>
+        <div class="glass rounded-2xl p-5">
+          <p class="text-xs text-gray-500 font-semibold">转人工建议率</p>
+          <p id="kpi-handoff" class="mt-2 text-3xl font-black text-amber-600">—</p>
+        </div>
+        <div class="glass rounded-2xl p-5">
+          <p class="text-xs text-gray-500 font-semibold">平均置信度</p>
+          <p id="kpi-conf" class="mt-2 text-3xl font-black text-violet-600">—</p>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6">
+        <section class="glass rounded-2xl p-6">
+          <h2 class="font-bold">各轮问答 · 置信度</h2>
+          <p class="text-xs text-gray-500 mt-1">最近一轮会话的每一问</p>
+          <div id="conf-bars" class="mt-5 space-y-4"></div>
+        </section>
+        <section class="glass rounded-2xl p-6">
+          <h2 class="font-bold">近几次会话 · 解决率</h2>
+          <p class="text-xs text-gray-500 mt-1">按会话聚合（演示）</p>
+          <div id="session-bars" class="mt-5 space-y-3"></div>
+        </section>
+      </div>
+
+      <section class="glass rounded-2xl p-6 overflow-x-auto">
+        <h2 class="font-bold">会话明细</h2>
+        <table class="mt-4 w-full text-sm text-left">
+          <thead class="text-gray-500 border-b border-gray-100">
+            <tr>
+              <th class="py-2 pr-4">时间</th>
+              <th class="py-2 pr-4">场景</th>
+              <th class="py-2 pr-4">阈值</th>
+              <th class="py-2 pr-4">提问数</th>
+              <th class="py-2 pr-4">解决率</th>
+              <th class="py-2">转人工</th>
+            </tr>
+          </thead>
+          <tbody id="session-table" class="text-gray-800"></tbody>
+        </table>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const ANALYTICS_KEY = "demo-ai-support-analytics";
+    const CURRENT_KEY = "demo-ai-support-current";
+
+    const SCENE_LABEL = { payment: "支付", gameplay: "玩法", after: "支付", before: "玩法" };
+
+    const SEED = [
+      {
+        id: "seed-1",
+        updatedAt: Date.now() - 86400000 * 2,
+        scene: "payment",
+        threshold: 70,
+        asked: 5,
+        resolved: 4,
+        handoffCount: 1,
+        turns: [
+          { q: "充值没到账怎么办？", pct: 91 },
+          { q: "提现失败钱去哪了？", pct: 88 },
+          { q: "能退款吗？", pct: 86 },
+          { q: "Google Play 一直 pending", pct: 52 },
+          { q: "重复扣款了", pct: 78 },
+        ],
+      },
+      {
+        id: "seed-2",
+        updatedAt: Date.now() - 86400000,
+        scene: "gameplay",
+        threshold: 65,
+        asked: 4,
+        resolved: 3,
+        handoffCount: 1,
+        turns: [
+          { q: "活动奖励没收到", pct: 90 },
+          { q: "账号被封怎么申诉", pct: 84 },
+          { q: "怎么换绑邮箱", pct: 82 },
+          { q: "赛季奖励什么时候发", pct: 41 },
+        ],
+      },
+    ];
+
+    function loadSessions() {
+      let list = [];
+      try {
+        list = JSON.parse(localStorage.getItem(ANALYTICS_KEY) || "[]");
+      } catch (_) {}
+      try {
+        const cur = JSON.parse(localStorage.getItem(CURRENT_KEY) || "null");
+        if (cur && cur.asked > 0) {
+          list = list.filter((s) => s.id !== cur.id);
+          list.unshift(cur);
+        }
+      } catch (_) {}
+      return list.sort((a, b) => b.updatedAt - a.updatedAt);
+    }
+
+    function rate(resolved, asked) {
+      return asked ? Math.round((resolved / asked) * 100) : 0;
+    }
+
+    function fmtTime(ts) {
+      return new Date(ts).toLocaleString("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    }
+
+    function barHtml(pct, color) {
+      return `<div class="bar-track"><div class="bar-fill ${color}" style="width:${Math.min(100, pct)}%"></div></div>`;
+    }
+
+    function render() {
+      const sessions = loadSessions();
+      const empty = document.getElementById("empty-hint");
+      const dash = document.getElementById("dashboard");
+      if (!sessions.length) {
+        empty.classList.remove("hidden");
+        dash.classList.add("hidden");
+        return;
+      }
+      empty.classList.add("hidden");
+      dash.classList.remove("hidden");
+
+      const totalAsked = sessions.reduce((a, s) => a + s.asked, 0);
+      const totalResolved = sessions.reduce((a, s) => a + s.resolved, 0);
+      const totalHandoff = sessions.reduce((a, s) => a + s.handoffCount, 0);
+      const allPcts = sessions.flatMap((s) => (s.turns || []).map((t) => t.pct));
+      const avgConf = allPcts.length ? Math.round(allPcts.reduce((a, b) => a + b, 0) / allPcts.length) : 0;
+
+      document.getElementById("kpi-sessions").textContent = sessions.length;
+      document.getElementById("kpi-resolve").textContent = totalAsked ? rate(totalResolved, totalAsked) + "%" : "—";
+      document.getElementById("kpi-handoff").textContent = totalAsked ? Math.round((totalHandoff / totalAsked) * 100) + "%" : "—";
+      document.getElementById("kpi-conf").textContent = allPcts.length ? avgConf + "%" : "—";
+
+      const latest = sessions[0];
+      const confBox = document.getElementById("conf-bars");
+      if (latest.turns && latest.turns.length) {
+        confBox.innerHTML = latest.turns
+          .map((t, i) => {
+            const c = t.pct >= 70 ? "bg-emerald-500" : t.pct >= 50 ? "bg-amber-400" : "bg-rose-400";
+            return `<div><div class="flex justify-between text-xs mb-1"><span class="font-medium truncate pr-2">${i + 1}. ${t.q}</span><span>${t.pct}%</span></div>${barHtml(t.pct, c)}</div>`;
+          })
+          .join("");
+      } else {
+        confBox.innerHTML = '<p class="text-sm text-gray-500">本轮无明细</p>';
+      }
+
+      const sessBox = document.getElementById("session-bars");
+      sessBox.innerHTML = sessions
+        .slice(0, 6)
+        .map((s) => {
+          const r = rate(s.resolved, s.asked);
+          return `<div><div class="flex justify-between text-xs mb-1"><span>${fmtTime(s.updatedAt)}</span><span>${r}%</span></div>${barHtml(r, "bg-indigo-500")}</div>`;
+        })
+        .join("");
+
+      document.getElementById("session-table").innerHTML = sessions
+        .map(
+          (s) => `<tr class="border-b border-gray-50">
+          <td class="py-3 pr-4 whitespace-nowrap">${fmtTime(s.updatedAt)}</td>
+          <td class="py-3 pr-4">${SCENE_LABEL[s.scene] || s.scene}</td>
+          <td class="py-3 pr-4">${s.threshold}%</td>
+          <td class="py-3 pr-4">${s.asked}</td>
+          <td class="py-3 pr-4">${rate(s.resolved, s.asked)}%</td>
+          <td class="py-3">${s.handoffCount}</td>
+        </tr>`
+        )
+        .join("");
+    }
+
+    document.getElementById("seed-demo").onclick = () => {
+      localStorage.setItem(ANALYTICS_KEY, JSON.stringify(SEED));
+      render();
+    };
+    document.getElementById("clear-data").onclick = () => {
+      if (!confirm("清空本机看板与会话记录？")) return;
+      localStorage.removeItem(ANALYTICS_KEY);
+      localStorage.removeItem(CURRENT_KEY);
+      render();
+    };
+
+    render();
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") render();
+    });
+  </script>
+</body>
+</html>

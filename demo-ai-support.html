@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>智能客服 RAG · 交互演示 | Ada Liu</title>
+  <title>海外游戏 · AI 玩家客服 Demo | Ada Liu</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: radial-gradient(circle at top left, rgba(99,102,241,.14), transparent 40%), #f8fafc; }
@@ -18,7 +18,7 @@
     <div class="max-w-6xl mx-auto px-5 py-4 flex justify-between items-center gap-3">
       <div>
         <a href="index.html#work" class="text-sm font-semibold text-indigo-600 hover:underline">← 返回主页</a>
-        <p class="mt-1 text-xs text-gray-500">对外 AI 客服场景 · 演示数据 fictitious</p>
+        <p class="mt-1 text-xs text-gray-500">海外游戏 · 玩家进线 · 演示数据 fictitious</p>
       </div>
       <span class="text-xs font-bold bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">客服 RAG 模拟</span>
     </div>
@@ -26,18 +26,18 @@
 
   <main class="max-w-6xl mx-auto px-5 py-8">
     <p class="text-sm font-bold text-indigo-600 uppercase tracking-widest">Demo 01</p>
-    <h1 class="mt-2 text-3xl font-black">智能客服 · RAG 知识库落地</h1>
+    <h1 class="mt-2 text-3xl font-black">AI 玩家客服 · 替代传统 Bot</h1>
     <p class="mt-3 text-gray-600 leading-8 max-w-3xl">
-      模拟对外客服：检索 FAQ → 生成回答 → 按<strong>置信度</strong>决定是否建议转人工；可切换售前/售后知识域，观察召回变化。
+      模拟海外游戏玩家进线：检索支付/玩法 FAQ → 生成回复 → 按<strong>置信度</strong>建议转人工。左侧可切换<strong>支付到账</strong>与<strong>玩法账号</strong>知识库。
     </p>
 
     <div class="grid lg:grid-cols-[300px_1fr] gap-6 mt-8">
       <aside class="glass rounded-2xl p-5 h-fit space-y-5">
         <div>
-          <label class="text-sm font-semibold">业务场景</label>
+          <label class="text-sm font-semibold">知识库</label>
           <select id="scene" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm">
-            <option value="after">售后 · 退款/物流</option>
-            <option value="before">售前 · 功能/价格</option>
+            <option value="payment">支付 · 充值/提现到账</option>
+            <option value="gameplay">玩法 · 账号/活动</option>
           </select>
         </div>
         <div>
@@ -50,7 +50,9 @@
           <p class="mt-1">解决率：<span id="stat-resolve">—</span></p>
           <p>建议转人工：<span id="stat-handoff">0</span> 次</p>
         </div>
-        <p class="text-xs text-gray-500">偏好设置会自动保存在本机浏览器。</p>
+        <a href="demo-metrics.html" class="block text-center text-xs font-semibold text-indigo-700 bg-white border border-indigo-200 py-2 rounded-xl hover:bg-indigo-50">查看指标看板 →</a>
+        <a href="demo-agent-workbench.html" class="block text-center text-xs font-semibold text-amber-800 bg-white border border-amber-200 py-2 rounded-xl hover:bg-amber-50">转人工后 · 坐席工作台 →</a>
+        <p class="text-xs text-gray-500">会话数据会同步到指标看板（本机浏览器）。</p>
       </aside>
 
       <div class="space-y-4">
@@ -60,15 +62,15 @@
             <button type="button" id="export-session" class="px-3 py-1.5 rounded-full border border-indigo-200 text-indigo-700 hover:bg-indigo-50">导出会话摘要</button>
           </div>
           <div class="flex flex-wrap gap-2 mb-3">
-            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-indigo-300" data-q="退款多久到账？">退款多久到账？</button>
-            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-indigo-300" data-q="怎么改收货地址？">怎么改收货地址？</button>
-            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-indigo-300" data-q="企业版有什么功能？">企业版有什么功能？</button>
+            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-indigo-300" data-q="充值没到账怎么办？">充值没到账</button>
+            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-indigo-300" data-q="提现失败钱去哪了？">提现失败</button>
+            <button type="button" class="quick-q text-sm border border-gray-200 px-3 py-1.5 rounded-full hover:border-indigo-300" data-q="活动奖励没收到">活动奖励</button>
           </div>
           <div id="chat" class="chat-scroll space-y-3">
-            <div class="msg-in rounded-2xl bg-gray-100 px-4 py-3 text-sm leading-7">你好，我是智能客服。选择左侧场景后提问；若置信度不足，我会建议转接人工坐席。</div>
+            <div class="msg-in rounded-2xl bg-gray-100 px-4 py-3 text-sm leading-7">Hi，我是游戏客服助手。请选择左侧知识库后提问（支付/玩法）。涉及到账时间与退款承诺时，我会按 FAQ 引用作答；没把握会建议你转人工。</div>
           </div>
           <form id="form" class="mt-4 flex gap-2">
-            <input id="q" class="flex-1 rounded-full border border-gray-200 px-4 py-3 text-sm" placeholder="输入用户问题…" />
+            <input id="q" class="flex-1 rounded-full border border-gray-200 px-4 py-3 text-sm" placeholder="输入玩家问题…" />
             <button class="bg-gray-950 text-white px-5 py-3 rounded-full text-sm font-semibold">发送</button>
           </form>
           <button id="handoff" type="button" class="hidden mt-3 w-full border-2 border-amber-400 text-amber-900 py-2.5 rounded-full text-sm font-bold bg-amber-50">
@@ -86,10 +88,12 @@
 
   <script>
     const KB = [
-      { scene: "after", keys: ["退款", "到账", "退钱"], q: 0.92, source: "FAQ/售后-退款", text: "退款提交后 3–7 个工作日原路退回；大额退款需人工复核，可在订单页查看进度。" },
-      { scene: "after", keys: ["地址", "收货", "改地址"], q: 0.88, source: "FAQ/物流-改址", text: "发货前可在 App 订单详情「修改地址」；已发货请联系在线客服拦截，成功率视承运商而定。" },
-      { scene: "before", keys: ["企业", "企业版", "功能"], q: 0.9, source: "FAQ/售前-企业版", text: "企业版含：多账号协作、审计日志、专属客服与 API 额度；支持 14 天试用，销售可安排演示。" },
-      { scene: "before", keys: ["价格", "多少钱", "收费"], q: 0.85, source: "FAQ/售前-定价", text: "标准版 ¥99/月/席位，企业版按年签约；具体报价以官网或销售方案为准。" },
+      { scene: "payment", keys: ["充值", "到账", "未到账", "没收到", "钻石", "宝石", "top up", "recharge", "payment"], q: 0.91, source: "FAQ/Payment/GooglePlay-Pending", text: "Google Play 充值一般 24–48 小时内到账。请提供订单号（GPA 开头）与 UID。若超 72 小时仍未到账，将转人工核查，请勿重复支付。" },
+      { scene: "payment", keys: ["提现", "withdraw", "失败", "不到账"], q: 0.88, source: "FAQ/Payment/Withdraw-Fail", text: "提现失败常见原因：信息不符、风控审核、渠道维护。款项通常 3–7 个工作日原路退回。请保留提现单号，勿相信非官方代充退款。" },
+      { scene: "payment", keys: ["退款", "refund"], q: 0.86, source: "FAQ/Payment/Refund-Policy", text: "符合退款条件的订单按渠道政策处理；已消费虚拟货币一般不支持退款。具体以支付渠道账单状态为准。" },
+      { scene: "gameplay", keys: ["活动", "奖励", "没收到", "礼包"], q: 0.9, source: "FAQ/Event/Reward-Delay", text: "活动奖励通常在结算后 2 小时内发放至邮箱，请检查是否满背包/满邮箱。若活动已结束，以公告规则为准。" },
+      { scene: "gameplay", keys: ["封号", "封禁", "ban", "申诉"], q: 0.84, source: "FAQ/Account/Ban-Appeal", text: "请在设置-客服中心提交申诉，附上 UID 与大致时间。人工将在 3 个工作日内回复，请勿使用第三方插件。" },
+      { scene: "gameplay", keys: ["换绑", "绑定", "账号", "丢失"], q: 0.82, source: "FAQ/Account/Rebind", text: "换绑需验证原绑定方式。若无法登录，请提供注册渠道、最近订单号（如有）转人工处理。" },
     ];
 
     const chat = document.getElementById("chat");
@@ -99,9 +103,51 @@
     const thresholdVal = document.getElementById("threshold-val");
     let handoffCount = 0, asked = 0, resolved = 0;
     const sessionLog = [];
+    let sessionId = "s" + Date.now();
 
     const sceneEl = document.getElementById("scene");
     const STORAGE_KEY = "demo-ai-support-prefs";
+    const CURRENT_KEY = "demo-ai-support-current";
+    const ANALYTICS_KEY = "demo-ai-support-analytics";
+
+    function pushToAnalytics(snap) {
+      let list = [];
+      try {
+        list = JSON.parse(localStorage.getItem(ANALYTICS_KEY) || "[]");
+      } catch (_) {}
+      list = list.filter((s) => s.id !== snap.id);
+      list.unshift(snap);
+      if (list.length > 30) list.length = 30;
+      localStorage.setItem(ANALYTICS_KEY, JSON.stringify(list));
+    }
+
+    function snapshot() {
+      return {
+        id: sessionId,
+        updatedAt: Date.now(),
+        scene: sceneEl.value,
+        threshold: Number(threshold.value),
+        asked,
+        resolved,
+        handoffCount,
+        turns: sessionLog.map((t) => ({ q: t.q, pct: t.pct })),
+      };
+    }
+
+    function saveCurrentSession() {
+      if (asked === 0) return;
+      localStorage.setItem(CURRENT_KEY, JSON.stringify(snapshot()));
+    }
+
+    function archiveSession() {
+      if (asked === 0) return;
+      pushToAnalytics(snapshot());
+      localStorage.removeItem(CURRENT_KEY);
+    }
+
+    function newSession() {
+      sessionId = "s" + Date.now();
+    }
 
     function loadPrefs() {
       try {
@@ -147,7 +193,7 @@
         if (s > bestScore) { bestScore = s; best = c; }
       });
 
-      const lines = [`场景过滤：${scene === "after" ? "售后" : "售前"} → ${pool.length} 片段`, ""];
+      const lines = [`知识库：${scene === "payment" ? "支付 · 充值/提现" : "玩法 · 账号/活动"} → ${pool.length} 片段`, ""];
       if (!best || bestScore === 0) {
         const conf = 0.35;
         lines.push("未命中 FAQ，置信度 ≈ 35%");
@@ -156,6 +202,7 @@
         handoffBtn.classList.remove("hidden");
         if (conf < th) handoffCount++;
         updateStats();
+        saveCurrentSession();
         return;
       }
 
@@ -175,6 +222,7 @@
         handoffCount++;
       }
       updateStats();
+      saveCurrentSession();
     }
 
     function updateStats() {
@@ -193,6 +241,8 @@
     handoffBtn.addEventListener("click", () => append("已为你排队人工坐席（模拟），预计等待 2 分钟。", false));
 
     document.getElementById("clear-chat").addEventListener("click", () => {
+      archiveSession();
+      newSession();
       chat.innerHTML = '<div class="msg-in rounded-2xl bg-gray-100 px-4 py-3 text-sm leading-7">会话已清空。请重新提问。</div>';
       handoffCount = asked = resolved = 0;
       sessionLog.length = 0;
@@ -205,10 +255,19 @@
       catch { prompt("复制日志：", log.textContent); }
     });
 
+    window.addEventListener("beforeunload", () => {
+      if (asked > 0) saveCurrentSession();
+    });
+
     document.getElementById("export-session").addEventListener("click", () => {
+      if (asked > 0) {
+        const snap = snapshot();
+        pushToAnalytics(snap);
+        localStorage.setItem(CURRENT_KEY, JSON.stringify(snap));
+      }
       const summary = [
         `智能客服会话摘要 · ${new Date().toLocaleString("zh-CN")}`,
-        `场景：${sceneEl.value === "after" ? "售后" : "售前"} · 阈值：${threshold.value}%`,
+        `知识库：${sceneEl.value === "payment" ? "支付" : "玩法"} · 阈值：${threshold.value}%`,
         `解决率：${document.getElementById("stat-resolve").textContent} · 转人工建议：${handoffCount} 次`,
         "",
         ...sessionLog.map((s, i) => `【${i + 1}】${s.q}\n置信度 ${s.pct}%\n${s.log}\n`),

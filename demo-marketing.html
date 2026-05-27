@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 营销 · 玩家分群与增收 Demo | Ada Liu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: radial-gradient(circle at top right, rgba(14,165,233,.14), transparent 42%), #f8fafc; }
+    .glass { background: rgba(255,255,255,.9); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.85); box-shadow: 0 16px 48px rgba(15,23,42,.06); }
+    .bar-track { height: 8px; background: #e5e7eb; border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; transition: width .45s ease; }
+  </style>
+</head>
+<body class="text-gray-900 min-h-screen">
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-gray-100">
+    <div class="max-w-6xl mx-auto px-5 py-4 flex justify-between items-center gap-3">
+      <div>
+        <a href="index.html#work" class="text-sm font-semibold text-sky-600 hover:underline">← 返回主页</a>
+        <p class="mt-1 text-xs text-gray-500">海外游戏 · 玩家行为分析 · 演示脱敏数据</p>
+      </div>
+      <span class="text-xs font-bold bg-sky-100 text-sky-800 px-3 py-1 rounded-full">增收策略模拟</span>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-5 py-8">
+    <p class="text-sm font-bold text-sky-600 uppercase tracking-widest">Demo 05</p>
+    <h1 class="mt-2 text-3xl font-black">AI 营销 · 玩家数据驱动增收</h1>
+    <p class="mt-3 text-gray-600 leading-8 max-w-3xl">
+      模拟 PM 视角：按<strong>市场 + 分群</strong>查看付费与留存指标，生成可落地的活动/外呼/礼包建议，并估算 ROI（演示公式，非真实数仓）。
+    </p>
+
+    <div class="grid lg:grid-cols-[280px_1fr] gap-6 mt-8">
+      <aside class="glass rounded-2xl p-5 h-fit space-y-4">
+        <div>
+          <label class="text-sm font-semibold">市场</label>
+          <select id="market" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm">
+            <option value="SEA">东南亚 SEA</option>
+            <option value="LATAM">拉美 LATAM</option>
+            <option value="NA">北美 NA</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-semibold">玩家分群</label>
+          <select id="segment" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm">
+            <option value="new">新注册 · 未首充</option>
+            <option value="churn7">流失 7 天 · 历史付费</option>
+            <option value="whale">大 R · 近 14 日 ARPU 下滑</option>
+            <option value="dolphin">中 R · 稳定小额付费</option>
+          </select>
+        </div>
+        <button type="button" id="analyze" class="w-full bg-sky-600 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-sky-500">生成本周策略建议</button>
+        <p class="text-xs text-gray-500 leading-6">切换分群后点击分析，右侧 KPI 与建议会更新。</p>
+      </aside>
+
+      <div class="space-y-5">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="glass rounded-2xl p-4">
+            <p class="text-xs text-gray-500 font-semibold">分群规模（7 日）</p>
+            <p id="kpi-size" class="mt-2 text-2xl font-black text-sky-700">—</p>
+          </div>
+          <div class="glass rounded-2xl p-4">
+            <p class="text-xs text-gray-500 font-semibold">付费转化率</p>
+            <p id="kpi-pay" class="mt-2 text-2xl font-black text-sky-700">—</p>
+          </div>
+          <div class="glass rounded-2xl p-4">
+            <p class="text-xs text-gray-500 font-semibold">D7 留存</p>
+            <p id="kpi-d7" class="mt-2 text-2xl font-black text-sky-700">—</p>
+          </div>
+          <div class="glass rounded-2xl p-4">
+            <p class="text-xs text-gray-500 font-semibold">预估活动 ROI</p>
+            <p id="kpi-roi" class="mt-2 text-2xl font-black text-emerald-600">—</p>
+          </div>
+        </div>
+
+        <section class="glass rounded-2xl p-5">
+          <h2 class="font-bold text-sm text-gray-500 uppercase tracking-wider">指标对比 · 分群 vs 全服均值</h2>
+          <div id="bars" class="mt-4 space-y-4 text-sm"></div>
+        </section>
+
+        <section class="glass rounded-2xl p-5">
+          <h2 class="font-bold">AI 策略建议（演示）</h2>
+          <ul id="insights" class="mt-3 space-y-2 text-sm leading-7 text-gray-700 list-disc pl-5">
+            <li>选择左侧分群并点击「生成本周策略建议」。</li>
+          </ul>
+        </section>
+
+        <section class="glass rounded-2xl p-5">
+          <h2 class="font-bold text-sm">联动动作（产品闭环示意）</h2>
+          <div class="mt-3 flex flex-wrap gap-2 text-xs">
+            <a href="demo-hr-rag.html" class="px-3 py-2 rounded-full border border-violet-200 text-violet-800 font-semibold hover:bg-violet-50">→ 外呼脚本 Demo</a>
+            <a href="demo-ai-support.html" class="px-3 py-2 rounded-full border border-indigo-200 text-indigo-800 font-semibold hover:bg-indigo-50">→ 玩家客服 Demo</a>
+            <a href="prd.html?p=5" class="px-3 py-2 rounded-full border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50">PRD 摘要</a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const DATA = {
+      SEA: {
+        new: { size: 128400, pay: 4.2, d7: 22, roi: 1.35, bars: [{ n: "付费转化", v: 4.2, avg: 8.1 }, { n: "D7 留存", v: 22, avg: 31 }, { n: "人均会话/周", v: 2.1, avg: 4.5 }], tips: ["首推 7 日新手链 + 首充双倍，避免与存量大促叠档。", "对未打开推送的用户，T+2 走外呼拉新（控制频次 ≤1 次/7 日）。", "A/B：礼包入口放主城 vs 邮箱，观测首充率差异。"] },
+        churn7: { size: 46200, pay: 18.5, d7: 9, roi: 2.1, bars: [{ n: "付费转化", v: 18.5, avg: 8.1 }, { n: "D7 留存", v: 9, avg: 31 }, { n: "回归登录率", v: 14, avg: 6 }], tips: ["回归礼与赛季倒计时组合推送，外呼仅做提醒不回诉支付。", "历史付费 >$50 用户单独礼包档，ROI 通常高于普发。", "与客服知识库对齐：到账类问题不进营销外呼。"] },
+        whale: { size: 890, pay: 72, d7: 68, roi: 3.4, bars: [{ n: "14 日 ARPU", v: 86, avg: 42, unit: "$" }, { n: "活跃天数", v: 4.2, avg: 6.1 }, { n: "客诉率", v: 2.1, avg: 5.8, unit: "%" }], tips: ["专属客服通道 + 版本前瞻，禁止在营销话术里承诺退款。", "活跃下滑先查版本/匹配/支付失败日志，再决定是否投补偿券。", "与 AI 客服联动：高价值用户进线优先标记 VIP。"] },
+        dolphin: { size: 12400, pay: 38, d7: 41, roi: 1.9, bars: [{ n: "月 ARPU", v: 28, avg: 18, unit: "$" }, { n: "D7 留存", v: 41, avg: 31 }, { n: "活动参与率", v: 55, avg: 48, unit: "%" }], tips: ["小额阶梯礼包 + 通行证，提升复购频次而非单次客单价。", "周末限时副本加成，适合中 R 稳定活跃。", "避免与大 R 专属折扣同屏，防止价差投诉。"] },
+      },
+      LATAM: {
+        new: { size: 96200, pay: 3.8, d7: 19, roi: 1.28, bars: [{ n: "付费转化", v: 3.8, avg: 7.5 }, { n: "D7 留存", v: 19, avg: 28 }, { n: "人均会话/周", v: 1.9, avg: 4.1 }], tips: ["本地化支付渠道说明进新手教程，降低首充流失。", "西语/葡语 Push 分开发送，避免混语。", "拉新外呼注意当地勿扰时段合规。"] },
+        churn7: { size: 38100, pay: 16.2, d7: 8, roi: 1.95, bars: [{ n: "付费转化", v: 16.2, avg: 7.5 }, { n: "D7 留存", v: 8, avg: 28 }, { n: "回归登录率", v: 12, avg: 5 }], tips: ["赛季末 72h 召回窗口，脚本强调倒计时而非具体返利金额。", "提现/充值问题引导客服，营销侧不口头承诺到账时间。"] },
+        whale: { size: 620, pay: 68, d7: 62, roi: 3.1, bars: [{ n: "14 日 ARPU", v: 79, avg: 38, unit: "$" }, { n: "活跃天数", v: 3.8, avg: 5.9 }, { n: "客诉率", v: 2.8, avg: 6.2, unit: "%" }], tips: ["公会/排位社交玩法绑定关怀，减少纯价格导向补贴。", "监测渠道汇率波动对付费意愿的影响。"] },
+        dolphin: { size: 9800, pay: 34, d7: 38, roi: 1.75, bars: [{ n: "月 ARPU", v: 22, avg: 15, unit: "$" }, { n: "D7 留存", v: 38, avg: 28 }, { n: "活动参与率", v: 51, avg: 45, unit: "%" }], tips: ["分期小额礼包适配当地支付方式。", "联合外呼仅触达近 3 日有登录但未付费用户。"] },
+      },
+      NA: {
+        new: { size: 28400, pay: 6.1, d7: 26, roi: 1.52, bars: [{ n: "付费转化", v: 6.1, avg: 11.2 }, { n: "D7 留存", v: 26, avg: 35 }, { n: "人均会话/周", v: 2.8, avg: 5.2 }], tips: ["强调公平竞技与赛季通行证，北美新用户对 P2W 敏感。", "客服 FAQ 前置退款政策，减少营销后客诉。"] },
+        churn7: { size: 11200, pay: 22.4, d7: 11, roi: 2.35, bars: [{ n: "付费转化", v: 22.4, avg: 11.2 }, { n: "D7 留存", v: 11, avg: 35 }, { n: "回归登录率", v: 16, avg: 7 }], tips: ["邮件 + App 内双通道召回，外呼作为高价值子集补充。", "对曾发起退款用户降频营销触达。"] },
+        whale: { size: 410, pay: 78, d7: 71, roi: 3.8, bars: [{ n: "14 日 ARPU", v: 124, avg: 58, unit: "$" }, { n: "活跃天数", v: 4.8, avg: 6.5 }, { n: "客诉率", v: 1.6, avg: 4.9, unit: "%" }], tips: ["VIP 预览版本内容，减少公开渠道泄露未上线信息。", "支付异常优先转客服 RAG，营销不重复解释到账。"] },
+        dolphin: { size: 5200, pay: 42, d7: 44, roi: 2.05, bars: [{ n: "月 ARPU", v: 45, avg: 32, unit: "$" }, { n: "D7 留存", v: 44, avg: 35 }, { n: "活动参与率", v: 58, avg: 50, unit: "%" }], tips: ["Battle Pass 阶梯奖励适合中 R 提频。", "与数据团队共建「增收实验看板」字段：分群、渠道、ROI。"] },
+      },
+    };
+
+    const marketEl = document.getElementById("market");
+    const segmentEl = document.getElementById("segment");
+
+    function barHtml(label, val, max, suffix = "") {
+      const pct = Math.min(100, Math.round((val / max) * 100));
+      return `<div><div class="flex justify-between text-xs mb-1"><span>${label}</span><span class="font-semibold">${val}${suffix}</span></div><div class="bar-track"><div class="bar-fill bg-sky-500" style="width:${pct}%"></div></div></div>`;
+    }
+
+    function render() {
+      const m = marketEl.value;
+      const s = segmentEl.value;
+      const row = DATA[m][s];
+      if (!row) return;
+
+      document.getElementById("kpi-size").textContent = row.size.toLocaleString();
+      document.getElementById("kpi-pay").textContent = row.pay + "%";
+      document.getElementById("kpi-d7").textContent = row.d7 + "%";
+      document.getElementById("kpi-roi").textContent = row.roi + "x";
+
+      const maxBar = Math.max(...row.bars.map((b) => Math.max(b.v, b.avg)));
+      document.getElementById("bars").innerHTML = row.bars
+        .map((b) => {
+          const suf = b.unit === "$" ? "$" : b.unit === "%" ? "%" : "";
+          return (
+            barHtml(`${b.n}（分群）`, b.v, maxBar, suf) +
+            `<p class="text-xs text-gray-500 -mt-2 mb-2">全服均值：${b.avg}${suf}</p>`
+          );
+        })
+        .join("");
+
+      document.getElementById("insights").innerHTML = row.tips.map((t) => `<li>${t}</li>`).join("");
+    }
+
+    document.getElementById("analyze").addEventListener("click", render);
+    marketEl.addEventListener("change", render);
+    segmentEl.addEventListener("change", render);
+    render();
+  </script>
+</body>
+</html>

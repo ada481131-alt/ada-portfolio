@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#ededed" />
+  <title>朋友圈</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Hiragino Sans GB", sans-serif;
+      background: #ededed;
+      margin: 0;
+      color: #000;
+      font-size: 16px;
+    }
+    button { font-family: inherit; }
+    .phone {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: #ededed;
+      position: relative;
+    }
+    /* 封面：背景向下延伸，避免 margin 区露出灰/白边 */
+    .cover {
+      height: 300px;
+      position: relative;
+      z-index: 2;
+      overflow: visible;
+      margin-bottom: 32px;
+    }
+    .cover-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: -32px;
+      background: #6b7b8c;
+      overflow: hidden;
+      z-index: 0;
+      cursor: pointer;
+    }
+    .cover-media {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .cover-video.is-hidden,
+    .cover-image.is-hidden {
+      display: none;
+    }
+    .cover-tint {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(0,0,0,.08) 0%, transparent 40%, rgba(0,0,0,.18) 100%);
+    }
+    .change-cover {
+      position: absolute;
+      right: 12px;
+      bottom: 14px;
+      z-index: 12;
+      border: none;
+      background: transparent;
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      padding: 4px 6px;
+      text-shadow: 0 1px 3px rgba(0,0,0,.55);
+      pointer-events: auto;
+    }
+    /* 全屏查看封面 */
+    .cover-viewer {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 450;
+      background: #000;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .cover-viewer.show {
+      display: flex;
+    }
+    .cover-viewer-media {
+      max-width: 100%;
+      max-height: 100%;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .cover-viewer-video {
+      background: #000;
+    }
+    .cover-viewer-media.is-hidden {
+      display: none;
+    }
+    .cover-viewer-close {
+      position: absolute;
+      right: 16px;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      z-index: 2;
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 6px;
+      background: rgba(80, 80, 80, 0.85);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    .cover-viewer-close svg {
+      width: 20px;
+      height: 20px;
+    }
+    .cover-viewer-change {
+      position: absolute;
+      right: 16px;
+      bottom: max(72px, calc(24px + env(safe-area-inset-bottom)));
+      z-index: 2;
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 14px;
+      cursor: pointer;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+      pointer-events: auto;
+    }
+    .cover-mute-hint {
+      position: absolute;
+      left: 12px;
+      bottom: 14px;
+      z-index: 12;
+      font-size: 11px;
+      color: rgba(255,255,255,.85);
+      text-shadow: 0 1px 2px rgba(0,0,0,.5);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .cover-mute-hint.show { opacity: 1; }
+    .nav-back {
+      position: absolute;
+      left: 8px;
+      top: env(safe-area-inset-top, 12px);
+      margin-top: 8px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 28px;
+      font-weight: 300;
+      text-decoration: none;
+      z-index: 5;
+      text-shadow: 0 1px 3px rgba(0,0,0,.35);
+    }
+    .nav-camera {
+      position: absolute;
+      right: 12px;
+      top: env(safe-area-inset-top, 12px);
+      margin-top: 12px;
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      z-index: 5;
+      padding: 0;
+    }
+    .nav-camera svg { width: 28px; height: 28px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
+    .profile-avatar {
+      position: absolute;
+      right: 12px;
+      bottom: -32px;
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      border: 2px solid rgba(255,255,255,.95);
+      object-fit: cover;
+      z-index: 15;
+      background: #d8d8d8;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+    .profile-name {
+      position: absolute;
+      right: 88px;
+      bottom: 8px;
+      color: #fff;
+      font-size: 17px;
+      font-weight: 500;
+      text-shadow: 0 1px 3px rgba(0,0,0,.45);
+      z-index: 15;
+    }
+  /* 动态 */
+    #feed {
+      position: relative;
+      z-index: 1;
+      background: #fff;
+      margin-top: -1px;
+    }
+    .feed-item {
+      padding: 14px 16px 16px 76px;
+      position: relative;
+      background: #fff;
+      border-bottom: 0.5px solid #e5e5e5;
+    }
+    .feed-item:first-child {
+      padding-top: 18px;
+    }
+    .feed-avatar {
+      position: absolute;
+      left: 16px;
+      top: 14px;
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      object-fit: cover;
+      background: #e5e5e5;
+    }
+    .feed-name {
+      color: #576b95;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+    .feed-text {
+      margin-top: 4px;
+      font-size: 16px;
+      line-height: 1.45;
+      color: #000;
+      word-break: break-word;
+    }
+    .mention { color: #576b95; }
+    .img-grid {
+      display: grid;
+      gap: 4px;
+      margin-top: 8px;
+      max-width: 252px;
+    }
+    .img-grid.cols-1 { grid-template-columns: 1fr; max-width: 180px; }
+    .img-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+    .img-grid.cols-3 { grid-template-columns: repeat(3, 80px); }
+    .img-grid img {
+      width: 100%;
+      height: 80px;
+      object-fit: cover;
+      background: #f2f2f2;
+    }
+    .img-grid.cols-1 img { height: auto; max-height: 240px; aspect-ratio: auto; }
+    .img-grid.cols-3 img { width: 80px; height: 80px; }
+    .img-placeholder {
+      aspect-ratio: 4/3;
+      max-height: 200px;
+      border-radius: 2px;
+      position: relative;
+      max-width: 200px;
+    }
+    .action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .action-time {
+      font-size: 13px;
+      color: #b2b2b2;
+    }
+    .vis-hint { font-size: 12px; color: #b2b2b2; margin-left: 4px; }
+    .action-menu-wrap { position: relative; }
+    .action-btn {
+      background: #f7f7f7;
+      border-radius: 4px;
+      padding: 0 8px;
+      height: 22px;
+      line-height: 22px;
+      font-size: 16px;
+      letter-spacing: 1px;
+      color: #576b95;
+      cursor: pointer;
+      border: none;
+    }
+    .action-popup {
+      display: none;
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 6px);
+      background: #4c4c4c;
+      border-radius: 4px;
+      overflow: hidden;
+      z-index: 30;
+      height: 36px;
+      align-items: stretch;
+    }
+    .action-popup.show { display: flex; }
+    .action-popup button {
+      color: #fff;
+      font-size: 14px;
+      padding: 0 16px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .action-popup button + button {
+      border-left: 1px solid #3e3e3e;
+    }
+    .action-popup .delete-btn { color: #ff6b6b; }
+    .likes-comments {
+      background: #f7f7f7;
+      margin-top: 10px;
+      position: relative;
+      padding: 6px 10px;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .likes-comments::before {
+      content: "";
+      position: absolute;
+      top: -6px;
+      left: 10px;
+      border: 6px solid transparent;
+      border-bottom-color: #f7f7f7;
+    }
+    .likes-row {
+      color: #576b95;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #e8e8e8;
+      margin-bottom: 4px;
+    }
+    .likes-row:only-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .likes-row:last-child { border-bottom: none; margin-bottom: 0; }
+    .likes-row .heart {
+      color: #576b95;
+      margin-right: 4px;
+      font-size: 14px;
+    }
+    .comments-row {
+      position: relative;
+      padding-right: 0;
+    }
+    .comments-row .c-author { color: #576b95; }
+    .comments-row.is-mine {
+      cursor: pointer;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .comment-del-btn {
+      margin-left: 6px;
+      border: none;
+      background: none;
+      color: #fa5151;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 0;
+      display: none;
+    }
+    .comments-row.is-mine.show-del .comment-del-btn {
+      display: inline;
+    }
+    .comment-input-row {
+      display: none;
+      margin-top: 8px;
+      gap: 8px;
+      align-items: center;
+    }
+    .comment-input-row.show { display: flex; }
+    .comment-input-row input {
+      flex: 1;
+      border: none;
+      background: #f7f7f7;
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-size: 14px;
+      outline: none;
+    }
+    .comment-input-row button {
+      border: none;
+      background: none;
+      color: #576b95;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .comment-send { color: #07c160 !important; font-weight: 500; }
+    /* 发表页 - 全屏仿微信 */
+    .compose-page {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: #fff;
+      flex-direction: column;
+      max-width: 430px;
+      margin: 0 auto;
+      left: 0;
+      right: 0;
+    }
+    .compose-page.show { display: flex; }
+    .wx-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 44px;
+      padding: 0 12px;
+      padding-top: env(safe-area-inset-top, 0);
+      border-bottom: 0.5px solid #e5e5e5;
+      flex-shrink: 0;
+    }
+    .wx-nav-cancel {
+      border: none;
+      background: none;
+      font-size: 16px;
+      color: #000;
+      padding: 8px 4px;
+      cursor: pointer;
+    }
+    .wx-nav-post {
+      border: none;
+      background: none;
+      font-size: 16px;
+      color: #07c160;
+      font-weight: 500;
+      padding: 8px 4px;
+      cursor: pointer;
+      outline: none;
+    }
+    .wx-nav-post:disabled { color: #9ed9bd; cursor: not-allowed; }
+    .wx-nav-post:active:not(:disabled) { opacity: .7; }
+    .compose-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px 24px;
+    }
+    .wx-compose-input {
+      width: 100%;
+      min-height: 120px;
+      border: none;
+      outline: none;
+      resize: none;
+      font-size: 17px;
+      line-height: 1.45;
+      padding: 0;
+    }
+    .wx-compose-input::placeholder { color: #b2b2b2; }
+    .wx-photo-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+    .wx-photo-cell {
+      width: calc(33.333% - 4px);
+      aspect-ratio: 1;
+      position: relative;
+      background: #f7f7f7;
+      overflow: hidden;
+    }
+    .wx-photo-cell img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .wx-photo-remove {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 22px;
+      height: 22px;
+      background: rgba(0,0,0,.55);
+      color: #fff;
+      border: none;
+      font-size: 14px;
+      line-height: 22px;
+      cursor: pointer;
+    }
+    .wx-photo-add {
+      width: calc(33.333% - 4px);
+      aspect-ratio: 1;
+      background: #f7f7f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      font-size: 36px;
+      color: #ccc;
+      font-weight: 200;
+    }
+    .wx-cell {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-top: 0.5px solid #e5e5e5;
+      margin-top: 16px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .wx-cell-value { color: #888; font-size: 15px; }
+    .wx-cell-value::after {
+      content: " ›";
+      color: #c8c8c8;
+    }
+    .wx-tool-row {
+      display: flex;
+      gap: 20px;
+      margin-top: 8px;
+      padding-top: 8px;
+    }
+    .wx-tool-btn {
+      border: none;
+      background: none;
+      color: #576b95;
+      font-size: 15px;
+      padding: 8px 0;
+      cursor: pointer;
+    }
+    /* 底部选择器 */
+    .sheet-mask {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: rgba(0,0,0,.5);
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .sheet-mask.show { display: flex; }
+    .action-sheet {
+      width: 100%;
+      max-width: 430px;
+      background: #f7f7f7;
+      border-radius: 12px 12px 0 0;
+      overflow: hidden;
+      padding-bottom: env(safe-area-inset-bottom, 8px);
+    }
+    .action-sheet button {
+      display: block;
+      width: 100%;
+      border: none;
+      background: #fff;
+      padding: 16px;
+      font-size: 17px;
+      color: #000;
+      border-bottom: 0.5px solid #e5e5e5;
+      cursor: pointer;
+    }
+    .action-sheet button.selected { color: #07c160; }
+    .action-sheet .sheet-cancel {
+      margin-top: 8px;
+      color: #000;
+    }
+    .action-sheet .sheet-title {
+      background: #fff;
+      padding: 12px;
+      text-align: center;
+      font-size: 13px;
+      color: #888;
+      border-bottom: 0.5px solid #e5e5e5;
+    }
+    .partial-list {
+      background: #fff;
+      max-height: 200px;
+      overflow-y: auto;
+      border-bottom: 0.5px solid #e5e5e5;
+    }
+    .partial-list label {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 0.5px solid #f0f0f0;
+      font-size: 16px;
+    }
+    .picker-sheet .picker-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 14px 16px;
+      border: none;
+      border-bottom: 0.5px solid #f0f0f0;
+      background: #fff;
+      font-size: 17px;
+      color: #000;
+      cursor: pointer;
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,.72);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 15px;
+      z-index: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+      max-width: 80%;
+      text-align: center;
+    }
+    .toast.show { opacity: 1; }
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 400;
+      background: #000;
+      align-items: center;
+      justify-content: center;
+    }
+    #lightbox.show { display: flex; }
+    #lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    #lightbox .lb-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      color: #fff;
+      font-size: 28px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .portfolio-link {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 40;
+      font-size: 11px;
+      color: #999;
+      text-decoration: none;
+      opacity: .6;
+    }
+    @media (min-width: 431px) {
+      .portfolio-link { left: calc(50% - 215px); transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="phone" id="app">
+    <header class="cover">
+      <div class="cover-bg" id="cover-bg">
+        <video
+          id="cover-video"
+          class="cover-media cover-video"
+          playsinline
+          webkit-playsinline
+          muted
+          loop
+          autoplay
+          preload="metadata"
+        ></video>
+        <img id="cover-image" class="cover-media cover-image is-hidden" alt="" />
+        <div class="cover-tint" aria-hidden="true"></div>
+      </div>
+      <span class="cover-mute-hint" id="cover-mute-hint">点击封面查看完整视频</span>
+      <button type="button" class="change-cover" id="change-cover" aria-label="更换封面">换封面</button>
+      <input type="file" id="cover-file" accept="image/*,video/*" hidden />
+      <a href="index.html" class="nav-back" aria-label="返回">‹</a>
+      <button type="button" class="nav-camera" id="open-compose-top" aria-label="发表">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 7h3l2-3h6l2 3h3a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V9a2 2 0 012-2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </button>
+      <span class="profile-name">Ada Liu</span>
+      <img class="profile-avatar" src="avatar.jpg" alt="" onerror="this.style.background='#c8c8c8'" />
+    </header>
+
+    <div id="feed"></div>
+    <p id="empty-feed" style="display:none;text-align:center;padding:48px 16px;color:#b2b2b2;font-size:14px;background:#fff;">还没有动态</p>
+  </div>
+
+  <a href="index.html#work" class="portfolio-link">作品集</a>
+
+  <!-- 发表动态 - 全屏 -->
+  <div class="compose-page" id="compose-page">
+    <header class="wx-nav">
+      <button type="button" class="wx-nav-cancel" id="close-compose">取消</button>
+      <button type="button" class="wx-nav-post" id="submit-post">发表</button>
+    </header>
+    <div class="compose-body">
+      <textarea id="compose-text" class="wx-compose-input" placeholder="这一刻的想法…"></textarea>
+      <div class="wx-photo-grid" id="compose-preview"></div>
+      <input type="file" id="compose-images" accept="image/*" multiple hidden />
+      <div class="wx-tool-row">
+        <button type="button" class="wx-tool-btn" id="trigger-images">图片</button>
+        <button type="button" class="wx-tool-btn" id="compose-at">提醒谁看</button>
+      </div>
+      <div class="wx-cell" id="open-vis-sheet">
+        <span>谁可以看</span>
+        <span class="wx-cell-value" id="vis-label">公开</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 可见范围 -->
+  <div class="sheet-mask" id="vis-sheet">
+    <div class="action-sheet">
+      <div class="sheet-title">谁可以看</div>
+      <button type="button" data-vis="public" class="vis-opt selected">公开</button>
+      <button type="button" data-vis="friends" class="vis-opt">私密</button>
+      <button type="button" data-vis="partial" class="vis-opt">部分可见</button>
+      <button type="button" data-vis="private" class="vis-opt">仅自己可见</button>
+      <div id="partial-friends" class="partial-list" style="display:none"></div>
+      <button type="button" class="sheet-cancel" id="close-vis-sheet">取消</button>
+    </div>
+  </div>
+
+  <!-- @ 选人 -->
+  <div class="sheet-mask" id="at-picker-modal">
+    <div class="action-sheet picker-sheet">
+      <div class="sheet-title">提醒谁看</div>
+      <div id="at-picker-list"></div>
+      <button type="button" class="sheet-cancel" data-close-at>取消</button>
+    </div>
+  </div>
+
+  <div id="lightbox">
+    <button type="button" class="lb-close" data-close-lightbox>×</button>
+    <img id="lightbox-img" alt="" />
+  </div>
+
+  <div class="cover-viewer" id="cover-viewer" aria-hidden="true">
+    <video
+      id="cover-viewer-video"
+      class="cover-viewer-media cover-viewer-video is-hidden"
+      playsinline
+      webkit-playsinline
+      controls
+      loop
+    ></video>
+    <img id="cover-viewer-image" class="cover-viewer-media is-hidden" alt="" />
+    <button type="button" class="cover-viewer-change" id="change-cover-viewer">换封面</button>
+    <button type="button" class="cover-viewer-close" id="close-cover-viewer" aria-label="收起">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="7" y="7" width="10" height="10" rx="1" stroke="#fff" stroke-width="1.8" />
+        <rect x="4" y="4" width="16" height="16" rx="2" stroke="#fff" stroke-width="1.5" opacity="0.9" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="sheet-mask" id="comment-del-sheet">
+    <div class="action-sheet">
+      <button type="button" id="confirm-del-comment" style="color:#fa5151">删除评论</button>
+      <button type="button" class="sheet-cancel" id="cancel-del-comment">取消</button>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "ada-moments-feed-v3";
+    const COVER_DB_NAME = "adaMomentsCover";
+    const COVER_STORE = "media";
+    const DEFAULT_COVER_VIDEO =
+      "https://assets.mixkit.co/videos/preview/mixkit-aerial-panorama-of-a-landscape-with-mountains-5035-large.mp4";
+    let coverObjectUrl = null;
+    let pendingCommentDelete = null;
+    const LEGACY_KEYS = ["ada-moments-feed-v2", "ada-moments-feed-v1"];
+    const ME = { name: "Ada Liu", avatar: "avatar.jpg" };
+    const FRIENDS = ["金中鳌", "Shiny 猎头顾问", "张产品", "李设计"];
+    const VIS_LABELS = { public: "公开", friends: "私密", partial: "部分可见", private: "仅自己可见" };
+
+    const SEED = [
+      {
+        id: "s1",
+        author: "金中鳌",
+        avatarColor: "#d4a574",
+        text: "忙里偷闲，来吸口氧 @Shiny 猎头顾问 下次一起",
+        mentions: ["Shiny 猎头顾问"],
+        visibility: "friends",
+        visibleTo: [],
+        images: [],
+        imageGradient: "linear-gradient(135deg,#9ca3af,#d1d5db)",
+        likes: ["Shiny 猎头顾问"],
+        comments: [],
+        createdAt: Date.now() - 36 * 60 * 1000,
+      },
+      {
+        id: "s2",
+        author: "Shiny 猎头顾问",
+        avatarColor: "#e8a0a8",
+        text: "天气好的钦州三娘湾",
+        mentions: [],
+        visibility: "public",
+        visibleTo: [],
+        images: [],
+        imageGradient: "linear-gradient(135deg,#7eb8da,#b8d4e8)",
+        isVideo: true,
+        likes: ["Ada Liu"],
+        comments: [{ id: "c-s2-1", author: "Ada Liu", text: "好想去！" }],
+        createdAt: Date.now() - 3 * 3600 * 1000,
+      },
+    ];
+
+    let posts = [];
+    let composePreviews = [];
+    let openMenuId = null;
+    let composeVisibility = "public";
+    let composeVisibleTo = [];
+    let atTarget = "compose";
+    let atCommentPostId = null;
+    let isPublishing = false;
+
+    function toast(msg, ms = 2200) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(el._t);
+      el._t = setTimeout(() => el.classList.remove("show"), ms);
+    }
+
+    function normalizePost(p) {
+      if (!p.visibility) p.visibility = "public";
+      if (!p.visibleTo) p.visibleTo = [];
+      if (!p.mentions) p.mentions = parseMentions(p.text || "");
+      if (!p.likes) p.likes = [];
+      p.comments = (p.comments || []).map((c, i) => ({
+        id: c.id || "c-" + p.id + "-" + i,
+        author: c.author,
+        text: c.text,
+      }));
+      return p;
+    }
+
+    function load() {
+      try {
+        let raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          for (const k of LEGACY_KEYS) {
+            raw = localStorage.getItem(k);
+            if (raw) break;
+          }
+        }
+        posts = raw ? JSON.parse(raw).map(normalizePost) : SEED.map((p) => ({ ...p }));
+      } catch {
+        posts = SEED.map((p) => ({ ...p }));
+      }
+    }
+
+    function save() {
+      try {
+        const json = JSON.stringify(posts);
+        localStorage.setItem(STORAGE_KEY, json);
+        return true;
+      } catch (e) {
+        console.error("save failed", e);
+        if (e && (e.name === "QuotaExceededError" || e.code === 22)) {
+          pruneOldPosts();
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+            return true;
+          } catch (e2) {
+            toast("存储空间不足，请删除部分带图动态后重试");
+            return false;
+          }
+        }
+        toast("保存失败，请重试");
+        return false;
+      }
+    }
+
+    function pruneOldPosts() {
+      const mine = posts.filter((p) => p.author === ME.name && p.images?.length);
+      if (mine.length > 5) {
+        const remove = mine.sort((a, b) => a.createdAt - b.createdAt).slice(0, mine.length - 5);
+        remove.forEach((p) => {
+          posts = posts.filter((x) => x.id !== p.id);
+        });
+      }
+    }
+
+    async function compressImage(file, maxSide = 1080, quality = 0.78) {
+      const blobUrl = URL.createObjectURL(file);
+      try {
+        const img = await new Promise((resolve, reject) => {
+          const i = new Image();
+          i.onload = () => resolve(i);
+          i.onerror = reject;
+          i.src = blobUrl;
+        });
+        let w = img.naturalWidth;
+        let h = img.naturalHeight;
+        if (w > maxSide || h > maxSide) {
+          if (w > h) {
+            h = Math.round((h * maxSide) / w);
+            w = maxSide;
+          } else {
+            w = Math.round((w * maxSide) / h);
+            h = maxSide;
+          }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        return canvas.toDataURL("image/jpeg", quality);
+      } finally {
+        URL.revokeObjectURL(blobUrl);
+      }
+    }
+
+    function parseMentions(text) {
+      const found = [];
+      [...FRIENDS, ME.name].forEach((name) => {
+        if (text.includes("@" + name)) found.push(name);
+      });
+      return [...new Set(found)];
+    }
+
+    function escapeRegex(s) {
+      return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function formatTextHtml(text) {
+      let html = escapeHtml(text || "");
+      [...FRIENDS, ME.name]
+        .sort((a, b) => b.length - a.length)
+        .forEach((name) => {
+          html = html.replace(
+            new RegExp("@" + escapeRegex(name), "g"),
+            `<span class="mention">@${escapeHtml(name)}</span>`
+          );
+        });
+      return html;
+    }
+
+    function canView(post, viewer) {
+      if (post.author === viewer) return true;
+      const vis = post.visibility || "public";
+      if (vis === "public") return true;
+      if (vis === "private") return false;
+      if (vis === "partial") return (post.visibleTo || []).includes(viewer);
+      if (vis === "friends") {
+        if (viewer === ME.name) return true;
+        return FRIENDS.includes(viewer);
+      }
+      return true;
+    }
+
+    function visibilityHint(post) {
+      if (post.author !== ME.name) return "";
+      const vis = post.visibility || "public";
+      if (vis === "public") return "";
+      const label = VIS_LABELS[vis] || "";
+      const extra = vis === "partial" && post.visibleTo?.length ? ` · ${post.visibleTo.join("、")}` : "";
+      return `<span class="vis-hint">${label}${extra}</span>`;
+    }
+
+    function timeAgo(ts) {
+      const m = Math.floor((Date.now() - ts) / 60000);
+      if (m < 1) return "刚刚";
+      if (m < 60) return m + "分钟前";
+      const h = Math.floor(m / 60);
+      if (h < 24) return h + "小时前";
+      const d = Math.floor(h / 24);
+      if (d < 7) return d + "天前";
+      const dt = new Date(ts);
+      return dt.getMonth() + 1 + "月" + dt.getDate() + "日";
+    }
+
+    function avatarHtml(post, cls) {
+      if (post.author === ME.name && ME.avatar) {
+        return `<img class="${cls}" src="${ME.avatar}" alt="" onerror="this.style.background='#ddd'" />`;
+      }
+      return `<div class="${cls}" style="background:${post.avatarColor || "#ccc"};display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff">${escapeHtml(post.author.slice(0, 1))}</div>`;
+    }
+
+    function imageGridHtml(post) {
+      if (post.images?.length) {
+        const n = post.images.length;
+        const cols = n === 1 ? "cols-1" : n === 4 ? "cols-2" : "cols-3";
+        const imgs = post.images
+          .map((src, i) => `<img src="${src}" alt="" data-lightbox="1" data-src="${src}" />`)
+          .join("");
+        return `<div class="img-grid ${cols}">${imgs}</div>`;
+      }
+      if (post.imageGradient) {
+        const play = post.isVideo ? '<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px">▶</span>' : "";
+        return `<div class="img-placeholder" style="background:${post.imageGradient}">${play}</div>`;
+      }
+      return "";
+    }
+
+    function renderFeed() {
+      const feed = document.getElementById("feed");
+      const empty = document.getElementById("empty-feed");
+      const visible = posts.filter((p) => canView(p, ME.name)).sort((a, b) => b.createdAt - a.createdAt);
+      if (!visible.length) {
+        feed.innerHTML = "";
+        empty.style.display = "block";
+        empty.textContent = posts.length ? "没有可见动态" : "还没有动态，点击右上角相机发布";
+        return;
+      }
+      empty.style.display = "none";
+      feed.innerHTML = visible
+        .map((post) => {
+          const liked = post.likes.includes(ME.name);
+          const isOwn = post.author === ME.name;
+          let lc = "";
+          if (post.likes.length) {
+            lc += `<div class="likes-row"><span class="heart">♡</span>${post.likes.map(escapeHtml).join("、")}</div>`;
+          }
+          post.comments.forEach((c) => {
+            const mine = c.author === ME.name;
+            const delBtn = mine
+              ? `<button type="button" class="comment-del-btn" data-del-comment="${post.id}" data-comment-id="${c.id}">删除</button>`
+              : "";
+            lc += `<div class="comments-row${mine ? " is-mine" : ""}" data-post-id="${post.id}" data-comment-id="${c.id}"><span class="c-author">${escapeHtml(c.author)}</span>：${formatTextHtml(c.text)}${delBtn}</div>`;
+          });
+          const lcBlock = lc ? `<div class="likes-comments">${lc}</div>` : "";
+          const deleteBtn = isOwn ? `<button type="button" class="delete-btn" data-delete="${post.id}">删除</button>` : "";
+          return `
+          <article class="feed-item" data-id="${post.id}">
+            ${avatarHtml(post, "feed-avatar")}
+            <div class="feed-name">${escapeHtml(post.author)}</div>
+            <div class="feed-text">${formatTextHtml(post.text)}</div>
+            ${imageGridHtml(post)}
+            <div class="action-bar">
+              <span class="action-time">${timeAgo(post.createdAt)}${visibilityHint(post)}</span>
+              <div class="action-menu-wrap">
+                <button type="button" class="action-btn" data-menu="${post.id}">··</button>
+                <div class="action-popup" id="menu-${post.id}">
+                  <button type="button" data-like="${post.id}">${liked ? "取消" : "赞"}</button>
+                  <button type="button" data-comment-focus="${post.id}">评论</button>
+                  ${deleteBtn}
+                </div>
+              </div>
+            </div>
+            ${lcBlock}
+            <div class="comment-input-row" id="comment-row-${post.id}">
+              <button type="button" data-comment-at="${post.id}">@</button>
+              <input type="text" placeholder="" data-comment-input="${post.id}" />
+              <button type="button" class="comment-send" data-comment-send="${post.id}">发送</button>
+            </div>
+          </article>`;
+        })
+        .join("");
+      bindFeedEvents();
+    }
+
+    function bindFeedEvents() {
+      document.querySelectorAll("[data-menu]").forEach((btn) => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.menu;
+          document.querySelectorAll(".action-popup").forEach((p) => p.classList.remove("show"));
+          if (openMenuId === id) {
+            openMenuId = null;
+            return;
+          }
+          openMenuId = id;
+          document.getElementById("menu-" + id).classList.add("show");
+        };
+      });
+      document.querySelectorAll("[data-like]").forEach((btn) => {
+        btn.onclick = () => {
+          const post = posts.find((p) => p.id === btn.dataset.like);
+          if (!post) return;
+          const i = post.likes.indexOf(ME.name);
+          if (i >= 0) post.likes.splice(i, 1);
+          else post.likes.push(ME.name);
+          save();
+          renderFeed();
+        };
+      });
+      document.querySelectorAll("[data-comment-focus]").forEach((btn) => {
+        btn.onclick = () => {
+          openMenuId = null;
+          document.querySelectorAll(".action-popup").forEach((p) => p.classList.remove("show"));
+          document.getElementById("comment-row-" + btn.dataset.commentFocus).classList.add("show");
+          document.querySelector(`[data-comment-input="${btn.dataset.commentFocus}"]`).focus();
+        };
+      });
+      document.querySelectorAll("[data-comment-send]").forEach((btn) => {
+        btn.onclick = () => sendComment(btn.dataset.commentSend);
+      });
+      document.querySelectorAll("[data-comment-input]").forEach((input) => {
+        input.onkeydown = (e) => {
+          if (e.key === "Enter") sendComment(input.dataset.commentInput);
+        };
+      });
+      document.querySelectorAll("[data-lightbox]").forEach((img) => {
+        img.onclick = () => {
+          document.getElementById("lightbox-img").src = img.dataset.src || img.src;
+          document.getElementById("lightbox").classList.add("show");
+        };
+      });
+      document.querySelectorAll("[data-delete]").forEach((btn) => {
+        btn.onclick = () => {
+          if (!confirm("删除该朋友圈？")) return;
+          posts = posts.filter((p) => p.id !== btn.dataset.delete);
+          save();
+          renderFeed();
+        };
+      });
+      document.querySelectorAll("[data-comment-at]").forEach((btn) => {
+        btn.onclick = () => {
+          atTarget = "comment";
+          atCommentPostId = btn.dataset.commentAt;
+          openAtPicker();
+        };
+      });
+      bindCommentDelete();
+    }
+
+    function bindCommentDelete() {
+      document.querySelectorAll(".comments-row.is-mine").forEach((row) => {
+        let pressTimer = null;
+        const showDel = () => row.classList.add("show-del");
+        const hideDel = () => row.classList.remove("show-del");
+        const onPressStart = () => {
+          pressTimer = setTimeout(() => {
+            pendingCommentDelete = {
+              postId: row.dataset.postId,
+              commentId: row.dataset.commentId,
+            };
+            document.getElementById("comment-del-sheet").classList.add("show");
+          }, 480);
+        };
+        const onPressEnd = () => {
+          clearTimeout(pressTimer);
+        };
+        row.addEventListener("touchstart", onPressStart, { passive: true });
+        row.addEventListener("touchend", onPressEnd);
+        row.addEventListener("touchmove", onPressEnd);
+        row.addEventListener("touchcancel", onPressEnd);
+        row.addEventListener("contextmenu", (e) => {
+          e.preventDefault();
+          pendingCommentDelete = {
+            postId: row.dataset.postId,
+            commentId: row.dataset.commentId,
+          };
+          document.getElementById("comment-del-sheet").classList.add("show");
+        });
+        row.addEventListener("click", (e) => {
+          if (e.target.closest(".comment-del-btn")) return;
+          document.querySelectorAll(".comments-row.is-mine.show-del").forEach((r) => {
+            if (r !== row) r.classList.remove("show-del");
+          });
+          row.classList.toggle("show-del");
+        });
+        document.addEventListener("click", (e) => {
+          if (!row.contains(e.target)) hideDel();
+        });
+      });
+      document.querySelectorAll("[data-del-comment]").forEach((btn) => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          deleteComment(btn.dataset.delComment, btn.dataset.commentId);
+        };
+      });
+    }
+
+    function deleteComment(postId, commentId) {
+      const post = posts.find((p) => p.id === postId);
+      if (!post) return;
+      const c = post.comments.find((x) => x.id === commentId);
+      if (!c || c.author !== ME.name) {
+        toast("只能删除自己的评论");
+        return;
+      }
+      post.comments = post.comments.filter((x) => x.id !== commentId);
+      save();
+      renderFeed();
+      toast("评论已删除");
+    }
+
+    function sendComment(postId) {
+      const input = document.querySelector(`[data-comment-input="${postId}"]`);
+      const text = input.value.trim();
+      if (!text) return;
+      const post = posts.find((p) => p.id === postId);
+      if (!post) return;
+      post.comments.push({ id: "c" + Date.now(), author: ME.name, text });
+      parseMentions(text).forEach((n) => {
+        if (!post.mentions.includes(n)) post.mentions.push(n);
+      });
+      input.value = "";
+      save();
+      renderFeed();
+    }
+
+    function renderComposePreview() {
+      const box = document.getElementById("compose-preview");
+      box.innerHTML = "";
+      composePreviews.forEach((item, idx) => {
+        const cell = document.createElement("div");
+        cell.className = "wx-photo-cell";
+        const img = document.createElement("img");
+        img.src = item.preview;
+        cell.appendChild(img);
+        const rm = document.createElement("button");
+        rm.type = "button";
+        rm.className = "wx-photo-remove";
+        rm.textContent = "×";
+        rm.onclick = () => {
+          if (item.preview.startsWith("blob:")) URL.revokeObjectURL(item.preview);
+          composePreviews.splice(idx, 1);
+          renderComposePreview();
+        };
+        cell.appendChild(rm);
+        box.appendChild(cell);
+      });
+      if (composePreviews.length < 9) {
+        const add = document.createElement("button");
+        add.type = "button";
+        add.className = "wx-photo-add";
+        add.textContent = "+";
+        add.onclick = () => document.getElementById("compose-images").click();
+        box.appendChild(add);
+      }
+    }
+
+    function openCompose() {
+      document.getElementById("compose-page").classList.add("show");
+      document.body.style.overflow = "hidden";
+      document.getElementById("compose-text").focus();
+      updateSubmitState();
+    }
+
+    function closeCompose() {
+      document.getElementById("compose-page").classList.remove("show");
+      document.body.style.overflow = "";
+      document.getElementById("compose-text").value = "";
+      composePreviews.forEach((p) => {
+        if (p.preview.startsWith("blob:")) URL.revokeObjectURL(p.preview);
+      });
+      composePreviews = [];
+      renderComposePreview();
+      document.getElementById("compose-images").value = "";
+      setComposeVisibility("public");
+    }
+
+    function updateSubmitState() {
+      const text = document.getElementById("compose-text").value.trim();
+      const btn = document.getElementById("submit-post");
+      btn.disabled = !text && !composePreviews.length;
+    }
+
+    function setComposeVisibility(vis) {
+      composeVisibility = vis;
+      document.getElementById("vis-label").textContent = VIS_LABELS[vis] || "公开";
+      document.querySelectorAll(".vis-opt").forEach((b) => {
+        b.classList.toggle("selected", b.dataset.vis === vis);
+      });
+      const partial = document.getElementById("partial-friends");
+      if (vis === "partial") {
+        partial.style.display = "block";
+        partial.innerHTML = FRIENDS.map(
+          (name) =>
+            `<label><input type="checkbox" value="${name.replace(/"/g, "")}" ${composeVisibleTo.includes(name) ? "checked" : ""} /> ${escapeHtml(name)}</label>`
+        ).join("");
+        partial.querySelectorAll("input").forEach((cb) => {
+          cb.onchange = () => {
+            composeVisibleTo = [...partial.querySelectorAll("input:checked")].map((x) => x.value);
+          };
+        });
+      } else {
+        partial.style.display = "none";
+        composeVisibleTo = [];
+      }
+    }
+
+    function openAtPicker() {
+      const list = document.getElementById("at-picker-list");
+      list.innerHTML = FRIENDS.map(
+        (name) => `<button type="button" class="picker-item" data-name="${name}">${escapeHtml(name)}</button>`
+      ).join("");
+      list.querySelectorAll(".picker-item").forEach((btn) => {
+        btn.onclick = () => insertAt(btn.getAttribute("data-name"));
+      });
+      document.getElementById("at-picker-modal").classList.add("show");
+    }
+
+    function insertAt(name) {
+      document.getElementById("at-picker-modal").classList.remove("show");
+      const token = "@" + name + " ";
+      if (atTarget === "compose") {
+        const ta = document.getElementById("compose-text");
+        ta.value += (ta.value && !/\s$/.test(ta.value) ? " " : "") + token;
+        ta.focus();
+        updateSubmitState();
+        return;
+      }
+      if (atCommentPostId) {
+        const input = document.querySelector(`[data-comment-input="${atCommentPostId}"]`);
+        if (input) {
+          input.value += (input.value && !/\s$/.test(input.value) ? " " : "") + token;
+          input.focus();
+        }
+      }
+    }
+
+    async function publishPost() {
+      if (isPublishing) return;
+      const text = document.getElementById("compose-text").value.trim();
+      if (!text && !composePreviews.length) {
+        toast("请输入内容或添加图片");
+        return;
+      }
+      if (composeVisibility === "partial" && !composeVisibleTo.length) {
+        toast("请选择可见的好友");
+        return;
+      }
+
+      isPublishing = true;
+      const btn = document.getElementById("submit-post");
+      const prevText = btn.textContent;
+      btn.textContent = "发表中…";
+      btn.disabled = true;
+
+      try {
+        const images = [];
+        for (const item of composePreviews) {
+          try {
+            images.push(await compressImage(item.file));
+          } catch {
+            toast("图片处理失败，请换一张试试");
+            return;
+          }
+        }
+
+        const body = text || (images.length ? "分享图片" : "");
+        const post = {
+          id: "p" + Date.now(),
+          author: ME.name,
+          avatarColor: "#c8c8c8",
+          text: body,
+          mentions: parseMentions(body),
+          visibility: composeVisibility,
+          visibleTo: composeVisibility === "partial" ? [...composeVisibleTo] : [],
+          images,
+          likes: [],
+          comments: [],
+          createdAt: Date.now(),
+        };
+        posts.unshift(post);
+        if (!save()) {
+          posts.shift();
+          return;
+        }
+        closeCompose();
+        renderFeed();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        toast("已发表");
+      } catch (err) {
+        console.error(err);
+        toast("发表失败：" + (err.message || "请重试"));
+      } finally {
+        isPublishing = false;
+        btn.textContent = prevText;
+        updateSubmitState();
+      }
+    }
+
+    document.getElementById("open-compose-top").onclick = openCompose;
+    document.getElementById("close-compose").onclick = closeCompose;
+    document.getElementById("submit-post").onclick = publishPost;
+    document.getElementById("trigger-images").onclick = () => document.getElementById("compose-images").click();
+    document.getElementById("compose-at").onclick = () => {
+      atTarget = "compose";
+      openAtPicker();
+    };
+    document.getElementById("compose-text").oninput = () => {
+      const v = document.getElementById("compose-text").value;
+      if (v.endsWith("@")) {
+        atTarget = "compose";
+        openAtPicker();
+      }
+      updateSubmitState();
+    };
+    document.getElementById("compose-images").onchange = (e) => {
+      const files = [...e.target.files];
+      const room = 9 - composePreviews.length;
+      files.slice(0, room).forEach((file) => {
+        composePreviews.push({ file, preview: URL.createObjectURL(file) });
+      });
+      e.target.value = "";
+      renderComposePreview();
+      updateSubmitState();
+    };
+    document.getElementById("open-vis-sheet").onclick = () => document.getElementById("vis-sheet").classList.add("show");
+    document.getElementById("close-vis-sheet").onclick = () => document.getElementById("vis-sheet").classList.remove("show");
+    document.querySelectorAll(".vis-opt").forEach((btn) => {
+      btn.onclick = () => {
+        setComposeVisibility(btn.dataset.vis);
+        if (btn.dataset.vis !== "partial") document.getElementById("vis-sheet").classList.remove("show");
+      };
+    });
+    document.querySelectorAll("[data-close-at]").forEach((b) => {
+      b.onclick = () => document.getElementById("at-picker-modal").classList.remove("show");
+    });
+    document.getElementById("lightbox").onclick = (e) => {
+      if (e.target.id === "lightbox" || e.target.dataset.closeLightbox !== undefined) {
+        document.getElementById("lightbox").classList.remove("show");
+      }
+    };
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".action-menu-wrap")) {
+        document.querySelectorAll(".action-popup").forEach((p) => p.classList.remove("show"));
+        openMenuId = null;
+      }
+    });
+
+    document.getElementById("confirm-del-comment").onclick = () => {
+      document.getElementById("comment-del-sheet").classList.remove("show");
+      if (pendingCommentDelete) {
+        deleteComment(pendingCommentDelete.postId, pendingCommentDelete.commentId);
+        pendingCommentDelete = null;
+      }
+    };
+    document.getElementById("cancel-del-comment").onclick = () => {
+      document.getElementById("comment-del-sheet").classList.remove("show");
+      pendingCommentDelete = null;
+    };
+
+    function openCoverDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(COVER_DB_NAME, 1);
+        req.onupgradeneeded = () => {
+          if (!req.result.objectStoreNames.contains(COVER_STORE)) {
+            req.result.createObjectStore(COVER_STORE);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function saveCoverBlob(blob, mime) {
+      const db = await openCoverDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(COVER_STORE, "readwrite");
+        tx.objectStore(COVER_STORE).put({ blob, mime, savedAt: Date.now() }, "current");
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+
+    async function loadCoverBlob() {
+      const db = await openCoverDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(COVER_STORE, "readonly");
+        const req = tx.objectStore(COVER_STORE).get("current");
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function revokeCoverUrl() {
+      if (coverObjectUrl) {
+        URL.revokeObjectURL(coverObjectUrl);
+        coverObjectUrl = null;
+      }
+    }
+
+    function setCoverMode(mode) {
+      const video = document.getElementById("cover-video");
+      const image = document.getElementById("cover-image");
+      const hint = document.getElementById("cover-mute-hint");
+      if (mode === "image") {
+        video.classList.add("is-hidden");
+        video.pause();
+        image.classList.remove("is-hidden");
+        hint.classList.remove("show");
+      } else {
+        image.classList.add("is-hidden");
+        video.classList.remove("is-hidden");
+      }
+    }
+
+    function getCoverSrc() {
+      const video = document.getElementById("cover-video");
+      const image = document.getElementById("cover-image");
+      if (!video.classList.contains("is-hidden") && video.src) {
+        return { type: "video", src: video.currentSrc || video.src };
+      }
+      if (!image.classList.contains("is-hidden") && image.src) {
+        return { type: "image", src: image.src };
+      }
+      return null;
+    }
+
+    function openCoverViewer() {
+      const media = getCoverSrc();
+      if (!media) return;
+      const viewer = document.getElementById("cover-viewer");
+      const vView = document.getElementById("cover-viewer-video");
+      const iView = document.getElementById("cover-viewer-image");
+      if (media.type === "video") {
+        iView.classList.add("is-hidden");
+        vView.classList.remove("is-hidden");
+        vView.src = media.src;
+        vView.muted = false;
+        vView.currentTime = document.getElementById("cover-video").currentTime || 0;
+        vView.play().catch(() => {});
+      } else {
+        vView.pause();
+        vView.classList.add("is-hidden");
+        iView.classList.remove("is-hidden");
+        iView.src = media.src;
+      }
+      viewer.classList.add("show");
+      viewer.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeCoverViewer() {
+      const viewer = document.getElementById("cover-viewer");
+      const vView = document.getElementById("cover-viewer-video");
+      vView.pause();
+      viewer.classList.remove("show");
+      viewer.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      const headerVideo = document.getElementById("cover-video");
+      if (!headerVideo.classList.contains("is-hidden")) {
+        headerVideo.play().catch(() => {});
+      }
+    }
+
+    function bindCoverOpen() {
+      const bg = document.getElementById("cover-bg");
+      if (bg.dataset.openBound) return;
+      bg.dataset.openBound = "1";
+      bg.addEventListener("click", (e) => {
+        if (e.target.closest(".change-cover")) return;
+        openCoverViewer();
+      });
+    }
+
+    async function applyCoverBlob(blob, mime) {
+      revokeCoverUrl();
+      coverObjectUrl = URL.createObjectURL(blob);
+      const isVideo = (mime || blob.type || "").startsWith("video");
+      if (isVideo) {
+        const video = document.getElementById("cover-video");
+        video.src = coverObjectUrl;
+        video.muted = true;
+        video.loop = true;
+        setCoverMode("video");
+        try {
+          await video.play();
+        } catch (_) {}
+      } else {
+        const image = document.getElementById("cover-image");
+        image.src = coverObjectUrl;
+        setCoverMode("image");
+      }
+    }
+
+    async function initCover() {
+      const video = document.getElementById("cover-video");
+      const hint = document.getElementById("cover-mute-hint");
+      bindCoverOpen();
+      video.setAttribute("disablepictureinpicture", "");
+      video.controls = false;
+
+      try {
+        const saved = await loadCoverBlob();
+        if (saved?.blob) {
+          await applyCoverBlob(saved.blob, saved.mime);
+          hint.classList.add("show");
+          setTimeout(() => hint.classList.remove("show"), 2800);
+          return;
+        }
+      } catch (e) {
+        console.warn("cover db", e);
+      }
+
+      video.src = DEFAULT_COVER_VIDEO;
+      video.muted = true;
+      setCoverMode("video");
+      video.play().catch(() => {});
+      hint.textContent = "点击封面查看完整视频";
+      hint.classList.add("show");
+      setTimeout(() => hint.classList.remove("show"), 2800);
+    }
+
+    document.getElementById("change-cover").onclick = (e) => {
+      e.stopPropagation();
+      document.getElementById("cover-file").click();
+    };
+    document.getElementById("change-cover-viewer").onclick = () => {
+      document.getElementById("cover-file").click();
+    };
+    document.getElementById("close-cover-viewer").onclick = closeCoverViewer;
+    document.getElementById("cover-viewer").addEventListener("click", (e) => {
+      if (e.target.id === "cover-viewer") closeCoverViewer();
+    });
+
+    document.getElementById("cover-file").onchange = async (e) => {
+      const file = e.target.files?.[0];
+      e.target.value = "";
+      if (!file) return;
+      const isVideo = file.type.startsWith("video");
+      const isImage = file.type.startsWith("image");
+      if (!isVideo && !isImage) {
+        toast("请选择图片或视频");
+        return;
+      }
+      if (file.size > 25 * 1024 * 1024) {
+        toast("文件过大，请选 25MB 以内的封面");
+        return;
+      }
+      try {
+        await applyCoverBlob(file, file.type);
+        await saveCoverBlob(file, file.type);
+        if (document.getElementById("cover-viewer").classList.contains("show")) {
+          closeCoverViewer();
+        }
+        toast(isVideo ? "视频封面已更新" : "图片封面已更新");
+      } catch (err) {
+        console.error(err);
+        toast("封面保存失败，请换小一点的文件");
+      }
+    };
+
+    load();
+    renderFeed();
+    setComposeVisibility("public");
+    initCover();
+  </script>
+</body>
+</html>

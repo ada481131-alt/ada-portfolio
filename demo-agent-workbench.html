@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aireach · 人工坐席工作台 | Ada Liu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --brand: #7c5cfc;
+      --brand-hover: #6d4ef5;
+      --brand-light: #f3f0ff;
+      --border: #e8e8ed;
+      --bg-app: #f6f6f8;
+      --text-muted: #8e8e93;
+    }
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg-app); margin: 0; }
+    .app { height: calc(100vh - 44px); min-height: 640px; }
+    .rail-btn { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #6b6b70; transition: .15s; }
+    .rail-btn:hover { background: #eeeef2; color: #333; }
+    .rail-btn.active { background: var(--brand-light); color: var(--brand); }
+    .rail-btn svg { width: 22px; height: 22px; }
+    .session-item { border-left: 3px solid transparent; }
+    .session-item.active { background: #fff; border-left-color: var(--brand); }
+    .session-item:hover:not(.active) { background: #fafafa; }
+    .chat-area { background: #f0f0f2; }
+    .bubble-user { background: #fff; border-radius: 4px 12px 12px 12px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+    .bubble-agent { background: var(--brand-light); border-radius: 12px 4px 12px 12px; }
+    .bubble-system { background: #fff8e6; border: 1px solid #ffe8a3; font-size: 12px; color: #8a6d00; text-align: center; padding: 6px 12px; border-radius: 8px; }
+    .panel-tab.active { color: var(--brand); border-bottom: 2px solid var(--brand); font-weight: 600; }
+    .canned-item { cursor: pointer; }
+    .canned-item:hover { background: var(--brand-light); }
+    .canned-item.open .canned-body { display: block; }
+    .canned-body { display: none; }
+    .view { display: none; height: 100%; }
+    .view.active { display: flex; }
+    .subview { display: none; flex: 1; min-width: 0; }
+    .subview.active { display: flex; }
+    .col-sessions { width: 220px; min-width: 200px; flex-shrink: 0; }
+    .col-chat { flex: 1 1 auto; min-width: 0; }
+    .col-info { width: 248px; min-width: 228px; flex-shrink: 0; }
+    .chat-scroll { flex: 1; overflow-y: auto; padding: 20px 28px; }
+    .info-scroll { flex: 1; overflow-y: auto; }
+    .msg-row { max-width: min(720px, 78%); }
+    .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 140px; }
+    .bar-chart .bar { flex: 1; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, #9b8afb, #7c5cfc); min-height: 8px; }
+    .metric-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+    .dash-table th { font-weight: 500; color: var(--text-muted); font-size: 12px; }
+    .dash-table td { padding: 10px 12px; border-bottom: 1px solid #f5f5f7; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .status-online { background: #22c55e; }
+    .status-busy { background: #f59e0b; }
+    .status-away { background: #94a3b8; }
+    .star.on { color: #fbbf24; }
+    .toast { animation: slideUp .25s ease; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .portfolio-bar { height: 44px; background: #fff; border-bottom: 1px solid var(--border); }
+  </style>
+</head>
+<body class="text-[#1c1c1e] text-sm">
+  <div class="portfolio-bar flex items-center justify-between px-4 text-xs shrink-0">
+    <a href="index.html#work" class="text-violet-600 font-semibold hover:underline">← 作品集</a>
+    <span class="text-[#8e8e93]">Aireach · 客户运营一体化 · 人工坐席（高保真原型还原 · 脱敏演示）</span>
+    <a href="prd.html?p=6" class="text-violet-600 font-semibold hover:underline">PRD</a>
+  </div>
+
+  <div class="app flex overflow-hidden">
+    <!-- 左侧图标导航 -->
+    <aside class="w-[56px] bg-white border-r border-[#e8e8ed] flex flex-col items-center py-3 shrink-0 z-10">
+      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-black text-xs mb-4">Ai</div>
+      <nav class="flex flex-col gap-1 flex-1" id="main-nav">
+        <button type="button" class="rail-btn active" data-view="live" title="实时对话">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" class="rail-btn" data-view="history" title="对话记录">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round"/></svg>
+        </button>
+        <button type="button" class="rail-btn" data-view="ticket" title="我的工单">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round"/></svg>
+        </button>
+        <button type="button" class="rail-btn" data-view="report" title="工作报表">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round"/></svg>
+        </button>
+        <button type="button" class="rail-btn" data-view="monitor" title="实时监控">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round"/></svg>
+        </button>
+        <button type="button" class="rail-btn" data-view="settings" title="其他配置">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round"/></svg>
+        </button>
+      </nav>
+      <div class="mt-auto flex flex-col items-center gap-2 pt-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500" title="在线"></span>
+        <div class="w-8 h-8 rounded-full bg-violet-200 flex items-center justify-center text-[10px] font-bold text-violet-800">Ada</div>
+      </div>
+    </aside>
+
+    <!-- ========== 实时对话（三栏） ========== -->
+    <div id="view-live" class="view active flex-1 min-w-0">
+      <!-- 会话列表 -->
+      <aside class="col-sessions bg-white border-r border-[#e8e8ed] flex flex-col subview active" id="live-list-col">
+        <div class="p-3 border-b border-[#e8e8ed]">
+          <div class="relative">
+            <input id="session-search" type="search" placeholder="搜索用户" class="w-full bg-[#f5f5f7] rounded-lg pl-9 pr-3 py-2 text-sm border-0 outline-none focus:ring-2 focus:ring-violet-200" />
+            <svg class="absolute left-3 top-2.5 w-4 h-4 text-[#8e8e93]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <div class="flex mt-3 text-sm">
+            <button type="button" class="session-tab flex-1 py-1.5 font-semibold text-violet-600 border-b-2 border-violet-600" data-tab="mine">我的</button>
+            <button type="button" class="session-tab flex-1 py-1.5 text-[#8e8e93]" data-tab="team">同事</button>
+          </div>
+        </div>
+        <div class="flex-1 overflow-y-auto" id="session-list">
+          <p class="px-3 pt-3 pb-1 text-xs text-[#8e8e93] font-medium">会话中</p>
+          <button type="button" class="session-item active w-full text-left px-3 py-3 flex gap-3" data-id="s1">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-yellow-400 shrink-0 flex items-center justify-center text-white text-[10px] font-bold">BR</div>
+            <div class="min-w-0 flex-1">
+              <div class="flex justify-between"><span class="font-semibold truncate">巴西区 · 用户789658</span><span class="text-[11px] text-[#8e8e93] shrink-0 ml-1">14:02</span></div>
+              <p class="text-xs text-[#8e8e93] truncate mt-0.5">我充值的钱一直没到账呢</p>
+            </div>
+          </button>
+          <button type="button" class="session-item w-full text-left px-3 py-3 flex gap-3" data-id="s2">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-300 to-pink-400 shrink-0"></div>
+            <div class="min-w-0 flex-1">
+              <div class="flex justify-between"><span class="font-semibold truncate">东南亚 · 用户130***</span><span class="text-[11px] text-[#8e8e93]">13:58</span></div>
+              <p class="text-xs text-[#8e8e93] truncate mt-0.5">Withdraw failed...</p>
+            </div>
+          </button>
+          <p class="px-3 pt-4 pb-1 text-xs text-[#8e8e93] font-medium">排队中 <span class="text-violet-600">10</span></p>
+          <div class="px-3 py-2 text-xs text-[#8e8e93]">支付队列 6 · 玩法 3 · VIP 1</div>
+          <p class="px-3 pt-3 pb-1 text-xs text-[#8e8e93] font-medium">AI 接待中 <span class="text-violet-600">1,000</span></p>
+          <p class="px-3 pt-3 pb-1 text-xs text-[#8e8e93] font-medium">已结束 <span class="text-[#8e8e93]">3</span></p>
+        </div>
+      </aside>
+
+      <!-- 对话主区 -->
+      <main class="col-chat flex flex-col subview active" id="live-chat-col">
+        <header class="h-14 bg-white border-b border-[#e8e8ed] flex items-center justify-between px-4 shrink-0">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="font-semibold truncate">巴西区 · 用户789658</span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-[#f0f0f2] text-[#6b6b70] shrink-0">web 网页</span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-rose-50 text-rose-700 shrink-0 hidden sm:inline">AI→人工 · 充值</span>
+          </div>
+          <div class="flex gap-2 shrink-0">
+            <button type="button" id="btn-transfer" class="px-3 py-1.5 text-sm border border-[#e8e8ed] rounded-lg hover:bg-[#fafafa]">转接</button>
+            <button type="button" id="btn-close" class="px-3 py-1.5 text-sm border border-[#e8e8ed] rounded-lg hover:bg-[#fafafa]">关闭会话</button>
+          </div>
+        </header>
+        <div class="px-4 py-2 bg-violet-50/80 border-b border-violet-100 text-xs text-violet-900 flex flex-wrap gap-x-4 gap-y-1">
+          <span>AI 摘要：已识别「充值未到账」· 订单号待补充</span>
+          <span>置信度 <strong>42%</strong> · 已建议转人工</span>
+        </div>
+
+        <div id="chat-messages" class="chat-scroll space-y-4">
+          <div class="text-center text-[11px] text-[#8e8e93]">2026-05-27 14:00</div>
+          <div class="flex gap-2 msg-row">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-yellow-400 shrink-0"></div>
+            <div>
+              <p class="text-[11px] text-[#8e8e93] mb-1">巴西区 · 用户789658</p>
+              <div class="bubble-user px-3 py-2.5 text-[#1c1c1e]">我充值的钱一直没到账呢</div>
+            </div>
+          </div>
+          <div class="flex gap-2 msg-row ml-auto flex-row-reverse">
+            <div class="w-8 h-8 rounded-full bg-violet-200 shrink-0 flex items-center justify-center text-[10px] font-bold text-violet-800">AI</div>
+            <div class="text-right">
+              <p class="text-[11px] text-[#8e8e93] mb-1">智能客服</p>
+              <div class="bubble-agent px-3 py-2.5 text-left text-[#1c1c1e]">您好，充值一般 24–48 小时到账。请提供订单号以便核查。（低置信度，已转人工）</div>
+            </div>
+          </div>
+          <div class="flex justify-center"><div class="bubble-system">会话已分配至坐席 Ada</div></div>
+          <div class="flex gap-2 msg-row ml-auto flex-row-reverse" id="agent-messages-anchor">
+            <div class="w-8 h-8 rounded-full bg-violet-500 shrink-0 flex items-center justify-center text-[10px] font-bold text-white">Ada</div>
+            <div class="text-right">
+              <p class="text-[11px] text-[#8e8e93] mb-1">Ada</p>
+              <div class="bubble-agent px-3 py-2.5 text-left text-[#1c1c1e]">您好，我是人工客服 Ada。为尽快核实充值，请您提供：① 游戏 UID ② 注册手机号 ③ 真实姓名 ④ 充值订单号（如有）</div>
+              <p class="text-[11px] text-emerald-600 mt-1 flex items-center justify-end gap-1">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                发送成功 · 已读
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div id="sensitive-toast" class="hidden mx-4 mb-2 px-3 py-2 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-800"></div>
+
+        <footer class="bg-white border-t border-[#e8e8ed] p-3 shrink-0">
+          <div class="flex items-center gap-1 text-[#8e8e93] mb-2 px-1">
+            <button type="button" class="p-1.5 hover:bg-[#f5f5f7] rounded" title="表情">😊</button>
+            <button type="button" class="p-1.5 hover:bg-[#f5f5f7] rounded" title="图片">🖼</button>
+            <button type="button" class="p-1.5 hover:bg-[#f5f5f7] rounded" title="文件">📎</button>
+            <button type="button" id="btn-quick" class="ml-1 px-2.5 py-1 text-xs border border-violet-200 text-violet-700 rounded-md hover:bg-violet-50 font-medium">快捷发送</button>
+          </div>
+          <form id="send-form" class="flex gap-2 items-end">
+            <textarea id="reply-input" rows="3" class="flex-1 resize-none border border-[#e8e8ed] rounded-lg px-4 py-3 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 min-h-[72px]" placeholder="输入消息…"></textarea>
+            <button type="submit" class="px-6 py-2.5 rounded-lg text-white font-semibold text-sm shrink-0" style="background: var(--brand)">发送</button>
+          </form>
+        </footer>
+      </main>
+
+      <!-- 右侧信息栏 -->
+      <aside class="col-info bg-white border-l border-[#e8e8ed] flex flex-col hidden md:flex subview active" id="live-info-col">
+        <div class="flex border-b border-[#e8e8ed]">
+          <button type="button" class="panel-tab active flex-1 py-3 text-sm" data-panel="visitor">访客资料</button>
+          <button type="button" class="panel-tab flex-1 py-3 text-sm text-[#8e8e93]" data-panel="canned">常用回答</button>
+        </div>
+        <div id="panel-visitor" class="info-scroll p-4 flex-1">
+          <dl class="space-y-3 text-sm">
+            <div class="grid grid-cols-[72px_1fr] gap-1"><dt class="text-[#8e8e93]">市场</dt><dd>巴西区</dd></div>
+            <div class="grid grid-cols-[72px_1fr] gap-1"><dt class="text-[#8e8e93]">用户名</dt><dd class="truncate">巴西区 · 用户789658</dd></div>
+            <div class="grid grid-cols-[72px_1fr] gap-1"><dt class="text-[#8e8e93]">用户ID</dt><dd>UID_789658</dd></div>
+            <div class="grid grid-cols-[72px_1fr] gap-1"><dt class="text-[#8e8e93]">注册手机</dt><dd>+55 11****8821</dd></div>
+            <div class="grid grid-cols-[72px_1fr] gap-1"><dt class="text-[#8e8e93]">真实姓名</dt><dd>—</dd></div>
+            <div class="grid grid-cols-[72px_1fr] gap-1"><dt class="text-[#8e8e93]">渠道</dt><dd>Web 网页</dd></div>
+            <div class="grid grid-cols-[72px_1fr] gap-1"><dt class="text-[#8e8e93]">设备</dt><dd>Android · Chrome</dd></div>
+            <div class="grid grid-cols-[72px_1fr] gap-1"><dt class="text-[#8e8e93]">IP</dt><dd>189.x.x.x · BR</dd></div>
+            <div class="grid grid-cols-[72px_1fr] gap-1 items-center"><dt class="text-[#8e8e93]">用户评分</dt><dd class="stars flex gap-0.5 text-lg"><span class="star on">★</span><span class="star on">★</span><span class="star on">★</span><span class="star">★</span><span class="star">★</span></dd></div>
+          </dl>
+          <div class="mt-6 pt-4 border-t border-[#e8e8ed]">
+            <p class="text-xs font-semibold text-[#8e8e93] mb-2">历史记录</p>
+            <p class="text-xs text-[#8e8e93]">05-20 充值咨询 · 已解决</p>
+            <p class="text-xs text-[#8e8e93] mt-1">05-12 活动奖励 · Bot 结案</p>
+          </div>
+        </div>
+        <div id="panel-canned" class="info-scroll p-3 flex-1 hidden">
+          <input type="search" placeholder="搜索常用回答" class="w-full bg-[#f5f5f7] rounded-lg px-3 py-2 text-xs mb-3 border-0 outline-none" />
+          <div class="space-y-1" id="canned-list">
+            <div class="canned-item open rounded-lg border border-[#e8e8ed] overflow-hidden">
+              <button type="button" class="canned-toggle w-full text-left px-3 py-2 text-sm font-medium flex justify-between">打招呼 <span>▼</span></button>
+              <div class="canned-body px-3 pb-2 text-xs text-[#6b6b70] leading-6 border-t border-[#f5f5f7]">
+                <p class="py-2 border-b border-[#f5f5f7] cursor-pointer hover:text-violet-600 canned-pick" data-text="您好，我是人工客服 Ada，很高兴为您服务。">您好，我是人工客服 Ada…</p>
+                <p class="py-2 cursor-pointer hover:text-violet-600 canned-pick" data-text="สวัสดีค่ะ ฉันเป็นฝ่ายบริการลูกค้า (TH)">泰语问候…</p>
+              </div>
+            </div>
+            <div class="canned-item rounded-lg border border-[#e8e8ed] overflow-hidden">
+              <button type="button" class="canned-toggle w-full text-left px-3 py-2 text-sm font-medium flex justify-between">充值问题 <span>▶</span></button>
+              <div class="canned-body px-3 pb-2 text-xs text-[#6b6b70] leading-6 border-t border-[#f5f5f7]">
+                <p class="py-2 border-b border-[#f5f5f7] canned-pick cursor-pointer hover:text-violet-600" data-text="已收到您的充值反馈，正在为您核查渠道到账状态，一般 24–48 小时内更新，请勿重复支付。">到账核查（中）</p>
+                <p class="py-2 border-b border-[#f5f5f7] canned-pick cursor-pointer hover:text-violet-600" data-text="Your deposit is being verified. Please provide your order ID (GPA.xxx). Do not pay again.">Deposit verification (EN)</p>
+                <p class="py-2 canned-pick cursor-pointer hover:text-violet-600" data-text="Seu depósito está em verificação. Envie o número do pedido. Não pague novamente.">充值延迟（葡）</p>
+              </div>
+            </div>
+            <div class="canned-item rounded-lg border border-[#e8e8ed] overflow-hidden">
+              <button type="button" class="canned-toggle w-full text-left px-3 py-2 text-sm font-medium flex justify-between">结束语 <span>▶</span></button>
+              <div class="canned-body px-3 pb-2 text-xs text-[#6b6b70] leading-6 border-t border-[#f5f5f7]">
+                <p class="py-2 canned-pick cursor-pointer hover:text-violet-600" data-text="问题已记录，处理结果将通过游戏内邮件通知您。感谢理解！">工单跟进 + 结束</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ========== 其他视图 ========== -->
+    <div id="view-history" class="view flex-1 flex-col bg-white">
+      <div class="p-6 border-b border-[#e8e8ed]"><h1 class="text-lg font-bold">对话记录</h1><p class="text-xs text-[#8e8e93] mt-1">支持按 UID、渠道、AI/人工类型筛选（演示）</p></div>
+      <div class="p-6 overflow-auto flex-1">
+        <table class="w-full text-sm">
+          <thead class="text-left text-[#8e8e93] border-b"><tr><th class="pb-2 font-medium">时间</th><th>用户</th><th>渠道</th><th>类型</th><th>坐席</th><th>结果</th></tr></thead>
+          <tbody>
+            <tr class="border-b border-[#f5f5f7]"><td class="py-3">05-27 14:00</td><td>巴西区 789658</td><td>Web</td><td>AI→人工</td><td>Ada</td><td class="text-emerald-600">进行中</td></tr>
+            <tr class="border-b border-[#f5f5f7]"><td class="py-3">05-27 11:20</td><td>东南亚 130***</td><td>App</td><td>人工</td><td>Ada</td><td class="text-emerald-600">已解决</td></tr>
+            <tr class="border-b border-[#f5f5f7]"><td class="py-3">05-26 22:10</td><td>UID_33201</td><td>Web</td><td>仅 AI</td><td>—</td><td>Bot 结案</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-ticket" class="view flex-1 flex-col bg-white p-6">
+      <h1 class="text-lg font-bold">我的工单</h1>
+      <p class="text-sm text-[#8e8e93] mt-2">与支付渠道、风控复核联动的工单列表（演示占位）。</p>
+      <ul class="mt-6 space-y-3 max-w-lg">
+        <li class="border border-[#e8e8ed] rounded-xl p-4 flex justify-between"><span><strong>#PAY-8821</strong> 充值未到账核查</span><span class="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded">处理中</span></li>
+        <li class="border border-[#e8e8ed] rounded-xl p-4 flex justify-between"><span><strong>#PAY-8810</strong> 提现失败</span><span class="text-xs text-emerald-700 bg-emerald-50 px-2 py-1 rounded">已完成</span></li>
+      </ul>
+    </div>
+
+    <div id="view-report" class="view flex-1 flex-col bg-[#f6f6f8] overflow-hidden">
+      <header class="bg-white border-b border-[#e8e8ed] px-6 py-4 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div>
+          <h1 class="text-lg font-bold">工作报表</h1>
+          <p class="text-xs text-[#8e8e93] mt-0.5">坐席 / 团队效率 · 海外游戏客服（脱敏）</p>
+        </div>
+        <div class="flex flex-wrap gap-2 items-center text-sm">
+          <select class="border border-[#e8e8ed] rounded-lg px-3 py-1.5 bg-white text-sm">
+            <option>本周</option><option>本月</option><option>自定义</option>
+          </select>
+          <select class="border border-[#e8e8ed] rounded-lg px-3 py-1.5 bg-white text-sm">
+            <option>个人 · Ada</option><option>团队 · 拉美组</option>
+          </select>
+          <button type="button" class="px-3 py-1.5 rounded-lg text-white text-sm font-medium" style="background:var(--brand)">导出</button>
+        </div>
+      </header>
+      <div class="p-6 overflow-auto flex-1 space-y-5">
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+          <div class="metric-card"><p class="text-xs text-[#8e8e93]">接入会话</p><p class="text-2xl font-bold mt-1 text-violet-600">47</p><p class="text-[11px] text-emerald-600 mt-1">↑ 12% 环比</p></div>
+          <div class="metric-card"><p class="text-xs text-[#8e8e93]">平均首响</p><p class="text-2xl font-bold mt-1">38s</p><p class="text-[11px] text-emerald-600 mt-1">↓ 5s</p></div>
+          <div class="metric-card"><p class="text-xs text-[#8e8e93]">平均结案时长</p><p class="text-2xl font-bold mt-1">6.2m</p></div>
+          <div class="metric-card"><p class="text-xs text-[#8e8e93]">一次解决率</p><p class="text-2xl font-bold mt-1 text-emerald-600">82%</p></div>
+          <div class="metric-card"><p class="text-xs text-[#8e8e93]">满意度 CSAT</p><p class="text-2xl font-bold mt-1">4.6</p></div>
+        </div>
+        <div class="grid lg:grid-cols-[1.4fr_1fr] gap-4">
+          <div class="metric-card">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="font-semibold text-sm">每日接入量</h2>
+              <span class="text-xs text-[#8e8e93]">人工 + AI 转人工</span>
+            </div>
+            <div class="bar-chart">
+              <div class="flex flex-col items-center flex-1 gap-1"><div class="bar w-full" style="height:45%"></div><span class="text-[10px] text-[#8e8e93]">一</span></div>
+              <div class="flex flex-col items-center flex-1 gap-1"><div class="bar w-full" style="height:62%"></div><span class="text-[10px] text-[#8e8e93]">二</span></div>
+              <div class="flex flex-col items-center flex-1 gap-1"><div class="bar w-full" style="height:55%"></div><span class="text-[10px] text-[#8e8e93]">三</span></div>
+              <div class="flex flex-col items-center flex-1 gap-1"><div class="bar w-full" style="height:78%"></div><span class="text-[10px] text-[#8e8e93]">四</span></div>
+              <div class="flex flex-col items-center flex-1 gap-1"><div class="bar w-full" style="height:100%"></div><span class="text-[10px] text-[#8e8e93]">五</span></div>
+              <div class="flex flex-col items-center flex-1 gap-1"><div class="bar w-full opacity-40" style="height:30%"></div><span class="text-[10px] text-[#8e8e93]">六</span></div>
+              <div class="flex flex-col items-center flex-1 gap-1"><div class="bar w-full opacity-40" style="height:20%"></div><span class="text-[10px] text-[#8e8e93]">日</span></div>
+            </div>
+          </div>
+          <div class="metric-card">
+            <h2 class="font-semibold text-sm mb-3">队列占比 · 本周</h2>
+            <ul class="space-y-3 text-sm">
+              <li><div class="flex justify-between text-xs mb-1"><span>支付</span><span>58%</span></div><div class="h-2 bg-[#f0f0f2] rounded-full"><div class="h-full rounded-full bg-violet-500" style="width:58%"></div></div></li>
+              <li><div class="flex justify-between text-xs mb-1"><span>玩法</span><span>28%</span></div><div class="h-2 bg-[#f0f0f2] rounded-full"><div class="h-full rounded-full bg-sky-400" style="width:28%"></div></div></li>
+              <li><div class="flex justify-between text-xs mb-1"><span>VIP</span><span>14%</span></div><div class="h-2 bg-[#f0f0f2] rounded-full"><div class="h-full rounded-full bg-amber-400" style="width:14%"></div></div></li>
+            </ul>
+            <p class="text-xs text-[#8e8e93] mt-4">巴西区支付类占比高于全服均值（演示）</p>
+          </div>
+        </div>
+        <div class="metric-card overflow-hidden">
+          <h2 class="font-semibold text-sm mb-3">团队排行 · 一次解决率</h2>
+          <table class="w-full text-sm dash-table">
+            <thead><tr><th class="text-left pb-2">坐席</th><th>接入</th><th>首响</th><th>解决率</th><th>CSAT</th><th>敏感词拦截</th></tr></thead>
+            <tbody>
+              <tr><td><span class="font-medium">Ada</span> <span class="text-[10px] text-violet-600 bg-violet-50 px-1 rounded">你</span></td><td>47</td><td>38s</td><td class="text-emerald-600 font-semibold">82%</td><td>4.6</td><td>3</td></tr>
+              <tr><td>Leo</td><td>52</td><td>41s</td><td>79%</td><td>4.5</td><td>1</td></tr>
+              <tr><td>Mia</td><td>39</td><td>35s</td><td>85%</td><td>4.7</td><td>0</td></tr>
+              <tr><td>Sam</td><td>44</td><td>52s</td><td>74%</td><td>4.3</td><td>5</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="view-monitor" class="view flex-1 flex-col bg-[#f6f6f8] overflow-hidden">
+      <header class="bg-white border-b border-[#e8e8ed] px-6 py-4 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div>
+          <h1 class="text-lg font-bold">实时监控</h1>
+          <p class="text-xs text-[#8e8e93] mt-0.5 flex items-center gap-2">
+            <span class="status-dot status-online"></span> 数据每 10s 刷新（演示）
+          </p>
+        </div>
+        <div class="flex gap-2 text-sm">
+          <span class="px-3 py-1.5 rounded-lg bg-violet-50 text-violet-800 text-xs font-medium">全部市场</span>
+          <span class="px-3 py-1.5 rounded-lg bg-white border border-[#e8e8ed] text-xs">巴西区</span>
+          <span class="px-3 py-1.5 rounded-lg bg-white border border-[#e8e8ed] text-xs">东南亚</span>
+        </div>
+      </header>
+      <div class="p-6 overflow-auto flex-1 space-y-4">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="metric-card"><p class="text-xs text-[#8e8e93]">在线坐席</p><p class="text-2xl font-bold">12<span class="text-sm text-[#8e8e93] font-normal">/15</span></p></div>
+          <div class="metric-card border-violet-200 bg-violet-50/40"><p class="text-xs text-violet-800">排队中</p><p class="text-2xl font-bold text-violet-700">23</p></div>
+          <div class="metric-card"><p class="text-xs text-[#8e8e93]">AI 接待中</p><p class="text-2xl font-bold">1,024</p></div>
+          <div class="metric-card"><p class="text-xs text-[#8e8e93]">转人工率 · 今日</p><p class="text-2xl font-bold text-amber-600">19%</p></div>
+        </div>
+        <div class="grid lg:grid-cols-[1.2fr_1fr] gap-4">
+          <div class="metric-card">
+            <h2 class="font-semibold text-sm mb-3">队列实时状态</h2>
+            <table class="w-full text-sm dash-table">
+              <thead><tr><th class="text-left">队列</th><th>排队</th><th>最长等待</th><th>SLA&gt;3min</th><th>状态</th></tr></thead>
+              <tbody>
+                <tr><td class="font-medium">支付</td><td>14</td><td>4m 12s</td><td class="text-rose-600">12%</td><td><span class="text-xs text-rose-700 bg-rose-50 px-2 py-0.5 rounded">告警</span></td></tr>
+                <tr><td>玩法</td><td>6</td><td>1m 40s</td><td>3%</td><td><span class="text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">正常</span></td></tr>
+                <tr><td>VIP</td><td>3</td><td>0m 55s</td><td>0%</td><td><span class="text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">正常</span></td></tr>
+                <tr><td class="text-[#8e8e93]">巴西区 · 支付</td><td>8</td><td>3m 28s</td><td class="text-amber-600">9%</td><td><span class="text-xs text-amber-800 bg-amber-50 px-2 py-0.5 rounded">关注</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="metric-card">
+            <h2 class="font-semibold text-sm mb-3">进线趋势 · 近 1 小时</h2>
+            <div class="bar-chart h-[100px]">
+              <div class="bar opacity-70" style="height:40%"></div><div class="bar opacity-70" style="height:55%"></div><div class="bar opacity-70" style="height:48%"></div>
+              <div class="bar" style="height:72%"></div><div class="bar" style="height:88%"></div><div class="bar" style="height:95%"></div>
+              <div class="bar" style="height:100%"></div><div class="bar opacity-80" style="height:82%"></div>
+            </div>
+            <p class="text-xs text-[#8e8e93] mt-2">14:00 峰值 · 支付类咨询集中</p>
+          </div>
+        </div>
+        <div class="grid lg:grid-cols-2 gap-4">
+          <div class="metric-card">
+            <h2 class="font-semibold text-sm mb-3">坐席状态</h2>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <div class="flex items-center gap-2 p-2 rounded-lg bg-[#fafafa]"><span class="status-dot status-online"></span> Ada · 会话中</div>
+              <div class="flex items-center gap-2 p-2 rounded-lg bg-[#fafafa]"><span class="status-dot status-busy"></span> Leo · 忙碌</div>
+              <div class="flex items-center gap-2 p-2 rounded-lg bg-[#fafafa]"><span class="status-dot status-online"></span> Mia · 空闲</div>
+              <div class="flex items-center gap-2 p-2 rounded-lg bg-[#fafafa]"><span class="status-dot status-away"></span> Sam · 小休</div>
+            </div>
+          </div>
+          <div class="metric-card">
+            <h2 class="font-semibold text-sm mb-3">告警与事件</h2>
+            <ul class="text-sm space-y-2">
+              <li class="flex gap-2 p-2 rounded-lg bg-rose-50 text-rose-900 text-xs"><span class="shrink-0 font-bold">!</span> 巴西区支付队列 SLA 超阈值 · 14:25</li>
+              <li class="flex gap-2 p-2 rounded-lg bg-amber-50 text-amber-900 text-xs"><span class="shrink-0">·</span> AI 转人工率 1h 内 +6% · 14:10</li>
+              <li class="flex gap-2 p-2 rounded-lg bg-[#fafafa] text-[#6b6b70] text-xs"><span class="shrink-0">·</span> 坐席 Sam 切换为小休 · 14:02</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="view-settings" class="view flex-1 flex-col bg-white p-6 overflow-auto max-w-2xl">
+      <h1 class="text-lg font-bold">其他配置</h1>
+      <div class="flex gap-2 mt-4">
+        <button type="button" class="settings-tab px-4 py-2 rounded-lg text-sm font-semibold bg-violet-100 text-violet-800" data-stab="words">敏感词配置</button>
+        <button type="button" class="settings-tab px-4 py-2 rounded-lg text-sm text-[#8e8e93]" data-stab="faq">常用问答管理</button>
+      </div>
+      <div id="stab-words" class="mt-4">
+        <p class="text-xs text-[#8e8e93] mb-3">发送前拦截；支付类禁止绝对到账承诺。</p>
+        <ul class="space-y-2 text-sm" id="word-list">
+          <li class="flex justify-between border border-[#e8e8ed] rounded-lg px-3 py-2"><code class="text-xs">保证.*到账</code><button type="button" class="text-rose-600 text-xs">删除</button></li>
+          <li class="flex justify-between border border-[#e8e8ed] rounded-lg px-3 py-2"><code class="text-xs">1\s*小时.*到</code><button type="button" class="text-rose-600 text-xs">删除</button></li>
+        </ul>
+        <div class="flex gap-2 mt-3">
+          <input id="new-word" class="flex-1 border border-[#e8e8ed] rounded-lg px-3 py-2 text-sm" placeholder="新增正则" />
+          <button type="button" id="add-word" class="px-4 py-2 rounded-lg text-white text-sm" style="background:var(--brand)">添加</button>
+        </div>
+      </div>
+      <div id="stab-faq" class="mt-4 hidden">
+        <p class="text-xs text-[#8e8e93]">与 AI 知识库分工：此处维护坐席「常用回答」分组，同步至右侧面板。</p>
+        <textarea class="w-full mt-2 border border-[#e8e8ed] rounded-lg p-3 text-sm h-40" readonly>打招呼 / 充值问题 / 结束语 …（运营后台编辑）</textarea>
+      </div>
+    </div>
+  </div>
+
+  <div id="global-toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#1c1c1e] text-white text-sm px-4 py-2 rounded-lg shadow-lg hidden z-50 toast"></div>
+
+  <script>
+    const SENSITIVE = [/保证.*到账/i, /1\s*小时.*到/i, /一定.*到账/i];
+
+    function toast(msg) {
+      const el = document.getElementById("global-toast");
+      el.textContent = msg;
+      el.classList.remove("hidden");
+      clearTimeout(el._t);
+      el._t = setTimeout(() => el.classList.add("hidden"), 2800);
+    }
+
+    document.querySelectorAll("#main-nav .rail-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#main-nav .rail-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
+        document.getElementById("view-" + btn.dataset.view).classList.add("active");
+      });
+    });
+
+    document.querySelectorAll(".session-item").forEach((el) => {
+      el.addEventListener("click", () => {
+        document.querySelectorAll(".session-item").forEach((s) => s.classList.remove("active"));
+        el.classList.add("active");
+      });
+    });
+
+    document.querySelectorAll(".session-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".session-tab").forEach((t) => {
+          t.className = "session-tab flex-1 py-1.5 text-[#8e8e93]";
+        });
+        tab.className = "session-tab flex-1 py-1.5 font-semibold text-violet-600 border-b-2 border-violet-600";
+        toast(tab.dataset.tab === "mine" ? "我的会话" : "同事会话（演示）");
+      });
+    });
+
+    document.querySelectorAll(".panel-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".panel-tab").forEach((t) => {
+          t.classList.remove("active");
+          t.classList.add("text-[#8e8e93]");
+        });
+        tab.classList.add("active");
+        tab.classList.remove("text-[#8e8e93]");
+        const p = tab.dataset.panel;
+        document.getElementById("panel-visitor").classList.toggle("hidden", p !== "visitor");
+        document.getElementById("panel-canned").classList.toggle("hidden", p !== "canned");
+      });
+    });
+
+    document.querySelectorAll(".canned-toggle").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const item = btn.closest(".canned-item");
+        const open = item.classList.toggle("open");
+        btn.querySelector("span").textContent = open ? "▼" : "▶";
+      });
+    });
+
+    function showCannedPanel() {
+      document.querySelectorAll(".panel-tab").forEach((t) => {
+        t.classList.toggle("active", t.dataset.panel === "canned");
+        t.classList.toggle("text-[#8e8e93]", t.dataset.panel !== "canned");
+      });
+      document.getElementById("panel-visitor").classList.add("hidden");
+      document.getElementById("panel-canned").classList.remove("hidden");
+    }
+
+    document.querySelectorAll(".canned-pick").forEach((el) => {
+      el.addEventListener("click", () => {
+        document.getElementById("reply-input").value = el.dataset.text;
+        document.getElementById("reply-input").focus();
+        toast("已填入输入框，可编辑后发送");
+      });
+    });
+
+    document.getElementById("btn-quick").addEventListener("click", showCannedPanel);
+
+    const chat = document.getElementById("chat-messages");
+    const anchor = document.getElementById("agent-messages-anchor");
+    const input = document.getElementById("reply-input");
+    const sensitiveToast = document.getElementById("sensitive-toast");
+
+    function appendAgent(text) {
+      const wrap = document.createElement("div");
+      wrap.className = "flex gap-2 msg-row ml-auto flex-row-reverse toast";
+      wrap.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-violet-500 shrink-0 flex items-center justify-center text-[10px] font-bold text-white">Ada</div>
+        <div class="text-right">
+          <p class="text-[11px] text-[#8e8e93] mb-1">Ada</p>
+          <div class="bubble-agent px-3 py-2.5 text-left text-[#1c1c1e]">${text.replace(/</g, "&lt;")}</div>
+          <p class="text-[11px] text-emerald-600 mt-1 flex items-center justify-end gap-1">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            发送成功
+          </p>
+        </div>`;
+      anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    document.getElementById("send-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const t = input.value.trim();
+      if (!t) return;
+      for (const re of SENSITIVE) {
+        if (re.test(t)) {
+          sensitiveToast.classList.remove("hidden");
+          sensitiveToast.textContent = "敏感词拦截：请勿使用绝对到账承诺，请改用常用回答中的核查模板。";
+          return;
+        }
+      }
+      sensitiveToast.classList.add("hidden");
+      appendAgent(t);
+      input.value = "";
+    });
+
+    document.getElementById("btn-transfer").addEventListener("click", () => toast("已转接至「支付专员」队列（演示）"));
+    document.getElementById("btn-close").addEventListener("click", () => {
+      toast("会话已关闭 · 将弹出满意度评价（演示）");
+    });
+
+    document.getElementById("session-search").addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase();
+      document.querySelectorAll(".session-item").forEach((item) => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = !q || text.includes(q) ? "" : "none";
+      });
+    });
+
+    document.querySelectorAll(".settings-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".settings-tab").forEach((t) => {
+          t.className = "settings-tab px-4 py-2 rounded-lg text-sm text-[#8e8e93]";
+        });
+        tab.className = "settings-tab px-4 py-2 rounded-lg text-sm font-semibold bg-violet-100 text-violet-800";
+        document.getElementById("stab-words").classList.toggle("hidden", tab.dataset.stab !== "words");
+        document.getElementById("stab-faq").classList.toggle("hidden", tab.dataset.stab !== "faq");
+      });
+    });
+
+    document.getElementById("add-word").addEventListener("click", () => {
+      const v = document.getElementById("new-word").value.trim();
+      if (!v) return;
+      try {
+        SENSITIVE.push(new RegExp(v, "i"));
+        const li = document.createElement("li");
+        li.className = "flex justify-between border border-[#e8e8ed] rounded-lg px-3 py-2";
+        li.innerHTML = `<code class="text-xs">${v}</code><button type="button" class="text-rose-600 text-xs">删除</button>`;
+        document.getElementById("word-list").appendChild(li);
+        document.getElementById("new-word").value = "";
+        toast("规则已添加");
+      } catch {
+        toast("无效正则");
+      }
+    });
+  </script>
+</body>
+</html>

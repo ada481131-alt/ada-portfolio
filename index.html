@@ -289,10 +289,31 @@
 
     .tag {
       border-radius: 999px;
-      padding: 6px 12px;
+      padding: 8px 14px;
       font-size: 13px;
       font-weight: 600;
       white-space: nowrap;
+      line-height: 1.4;
+    }
+
+    .hero-lead {
+      line-height: 2;
+      letter-spacing: 0.02em;
+    }
+
+    @media (min-width: 768px) {
+      .hero-lead {
+        line-height: 2.05;
+      }
+    }
+
+    .exp-card ul li {
+      line-height: 1.85;
+    }
+
+    .exp-company {
+      font-size: 1.05rem;
+      line-height: 1.6;
     }
   </style>
 </head>
@@ -306,6 +327,7 @@
 
       <div class="hidden md:flex items-center gap-6 text-sm text-gray-600">
         <a href="#about" class="hover:text-gray-950">关于我</a>
+        <a href="#experience" class="hover:text-gray-950">工作经历</a>
         <a href="#work" class="hover:text-gray-950">作品案例</a>
         <a href="#life" class="hover:text-gray-950">生活一面</a>
         <a href="resume.html" class="hover:text-gray-950">简历</a>
@@ -335,6 +357,7 @@
     <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 bg-white/95 px-5 py-4">
       <div class="flex flex-col gap-3 text-sm font-medium text-gray-700">
         <a href="#about" class="mobile-nav-link py-1">关于我</a>
+        <a href="#experience" class="mobile-nav-link py-1">工作经历</a>
         <a href="#work" class="mobile-nav-link py-1">作品案例</a>
         <a href="#life" class="mobile-nav-link py-1">生活一面</a>
         <a href="resume.html" class="py-1">查看简历</a>
@@ -353,25 +376,29 @@
           开放合作 · 海外游戏 · AI 增长
         </div>
 
-        <h1 class="text-5xl md:text-7xl font-black leading-[1.05] tracking-tight">
+        <h1 class="text-5xl md:text-7xl font-black leading-[1.12] tracking-tight">
           你好，我是 <br />
           <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-pink-500 to-orange-400">
             Ada Liu
           </span>
         </h1>
-        <p class="mt-4 text-base md:text-lg font-bold text-gray-800 max-w-2xl">
-          海外游戏 · AI 产品经理 · 客服 / 外呼 / 营销 · 2023 至今
+        <p class="mt-6 text-base md:text-lg font-bold text-gray-800 max-w-2xl leading-relaxed">
+          AI 产品经理 · 海外游戏 · 客服 / 外呼 / 营销
         </p>
-        <p class="mt-4 text-lg md:text-xl text-gray-600 leading-8 max-w-2xl">
-            我是 Ada Liu，聚焦<strong class="text-indigo-600 font-semibold">海外游戏</strong>场景的 AI 产品工作：
-            <strong>AI 玩家客服</strong>替代传统 Bot 处理充值/提现未到账等问题；
-            <strong>AI 外呼</strong>服务拉新与流失召回；
-            <strong>AI 营销</strong>基于玩家数据分析促进收入增长；
-            平台另含<strong>人工坐席</strong>（实时对话、历史、报表、监控与配置），形成客户运营一体化。
-            2025 年 7 月起在海外游戏初创 AI 公司负责上述模块产品工作。
+        <div class="mt-6 text-base md:text-lg text-gray-600 hero-lead max-w-2xl space-y-4">
+          <p>
+            聚焦<strong class="text-indigo-600 font-semibold">海外游戏</strong>场景的 AI 产品：
+            <strong>AI 玩家客服</strong>处理充值/提现与玩法咨询；
+            <strong>AI 外呼</strong>负责拉新与流失召回；
+            <strong>AI 营销</strong>基于玩家数据驱动增收。
           </p>
-          
-          <div class="mt-8 flex flex-wrap gap-3">
+          <p>
+            平台含<strong>人工坐席</strong>（实时对话、历史、报表、监控与配置），形成客户运营一体化。
+            2025 年 7 月起在<strong>某 AI 初创公司</strong>负责上述模块产品工作。
+          </p>
+        </div>
+
+          <div class="mt-10 flex flex-wrap gap-3">
             <span class="tag bg-amber-50 text-amber-800">人工坐席 · 运营一体化</span>
             <span class="tag bg-indigo-50 text-indigo-700">AI 玩家客服 · RAG / 转人工</span>
             <span class="tag bg-violet-50 text-violet-700">AI 外呼 · 拉新 / 召回</span>
@@ -379,7 +406,7 @@
             <span class="tag bg-pink-50 text-pink-700">Prompt · 知识库治理</span>
           </div>
 
-        <div class="mt-9 flex flex-wrap gap-4">
+        <div class="mt-10 flex flex-wrap gap-4">
           <a href="#work" class="bg-gray-950 text-white px-6 py-3 rounded-full font-semibold hover:bg-gray-800">
             查看作品
           </a>
@@ -399,8 +426,8 @@
 
         <div class="mt-5 grid grid-cols-3 gap-3 text-center">
           <div class="bg-white rounded-2xl p-4">
-            <p class="text-2xl font-black">3+</p>
-            <p class="text-xs text-gray-500 mt-1">年 AI 实践</p>
+            <p class="text-2xl font-black">5+</p>
+            <p class="text-xs text-gray-500 mt-1.5 leading-snug">年产品经验</p>
           </div>
           <div class="bg-white rounded-2xl p-4">
             <p class="text-2xl font-black">RAG</p>
@@ -423,7 +450,7 @@
         </div>
 
         <div class="glass rounded-[2rem] p-7 md:p-9">
-          <p class="text-lg text-gray-700 leading-9">
+          <p class="text-lg text-gray-700 leading-[1.9]">
             我长期在海外游戏业务做 AI 产品，熟悉从需求澄清、方案设计到上线迭代的完整链路。
             尤其关注客户运营一体化：AI 客服与人工坐席同平台接力、外呼脚本合规、营销分群增收，以及坐席侧的监控与敏感词治理。
           </p>
@@ -444,6 +471,110 @@
             </div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- 工作经历 -->
+    <section id="experience" class="py-20 md:py-24 border-t border-gray-100">
+      <div class="flex flex-wrap items-end justify-between gap-6 mb-12">
+        <div>
+          <p class="text-sm font-bold text-violet-600 uppercase tracking-widest">Experience</p>
+          <h2 class="mt-4 text-3xl md:text-4xl font-black tracking-tight leading-tight">工作经历</h2>
+          <p class="mt-4 text-gray-600 max-w-2xl text-base md:text-lg leading-relaxed">
+            四段经历，由近及远。完整简历与 PDF 导出见
+            <a href="resume.html" class="text-indigo-600 font-semibold hover:underline">简历页</a>。
+          </p>
+        </div>
+        <a href="resume.html" class="shrink-0 text-sm font-semibold border border-gray-200 px-5 py-2.5 rounded-full hover:bg-gray-50">
+          查看完整简历 →
+        </a>
+      </div>
+
+      <div class="relative max-w-4xl space-y-10">
+        <div class="absolute left-[11px] top-3 bottom-3 w-px bg-gradient-to-b from-indigo-300 via-violet-200 to-slate-200 md:left-[15px]" aria-hidden="true"></div>
+
+        <article class="relative pl-10 md:pl-14">
+          <span class="absolute left-0 top-2 w-6 h-6 md:w-7 md:h-7 rounded-full bg-white border-2 border-indigo-500 shadow-sm ring-4 ring-indigo-50" aria-hidden="true"></span>
+          <div class="glass exp-card rounded-[1.75rem] p-7 md:p-9">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h3 class="text-xl md:text-2xl font-black">AI 产品经理</h3>
+                <p class="exp-company mt-2 text-gray-800 font-semibold">某 AI 初创公司</p>
+              </div>
+              <time class="text-sm font-semibold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-full whitespace-nowrap">2025.7 — 至今</time>
+            </div>
+            <p class="mt-3 text-gray-600 leading-relaxed">海外游戏 · 客户运营一体化 SaaS</p>
+            <ul class="mt-5 space-y-3.5 text-gray-700 text-base list-disc pl-5">
+              <li><strong>AI 玩家客服</strong>：充值/提现、活动与账号类 FAQ；支付/玩法双库 RAG、置信度转人工</li>
+              <li><strong>人工坐席工作台</strong>：与 AI 同平台接力；实时对话、历史、报表、监控、敏感词与常用问答</li>
+              <li><strong>AI 外呼</strong>：拉新、流失召回、大 R 关怀；脚本按市场/分层检索，支付类转客服队列</li>
+              <li><strong>AI 营销</strong>：玩家分群与 ROI 实验，活动/礼包与外呼联动，与客服知识库口径对齐</li>
+            </ul>
+            <p class="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+              <a href="#work" class="font-semibold text-indigo-700 hover:underline">↓ 作品案例 1–5</a>
+              <a href="demo-agent-workbench.html" class="font-semibold text-amber-700 hover:underline">坐席工作台</a>
+              <a href="demo-ai-support.html" class="font-semibold text-indigo-600 hover:underline">玩家客服</a>
+            </p>
+          </div>
+        </article>
+
+        <article class="relative pl-10 md:pl-14">
+          <span class="absolute left-0 top-2 w-6 h-6 md:w-7 md:h-7 rounded-full bg-white border-2 border-violet-400 shadow-sm ring-4 ring-violet-50" aria-hidden="true"></span>
+          <div class="glass exp-card rounded-[1.75rem] p-7 md:p-9">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h3 class="text-xl md:text-2xl font-black">AI 产品经理</h3>
+                <p class="exp-company mt-2 text-gray-800 font-semibold">华为技术有限公司</p>
+              </div>
+              <time class="text-sm font-semibold text-violet-700 bg-violet-50 px-3 py-1.5 rounded-full whitespace-nowrap">2024.9 — 2025.4</time>
+            </div>
+            <ul class="mt-5 space-y-3.5 text-gray-700 text-base list-disc pl-5">
+              <li>参与企业级 AI 应用 / 智能助手类产品规划，输出 PRD 与迭代节奏</li>
+              <li>协同算法与研发定义效果指标、评测与灰度方案，推动场景落地</li>
+              <li>关注 ToB 交付、权限与合规边界，衔接客户侧需求与产品能力</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="relative pl-10 md:pl-14">
+          <span class="absolute left-0 top-2 w-6 h-6 md:w-7 md:h-7 rounded-full bg-white border-2 border-blue-400 shadow-sm ring-4 ring-blue-50" aria-hidden="true"></span>
+          <div class="glass exp-card rounded-[1.75rem] p-7 md:p-9">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h3 class="text-xl md:text-2xl font-black">AI 产品助理</h3>
+                <p class="exp-company mt-2 text-gray-800 font-semibold">百度科技技术有限公司</p>
+              </div>
+              <time class="text-sm font-semibold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full whitespace-nowrap">2023.11 — 2024.9</time>
+            </div>
+            <ul class="mt-5 space-y-3.5 text-gray-700 text-base list-disc pl-5">
+              <li>协助 AI / 大模型相关产品：需求整理、PRD 与文档、评审与上线跟进</li>
+              <li>参与智能客服、知识问答等场景的效果评测、Badcase 与数据反馈闭环</li>
+              <li>用低/零代码与 Prompt 快速搭 Demo，支撑场景验证与跨团队沟通</li>
+            </ul>
+            <p class="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+              <a href="demo-knowledge-base.html" class="font-semibold text-emerald-700 hover:underline">知识库治理</a>
+              <a href="demo-prompt-lab.html" class="font-semibold text-pink-600 hover:underline">Prompt 实验室</a>
+            </p>
+          </div>
+        </article>
+
+        <article class="relative pl-10 md:pl-14">
+          <span class="absolute left-0 top-2 w-6 h-6 md:w-7 md:h-7 rounded-full bg-white border-2 border-slate-300 shadow-sm ring-4 ring-slate-50" aria-hidden="true"></span>
+          <div class="glass exp-card rounded-[1.75rem] p-7 md:p-9">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h3 class="text-xl md:text-2xl font-black">抖火热点运营</h3>
+                <p class="exp-company mt-2 text-gray-800 font-semibold">字节跳动网络技术有限公司</p>
+              </div>
+              <time class="text-sm font-semibold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full whitespace-nowrap">2019.12 — 2022.2</time>
+            </div>
+            <ul class="mt-5 space-y-3.5 text-gray-700 text-base list-disc pl-5">
+              <li>抖音 / 火山端热点挖掘、话题策划与内容分发运营</li>
+              <li>跟踪热点数据与传播效果，协同内容、产品侧推进活动与资源位</li>
+              <li>积累 C 端增长与数据驱动运营经验，为后续转 AI 产品打基础</li>
+            </ul>
+          </div>
+        </article>
       </div>
     </section>
 

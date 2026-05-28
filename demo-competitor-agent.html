@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>竞品调研 Agent · 完整版 | Ada Liu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://js.puter.com/v2/"></script>
+  <style>
+    :root { --brand: #7c3aed; --brand-dim: #5b21b6; }
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0f0f12; color: #e4e4e7; }
+  .agent-log { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; line-height: 1.65; }
+  .agent-log .line { padding: 2px 0; }
+  .agent-log .ok { color: #34d399; }
+  .agent-log .warn { color: #fbbf24; }
+  .agent-log .info { color: #a78bfa; }
+  .agent-log .muted { color: #71717a; }
+  .md-preview { font-size: 13px; line-height: 1.8; }
+  .md-preview h1 { font-size: 1.35rem; font-weight: 800; margin: 0 0 1rem; color: #fafafa; }
+  .md-preview h2 { font-size: 1.05rem; font-weight: 700; margin: 1.25rem 0 0.5rem; color: #e4e4e7; border-bottom: 1px solid #3f3f46; padding-bottom: 0.35rem; }
+  .md-preview h3 { font-size: 0.95rem; font-weight: 600; margin: 1rem 0 0.35rem; color: #d4d4d8; }
+  .md-preview p, .md-preview li { color: #a1a1aa; }
+  .md-preview ul { padding-left: 1.25rem; margin: 0.5rem 0; }
+  .md-preview table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 0.75rem 0; }
+  .md-preview th, .md-preview td { border: 1px solid #3f3f46; padding: 6px 8px; text-align: left; }
+  .md-preview th { background: #27272a; color: #e4e4e7; }
+  .step-pulse { animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+  .wf-step { font-size: 10px; padding: 4px 8px; border-radius: 999px; border: 1px solid #3f3f46; color: #71717a; white-space: nowrap; }
+  .wf-step.active { border-color: #7c3aed; color: #c4b5fd; background: #2e1065; }
+  .wf-step.done { border-color: #065f46; color: #6ee7b7; background: #022c22; }
+  .agent-log .think { color: #fde68a; font-style: italic; }
+  .agent-log .tool { color: #38bdf8; }
+  .agent-log .file { color: #f472b6; }
+  .agent-log .wf { color: #a78bfa; }
+  </style>
+</head>
+<body class="min-h-screen text-sm">
+  <header class="border-b border-zinc-800 bg-zinc-950/90 backdrop-blur sticky top-0 z-20">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
+      <div>
+        <a href="index.html#work" class="text-violet-400 font-semibold hover:underline">← 作品集</a>
+        <p class="text-xs text-zinc-500 mt-0.5">完整 Agent：真抓取 + 真 LLM · 本机保存报告</p>
+      </div>
+      <a href="prd.html?p=8" class="text-xs font-semibold text-violet-300 border border-violet-800 px-3 py-1.5 rounded-full hover:bg-violet-950">PRD 摘要</a>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">竞品调研 · AI Agent</h1>
+    <p class="mt-2 text-zinc-400 leading-8 max-w-3xl">
+      默认 <strong class="text-violet-300">Agent 编排模式</strong>：工作流自动执行 → Tool Calling → Browser 多页抓取 → Agent 思维 → 导出 .html / .md / 执行记录 .json。
+    </p>
+    <div class="mt-3 flex flex-wrap gap-1.5 text-[10px]">
+      <span class="px-2 py-0.5 rounded-full bg-violet-950 text-violet-300 border border-violet-800">Tool Calling</span>
+      <span class="px-2 py-0.5 rounded-full bg-sky-950 text-sky-300 border border-sky-800">Browser Use</span>
+      <span class="px-2 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-800">文件生成</span>
+      <span class="px-2 py-0.5 rounded-full bg-amber-950 text-amber-200 border border-amber-800">Agent 思维</span>
+      <span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800">工作流</span>
+      <span class="px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-600">自动执行</span>
+    </div>
+
+    <div class="mt-4 rounded-xl border border-emerald-900/50 bg-emerald-950/30 p-4 text-sm leading-7 text-zinc-300">
+      <p class="font-bold text-emerald-300">怎么用（不用懂技术）</p>
+      <ol class="mt-2 list-decimal list-inside space-y-1 text-zinc-400">
+        <li>保持下面默认模式：<strong class="text-white">推荐 · 浏览器里直接跑</strong></li>
+        <li>输入 <code class="text-violet-300">分析 smartico.ai</code>，点 <strong class="text-white">运行</strong></li>
+        <li>若弹出登录，按提示用 Puter 免费登录一次（不是你的 OpenAI 账单）</li>
+        <li>右侧看报告，可下载 Word 能打开的 <strong class="text-white">.html</strong> 或 .md</li>
+      </ol>
+      <p class="mt-3 text-xs text-zinc-500">
+        「云端引擎」= 可选进阶，要有人在 Cloudflare 上架一小段程序，<strong class="text-zinc-400">不是必做</strong>。
+        <a href="agent-api/怎么部署-通俗版.md" class="text-violet-400 underline" target="_blank" rel="noopener">通俗说明（给非技术）</a>
+      </p>
+    </div>
+
+    <details class="mt-4 rounded-xl border border-zinc-800 bg-zinc-950/80 p-4">
+      <summary class="cursor-pointer font-semibold text-violet-300 text-sm">⚙️ 运行模式与设置（一般不用改）</summary>
+      <div class="mt-4 grid sm:grid-cols-2 gap-4 text-sm">
+        <div>
+          <label class="text-xs text-zinc-500">模式</label>
+          <select id="cfg-mode" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white">
+            <option value="full" selected>推荐 · 浏览器里直接跑（Tool Calling + 多页抓取 + AI）</option>
+            <option value="worker">可选 · 云端引擎（需请人部署，填网址）</option>
+            <option value="offline">离线演示（假 AI，只看流程）</option>
+          </select>
+        </div>
+        <div id="cfg-worker-wrap" class="hidden sm:col-span-2 rounded-lg border border-amber-900/40 bg-amber-950/20 p-3">
+          <label class="text-xs text-amber-200/90">云端引擎网址（部署后才有一串 https://…）</label>
+          <input id="cfg-worker-url" type="url" placeholder="https://你的程序.workers.dev" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white text-xs" />
+          <p class="text-[11px] text-zinc-500 mt-2 leading-5">
+            这是什么？= 放在 Cloudflare 机房里帮你跑 AI 的小程序，不是 GitHub 网页本身。
+            没有网址就<strong>不要选这项</strong>，用上面的「推荐」即可。
+            技术同事可看 <code class="text-violet-400">agent-api/怎么部署-通俗版.md</code>
+          </p>
+        </div>
+        <div class="sm:col-span-2">
+          <label class="text-xs text-zinc-500">网站打不开时：把官网文字粘贴到这里（可选）</label>
+          <textarea id="cfg-paste" rows="2" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white text-xs" placeholder="从官网复制产品介绍…"></textarea>
+        </div>
+      </div>
+    </details>
+
+    <div id="workflow-bar" class="mt-4 flex flex-wrap gap-2 items-center" aria-label="工作流">
+      <span class="text-[10px] text-zinc-500 uppercase tracking-wider mr-1">工作流</span>
+    </div>
+
+    <div class="mt-4 grid lg:grid-cols-[1fr_1.1fr] gap-4 min-h-[520px]">
+      <div class="rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col overflow-hidden">
+        <div class="px-4 py-3 border-b border-zinc-800 flex justify-between items-center">
+          <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Agent 执行日志</span>
+          <span id="agent-status" class="text-xs text-zinc-500">待命</span>
+        </div>
+        <div id="agent-log" class="agent-log flex-1 p-4 overflow-y-auto max-h-[420px] lg:max-h-none min-h-[280px]">
+          <div class="line muted">› 等待任务。试试：分析 smartico.ai</div>
+        </div>
+        <form id="agent-form" class="p-4 border-t border-zinc-800 flex gap-2">
+          <input
+            id="agent-input"
+            type="text"
+            class="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-violet-600"
+            placeholder="分析 smartico.ai"
+            autocomplete="off"
+          />
+          <button type="submit" id="btn-run" class="shrink-0 px-5 py-3 rounded-xl font-bold text-white bg-violet-600 hover:bg-violet-500 disabled:opacity-40">
+            运行
+          </button>
+        </form>
+      </div>
+
+      <div class="rounded-2xl border border-zinc-800 bg-zinc-900/50 flex flex-col overflow-hidden">
+        <div class="px-4 py-3 border-b border-zinc-800 flex flex-wrap justify-between gap-2 items-center">
+          <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Markdown 报告</span>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" id="btn-copy-md" class="hidden text-xs px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-300 hover:bg-zinc-800">复制</button>
+            <button type="button" id="btn-download-html" class="hidden text-xs px-3 py-1.5 rounded-lg bg-emerald-700 text-white font-semibold hover:bg-emerald-600">下载 .html</button>
+            <button type="button" id="btn-download-md" class="hidden text-xs px-3 py-1.5 rounded-lg bg-violet-600 text-white font-semibold hover:bg-violet-500">下载 .md</button>
+            <button type="button" id="btn-download-json" class="hidden text-xs px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-300 hover:bg-zinc-800">执行记录 .json</button>
+            <button type="button" id="btn-history" class="text-xs px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-400 hover:bg-zinc-800">历史报告</button>
+          </div>
+        </div>
+        <div id="md-preview" class="md-preview flex-1 p-5 overflow-y-auto max-h-[480px]">
+          <p class="text-zinc-500">报告将在此预览…</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="mt-4 text-xs text-zinc-600 leading-6 max-w-3xl">
+      报告仅供内部分析；请遵守目标网站 robots 与版权。生产环境建议：Playwright 多页爬取 + 自建 Worker（已提供模板）。
+    </p>
+  </main>
+
+  <dialog id="history-dialog" class="rounded-2xl border border-zinc-700 bg-zinc-900 text-zinc-200 p-0 max-w-lg w-[calc(100%-2rem)] backdrop:bg-black/60">
+    <div class="p-5 border-b border-zinc-800 flex justify-between items-center">
+      <h2 class="font-bold">本地已保存的报告</h2>
+      <button type="button" id="history-close" class="text-zinc-400 hover:text-white text-xl leading-none">&times;</button>
+    </div>
+    <ul id="history-list" class="p-4 max-h-80 overflow-y-auto text-sm space-y-2"></ul>
+  </dialog>
+
+  <script>
+    const STORAGE_KEY = "demo-competitor-agent-reports";
+    const CONFIG_KEY = "demo-competitor-agent-config";
+    const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+
+    const WORKFLOW_DEF = [
+      { id: "parse", label: "解析" },
+      { id: "plan", label: "规划" },
+      { id: "browser", label: "Browser" },
+      { id: "tools", label: "Tools" },
+      { id: "think", label: "思维" },
+      { id: "report", label: "报告" },
+      { id: "files", label: "文件" },
+    ];
+    const COMMON_PATHS = ["/", "/pricing", "/about", "/solutions", "/product", "/features"];
+    const REPORT_SYSTEM = `撰写完整中文 Markdown 竞品报告，必须含：
+## 1. 产品概览 ## 2. 核心功能 ## 3. 卖点与定位 ## 4. 竞品格局（表格）
+## 5. 与「海外游戏客户运营一体化（AI客服+坐席+外呼+营销）」对比（表格） ## 6. 风险与机会 ## 7. 建议下一步
+只基于提供的抓取内容；不确定写「待核实」。`;
+    const PLANNER_SYSTEM = `你是 Agent 编排器。只输出 JSON（不要 markdown 代码块），格式：
+{"thoughts":["推理1"],"tool_calls":[{"name":"工具名","arguments":{}}]}
+可用工具：
+- agent_think(thought, step?) 记录推理
+- browser_open(url) 打开官网
+- browser_crawl_site(base_url) 多页抓取
+- browser_fetch_page(url, purpose?) 单页抓取
+第一轮建议：think → browser_open → browser_crawl_site`;
+
+    /** 演示快照：抓取失败时仍可完成 Agent 全流程 */
+    const SITE_SNAPSHOTS = {
+      "smartico.ai": {
+        brand: "Smartico",
+        tagline: "Gamification & CRM for iGaming — engagement, loyalty, automation",
+        features: [
+          "Gamification hub：任务、勋章、等级、商店与积分经济",
+          "CRM 自动化：分群、旅程、触发式活动与多渠道触达",
+          "Bonus engine：免费旋转、彩金、锦标赛等运营玩法配置",
+          "实时数据与运营看板：留存、活跃、付费转化相关指标",
+          "API / Webhook 与第三方集成（支付、体育、游戏供应商等）",
+          "多品牌 / 多市场租户与权限管理",
+        ],
+        sellingPoints: [
+          "面向 iGaming 的一站式「留存 + 活动」平台，减少多工具拼接",
+          "强调低代码配置活动与旅程，缩短运营上线周期",
+          "游戏化机制提升 DAU / 留存与复充，偏增长与运营效率",
+          "可与现有 PAM / 数据栈对接，强调企业级扩展",
+        ],
+        competitors: [
+          { name: "Optimove", note: "CRM + 分群 + 活动编排，偏数据驱动营销" },
+          { name: "Fast Track", note: "iGaming CRM，实时个性化与运营自动化" },
+          { name: "Xtremepush", note: "全渠道 engagement + gamification" },
+          { name: "内部自研活动系统", note: "大型运营商常见替代路径" },
+        ],
+        risks: ["活动配置复杂度高，需运营培训", "与本地合规/彩金规则强绑定", "依赖数据质量与事件埋点"],
+        opportunities: ["与 AI 客服/外呼联动做闭环触达", "统一玩家标签与分层口径", "A/B 与 ROI 看板一体化"],
+      },
+    };
+
+    const OUR_PRODUCT = {
+      name: "客户运营一体化（AI 客服 + 坐席 + 外呼 + 营销）",
+      strengths: ["支付/玩法 FAQ 与 RAG 客服", "人机协同坐席", "外呼拉新召回", "营销分群与 ROI"],
+    };
+
+    const logEl = document.getElementById("agent-log");
+    const previewEl = document.getElementById("md-preview");
+    const statusEl = document.getElementById("agent-status");
+    const inputEl = document.getElementById("agent-input");
+    const btnRun = document.getElementById("btn-run");
+    let lastReportMd = "";
+    let lastTraceJson = "";
+    let running = false;
+    const wfBar = document.getElementById("workflow-bar");
+
+    WORKFLOW_DEF.forEach((s) => {
+      const el = document.createElement("span");
+      el.className = "wf-step";
+      el.id = `wf-${s.id}`;
+      el.textContent = s.label;
+      wfBar.appendChild(el);
+    });
+
+    function setWorkflow(activeId, doneIds = []) {
+      WORKFLOW_DEF.forEach((s) => {
+        const el = document.getElementById(`wf-${s.id}`);
+        el.classList.remove("active", "done");
+        if (doneIds.includes(s.id)) el.classList.add("done");
+        if (s.id === activeId) el.classList.add("active");
+      });
+    }
+
+    function log(msg, type = "muted") {
+      const div = document.createElement("div");
+      div.className = `line ${type}`;
+      const prefix =
+        type === "think" ? "💭 " : type === "tool" ? "🔧 " : type === "file" ? "📄 " : type === "wf" ? "⚙ " : "› ";
+      div.textContent = `${prefix}${msg}`;
+      logEl.appendChild(div);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function logStepFromServer(s) {
+      const t = s.type || s.t || "info";
+      const map = {
+        think: "think",
+        tool_call: "tool",
+        tool_result: "tool",
+        browser: "tool",
+        file: "file",
+        workflow: "wf",
+        parse: "info",
+        report: "ok",
+      };
+      if (s.step) setWorkflow(s.step, WORKFLOW_DEF.slice(0, WORKFLOW_DEF.findIndex((x) => x.id === s.step)).map((x) => x.id));
+      log(s.msg || `${t}`, map[t] || (s.ok === false ? "warn" : "ok"));
+    }
+
+    function delay(ms) {
+      return new Promise((r) => setTimeout(r, ms));
+    }
+
+    function parseTask(raw) {
+      const text = raw.trim();
+      let domain = "";
+      const m1 = text.match(/分析\s+([a-z0-9][-a-z0-9.]*\.[a-z]{2,})/i);
+      const m2 = text.match(/(https?:\/\/[^\s]+)/i);
+      const m3 = text.match(/([a-z0-9][-a-z0-9.]*\.[a-z]{2,})/i);
+      if (m1) domain = m1[1].toLowerCase();
+      else if (m2) {
+        try {
+          domain = new URL(m2[1]).hostname.replace(/^www\./, "");
+        } catch (_) {}
+      } else if (m3) domain = m3[1].toLowerCase().replace(/^www\./, "");
+
+      if (!domain) return null;
+      const url = domain.startsWith("http") ? domain : `https://${domain}`;
+      const normalized = domain.replace(/^www\./, "");
+      return { domain: normalized, url: url.startsWith("http") ? url : `https://${normalized}`, raw: text };
+    }
+
+    function getConfig() {
+      try {
+        return JSON.parse(localStorage.getItem(CONFIG_KEY) || "{}");
+      } catch {
+        return {};
+      }
+    }
+
+    function saveConfig() {
+      localStorage.setItem(
+        CONFIG_KEY,
+        JSON.stringify({
+          mode: document.getElementById("cfg-mode").value,
+          workerUrl: document.getElementById("cfg-worker-url").value.trim(),
+          paste: document.getElementById("cfg-paste").value,
+        })
+      );
+    }
+
+    function getMode() {
+      return document.getElementById("cfg-mode").value;
+    }
+
+    document.getElementById("cfg-mode").addEventListener("change", () => {
+      const m = getMode();
+      document.getElementById("cfg-worker-wrap").classList.toggle("hidden", m !== "worker");
+      saveConfig();
+    });
+    document.getElementById("cfg-worker-url").addEventListener("input", saveConfig);
+    document.getElementById("cfg-paste").addEventListener("input", saveConfig);
+
+    /** 真抓取：Jina Reader 将 URL 转为 Markdown */
+    async function fetchJinaMarkdown(url) {
+      const jinaUrl = `https://r.jina.ai/${url}`;
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 45000);
+      try {
+        const res = await fetch(jinaUrl, {
+          signal: ctrl.signal,
+          headers: { Accept: "text/plain", "X-Return-Format": "markdown" },
+        });
+        if (!res.ok) throw new Error(`Jina HTTP ${res.status}`);
+        const text = await res.text();
+        if (!text || text.length < 100) throw new Error("页面内容过短");
+        return text.slice(0, 28000);
+      } finally {
+        clearTimeout(t);
+      }
+    }
+
+    async function fetchPageText(url) {
+      try {
+        return await fetchJinaMarkdown(url);
+      } catch (e) {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 15000);
+        try {
+          const res = await fetch(CORS_PROXY + encodeURIComponent(url), { signal: ctrl.signal });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const html = await res.text();
+          return stripHtml(html).slice(0, 12000);
+        } finally {
+          clearTimeout(t);
+        }
+      }
+    }
+
+    async function llmPuter(prompt, systemExtra = "") {
+      if (typeof puter === "undefined" || !puter.ai?.chat) {
+        throw new Error("Puter.js 未加载，请检查网络或改用 Worker/离线模式");
+      }
+      const msg = systemExtra ? `${systemExtra}\n\n${prompt}` : prompt;
+      const resp = await puter.ai.chat(msg, { model: "gpt-4o-mini" });
+      const text = typeof resp === "string" ? resp : resp?.message?.content || resp?.text || String(resp);
+      return (text || "").trim();
+    }
+
+    function parseJsonFromLlm(text) {
+      const raw = text.replace(/^```json?\s*/i, "").replace(/```\s*$/i, "").trim();
+      try {
+        return JSON.parse(raw);
+      } catch (_) {
+        const m = raw.match(/\{[\s\S]*\}/);
+        if (m) try {
+          return JSON.parse(m[0]);
+        } catch (_) {}
+      }
+      return null;
+    }
+
+    function joinUrl(base, path) {
+      try {
+        return new URL(path, base).href;
+      } catch {
+        return base;
+      }
+    }
+
+    async function toolBrowserCrawl(baseUrl, ctx) {
+      const results = [];
+      for (const p of COMMON_PATHS) {
+        const url = joinUrl(baseUrl, p);
+        log(`Tool browser_crawl_site → ${url}`, "tool");
+        try {
+          const md = await fetchJinaMarkdown(url);
+          ctx.pages.push({ url, path: p, chars: md.length });
+          ctx.corpus += `\n\n---\n## ${url}\n\n${md.slice(0, 10000)}`;
+          results.push({ path: p, ok: true, chars: md.length });
+          log(`  ↳ ${md.length} 字`, "ok");
+        } catch (e) {
+          results.push({ path: p, ok: false, error: e.message });
+          log(`  ↳ 跳过 ${p}: ${e.message}`, "warn");
+        }
+        await delay(200);
+      }
+      return { pages: results };
+    }
+
+    async function executeToolCall(tc, task, ctx) {
+      const name = tc.name;
+      const args = tc.arguments || {};
+      log(`Tool Calling: ${name}(${JSON.stringify(args).slice(0, 100)})`, "tool");
+
+      if (name === "agent_think") {
+        const thought = args.thought || "";
+        ctx.thoughts.push(thought);
+        log(thought, "think");
+        setWorkflow("think", ["parse", "plan", "browser", "tools"]);
+        return { recorded: true };
+      }
+      if (name === "browser_open") {
+        const u = args.url || task.url;
+        log(`Browser Use: 打开 ${u}`, "tool");
+        window.open(u, "_blank", "noopener,noreferrer");
+        setWorkflow("browser", ["parse", "plan"]);
+        return { opened: true };
+      }
+      if (name === "browser_fetch_page") {
+        const u = args.url || task.url;
+        setWorkflow("browser", ["parse", "plan"]);
+        const md = await fetchJinaMarkdown(u);
+        ctx.pages.push({ url: u, chars: md.length });
+        ctx.corpus += `\n\n---\n## ${u}\n\n${md}`;
+        return { chars: md.length };
+      }
+      if (name === "browser_crawl_site") {
+        setWorkflow("browser", ["parse", "plan"]);
+        return toolBrowserCrawl(args.base_url || task.url, ctx);
+      }
+      if (name === "write_report_file") {
+        ctx.report = args.markdown || "";
+        ctx.files.push({ name: args.filename || `competitor-${task.domain}.md`, content: ctx.report });
+        setWorkflow("files", ["parse", "plan", "browser", "tools", "think", "report"]);
+        log(`write_report_file → ${ctx.report.length} 字`, "file");
+        return { ok: true };
+      }
+      return { error: "unknown tool" };
+    }
+
+    function defaultToolPlan(task) {
+      return {
+        thoughts: ["先打开官网，再爬取首页与定价/方案等子页，最后写报告"],
+        tool_calls: [
+          { name: "agent_think", arguments: { thought: "规划：需要首页 + pricing/about 了解定位与功能边界", step: "plan" } },
+          { name: "browser_open", arguments: { url: task.url } },
+          { name: "browser_crawl_site", arguments: { base_url: task.url } },
+        ],
+      };
+    }
+
+    function appendThinkAppendix(md, thoughts) {
+      if (!thoughts?.length) return md;
+      const block = thoughts.map((t, i) => `${i + 1}. ${t}`).join("\n\n");
+      return `${md}\n\n---\n\n## 附录：Agent 思维链（可面试展示）\n\n${block}\n`;
+    }
+
+    function buildHtmlReport(title, md) {
+      const body = simpleMarkdownToHtml(md);
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+      return `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"/><title>${esc(title)}</title>
+<style>body{font-family:"PingFang SC",sans-serif;max-width:820px;margin:2rem auto;padding:0 1rem;line-height:1.75;color:#222}
+h1{font-size:1.5rem}h2{font-size:1.15rem;margin-top:1.5rem;border-bottom:1px solid #eee;padding-bottom:.3rem}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #ddd;padding:8px}th{background:#f5f5f5}
+pre{background:#f4f4f5;padding:12px;border-radius:8px;overflow:auto;font-size:12px}</style></head>
+<body>${body}<hr/><p style="font-size:12px;color:#888">竞品 Agent 自动生成 · ${new Date().toLocaleString("zh-CN")}</p></body></html>`;
+    }
+
+    function buildTrace(task, ctx, mode) {
+      return {
+        mode,
+        task,
+        workflow: WORKFLOW_DEF.map((w) => w.id),
+        thoughts: ctx.thoughts,
+        pages: ctx.pages,
+        toolCalling: true,
+        browserUse: true,
+        generatedAt: new Date().toISOString(),
+      };
+    }
+
+    function attachPasteFallback(task, ctx) {
+      const paste = document.getElementById("cfg-paste").value.trim();
+      if (paste) {
+        ctx.corpus += `\n\n---\n## 用户粘贴\n\n${paste}`;
+        return;
+      }
+      if (SITE_SNAPSHOTS[task.domain]) {
+        const s = SITE_SNAPSHOTS[task.domain];
+        ctx.corpus += `\n\n# ${s.brand}\n${s.tagline}\n` + s.features.map((f) => `- ${f}`).join("\n");
+        log("使用内置快照补充语料", "warn");
+      }
+    }
+
+    /** Agent 编排：Tool Calling + Browser + 思维链 + 文件 */
+    async function runAgentOrchestrated(task) {
+      const ctx = { corpus: "", pages: [], thoughts: [], report: "", files: [] };
+      const traceSteps = [];
+
+      setWorkflow("parse");
+      log("工作流：自动执行开始", "wf");
+      log(`解析任务 → ${task.domain}`, "info");
+      traceSteps.push({ type: "parse", msg: task.domain });
+      setWorkflow("plan", ["parse"]);
+
+      let plan = defaultToolPlan(task);
+      try {
+        log("Planner：请求 LLM 生成 tool_calls 计划…", "info");
+        const planText = await llmPuter(
+          `目标：${task.domain}\nURL：${task.url}\n输出 JSON 的 tool_calls（含 agent_think、browser_open、browser_crawl_site）。`,
+          PLANNER_SYSTEM
+        );
+        const parsed = parseJsonFromLlm(planText);
+        if (parsed?.tool_calls?.length) {
+          plan = parsed;
+          if (parsed.thoughts) parsed.thoughts.forEach((t) => log(t, "think"));
+        } else log("Planner 未返回 JSON，使用默认工具序列", "warn");
+      } catch (e) {
+        log(`Planner：${e.message}，使用默认工具序列`, "warn");
+      }
+
+      setWorkflow("tools", ["parse", "plan"]);
+      for (const tc of plan.tool_calls) {
+        traceSteps.push({ type: "tool_call", name: tc.name, args: tc.arguments });
+        await executeToolCall(tc, task, ctx);
+        traceSteps.push({ type: "tool_result", name: tc.name });
+      }
+
+      if (!ctx.corpus || ctx.corpus.length < 200) {
+        log("语料不足，Tool Calling 补抓首页…", "warn");
+        try {
+          const md = await fetchJinaMarkdown(task.url);
+          ctx.corpus += md;
+          ctx.pages.push({ url: task.url, chars: md.length, note: "fallback" });
+        } catch (_) {
+          attachPasteFallback(task, ctx);
+        }
+      }
+
+      if (ctx.pages.filter((p) => p.ok !== false).length < 2) {
+        log("Browser Use 第二轮：补抓定价页", "tool");
+        try {
+          await executeToolCall(
+            { name: "browser_fetch_page", arguments: { url: joinUrl(task.url, "/pricing"), purpose: "定价/套餐" } },
+            task,
+            ctx
+          );
+        } catch (_) {}
+      }
+
+      setWorkflow("think", ["parse", "plan", "browser", "tools"]);
+      try {
+        log("agent_think：根据已抓取页面做竞品推理…", "think");
+        const think2 = await llmPuter(
+          `已抓取 ${ctx.pages.length} 页，共 ${ctx.corpus.length} 字。用 3-5 句话说明：①产品定位 ②目标客户 ③3 个核心功能 ④与我方（AI客服+坐席+外呼+营销）差异。只输出思考，不要 Markdown 报告。`,
+          "你是 Agent 分析师，只输出推理。"
+        );
+        log(think2, "think");
+        ctx.thoughts.push(think2);
+      } catch (_) {}
+
+      setWorkflow("report", ["parse", "plan", "browser", "tools", "think"]);
+      if (!ctx.report || ctx.report.length < 300) {
+        log("write_report_file：生成最终 Markdown 报告…", "file");
+        ctx.report = await llmPuter(
+          `竞品：${task.domain}\n\nAgent 推理摘要：\n${ctx.thoughts.join("\n")}\n\n官网抓取：\n${ctx.corpus.slice(0, 22000)}`,
+          REPORT_SYSTEM
+        );
+      }
+      ctx.report = appendThinkAppendix(ctx.report, ctx.thoughts);
+
+      const mdName = `competitor-${task.domain}.md`;
+      const htmlName = `competitor-${task.domain}.html`;
+      ctx.files.push({ name: mdName, content: ctx.report });
+      const html = buildHtmlReport(`竞品报告 · ${task.domain}`, ctx.report);
+      ctx.files.push({ name: htmlName, content: html });
+
+      const trace = buildTrace(task, ctx, "orchestrator");
+      trace.steps = traceSteps;
+      lastTraceJson = JSON.stringify(trace, null, 2);
+      ctx.files.push({ name: `agent-trace-${task.domain}.json`, content: lastTraceJson });
+
+      setWorkflow("files", WORKFLOW_DEF.map((w) => w.id).filter((id) => id !== "files"));
+      log(`文件生成：${ctx.files.length} 个（.md / .html / 执行记录.json）`, "file");
+
+      return {
+        md: ctx.report,
+        fetchNote: "Tool Calling + Browser 多页 + Agent 思维链 + 多文件导出",
+        files: ctx.files,
+      };
+    }
+
+    async function runViaWorker(task) {
+      const base = document.getElementById("cfg-worker-url").value.trim().replace(/\/$/, "");
+      if (!base) throw new Error("请填写 Worker URL（见 agent-api/README.md）");
+      log("生产 Worker：OpenAI 原生 Tool Calling 循环", "wf");
+      setWorkflow("tools");
+      const res = await fetch(base, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain: task.domain, url: task.url }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "Worker 失败");
+      (data.steps || []).forEach(logStepFromServer);
+      if (data.fileContents) {
+        const traceFile = data.fileContents.find((f) => f.name?.endsWith(".json"));
+        if (traceFile) lastTraceJson = traceFile.content;
+      } else {
+        lastTraceJson = JSON.stringify({ domain: task.domain, steps: data.steps, meta: data.meta }, null, 2);
+      }
+      setWorkflow("files", WORKFLOW_DEF.map((w) => w.id).filter((id) => id !== "files"));
+      return {
+        md: data.report,
+        fetchNote: `Worker · Tool Calling · ${data.meta?.pages || 0} 页 · ${data.meta?.thoughts || 0} 条思维`,
+        files: data.fileContents || [],
+      };
+    }
+
+    function stripHtml(html) {
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      doc.querySelectorAll("script, style, noscript").forEach((n) => n.remove());
+      return (doc.body?.innerText || doc.documentElement?.textContent || "")
+        .replace(/\s+/g, " ")
+        .replace(/\s*\n\s*/g, "\n")
+        .trim();
+    }
+
+    function extractFromText(text, domain) {
+      const snap = SITE_SNAPSHOTS[domain];
+      const lower = text.toLowerCase();
+      const featureHints = [];
+      const patterns = [
+        [/gamification|gameification|游戏化/i, "游戏化 / Gamification"],
+        [/crm|customer relationship/i, "CRM / 用户运营"],
+        [/loyalty|忠诚|积分|reward/i, "忠诚度 / 积分奖励"],
+        [/bonus|彩金|tournament|锦标赛/i, "彩金 / 活动玩法"],
+        [/automation|自动化|journey|旅程/i, "自动化旅程"],
+        [/segment|分群|personaliz/i, "分群 / 个性化"],
+        [/api|webhook|integrat/i, "API / 集成"],
+        [/igaming|casino|betting|sportsbook/i, "iGaming / 博彩运营"],
+        [/retention|留存|engagement/i, "留存 / 互动"],
+        [/analytics|dashboard|report|数据|看板/i, "数据分析 / 看板"],
+      ];
+      patterns.forEach(([re, label]) => {
+        if (re.test(text) && !featureHints.includes(label)) featureHints.push(label);
+      });
+
+      if (snap) {
+        return {
+          brand: snap.brand,
+          tagline: snap.tagline,
+          features: [...new Set([...snap.features, ...featureHints])],
+          sellingPoints: snap.sellingPoints,
+          competitors: snap.competitors,
+          risks: snap.risks,
+          opportunities: snap.opportunities,
+          source: "snapshot+page",
+          excerpt: text.slice(0, 400),
+        };
+      }
+
+      return {
+        brand: domain.split(".")[0].replace(/^\w/, (c) => c.toUpperCase()),
+        tagline: text.slice(0, 120) || "（未能提取标语，见正文摘录）",
+        features: featureHints.length ? featureHints : ["（请粘贴更多官网文字以补充功能点）"],
+        sellingPoints: [
+          "基于页面关键词推断的核心价值（演示）",
+          "建议结合官网 Pricing / Solutions 页人工复核",
+        ],
+        competitors: [
+          { name: "同赛道 CRM / Engagement 平台", note: "需按区域与牌照补充名单" },
+          { name: "运营商自研", note: "常见替代方案" },
+        ],
+        risks: ["公开信息有限，功能边界需销售/试用确认"],
+        opportunities: ["可与 AI 客服、外呼、营销分群联动"],
+        source: "page-only",
+        excerpt: text.slice(0, 500),
+      };
+    }
+
+    function buildMarkdown(task, data, meta) {
+      const date = new Date().toISOString().slice(0, 10);
+      const featList = data.features.map((f) => `- ${f}`).join("\n");
+      const spList = data.sellingPoints.map((s) => `- ${s}`).join("\n");
+      const compRows = data.competitors
+        .map((c) => `| ${c.name} | ${c.note} |`)
+        .join("\n");
+      const riskList = data.risks.map((r) => `- ${r}`).join("\n");
+      const oppList = data.opportunities.map((o) => `- ${o}`).join("\n");
+
+      return `# 竞品调研报告 · ${data.brand}
+
+> 生成时间：${date}  
+> 目标：${task.url}（${task.domain}）  
+> 数据来源：${meta.fetchNote}  
+> 说明：作品集 Agent Demo，仅供面试/内部分析框架参考
+
+## 1. 产品概览
+
+**${data.brand}** — ${data.tagline}
+
+## 2. 核心功能（从官网提取）
+
+${featList}
+
+## 3. 卖点与定位分析
+
+${spList}
+
+### 3.1 目标用户（推断）
+
+- iGaming / 在线博彩运营商（市场、运营、CRM 团队）
+- 需要活动配置、留存与复充提升的中大型平台
+
+### 3.2 差异化关键词
+
+${data.features.slice(0, 6).map((f) => `- ${f}`).join("\n")}
+
+## 4. 竞品格局（整理）
+
+| 竞品/替代 | 简要对比 |
+|-----------|----------|
+${compRows}
+
+## 5. 与我方产品对照（${OUR_PRODUCT.name}）
+
+| 维度 | ${data.brand}（竞品） | 我方（示意） |
+|------|------------------------|--------------|
+| 核心场景 | 活动 / CRM / 游戏化留存 | AI 客服 + 坐席 + 外呼 + 营销 |
+| 玩家问题处理 | 偏运营触达与活动 | 到账/玩法 FAQ、转人工 |
+| 数据运用 | 分群、旅程、活动效果 | 分群、ROI、外呼与客服协同 |
+| 人力效率 | 运营配置后台 | 坐席工作台 + AI 替代 Bot |
+
+**可借鉴：** ${data.opportunities[0] || "旅程与分群能力"}  
+**需规避：** ${data.risks[0] || "活动与客服话术口径不一致"}
+
+## 6. 风险与机会
+
+### 风险
+${riskList}
+
+### 机会
+${oppList}
+
+## 7. 建议下一步（PM 动作）
+
+1. 预约竞品 Demo，核对 Bonus / Journey 配置深度  
+2. 要一份典型运营商 Case Study（留存、复充指标）  
+3. 与商务/合规确认目标市场牌照限制  
+4. 内部工作坊：我方「客服+外呼+营销」与该类 CRM 的边界与集成点  
+
+---
+
+## 附录：页面文本摘录
+
+\`\`\`
+${(data.excerpt || meta.rawExcerpt || "").slice(0, 800)}
+\`\`\`
+`;
+    }
+
+    function simpleMarkdownToHtml(md) {
+      let h = md
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      h = h.replace(/^### (.+)$/gm, "<h3>$1</h3>");
+      h = h.replace(/^## (.+)$/gm, "<h2>$1</h2>");
+      h = h.replace(/^# (.+)$/gm, "<h1>$1</h1>");
+      h = h.replace(/^&gt; (.+)$/gm, '<p class="text-zinc-500 text-xs italic">$1</p>');
+      h = h.replace(/\*\*(.+?)\*\*/g, '<strong class="text-zinc-200">$1</strong>');
+      h = h.replace(/^- (.+)$/gm, "<li>$1</li>");
+      h = h.replace(/(<li>.*<\/li>\n?)+/g, (m) => `<ul>${m}</ul>`);
+      const tableMatch = h.match(/\|[^\n]+\|\n\|[-| ]+\|\n(?:\|[^\n]+\|\n?)+/);
+      if (tableMatch) {
+        const lines = tableMatch[0].trim().split("\n");
+        const head = lines[0].split("|").filter(Boolean).map((c) => c.trim());
+        const rows = lines.slice(2).map((line) => line.split("|").filter(Boolean).map((c) => c.trim()));
+        let tbl = "<table><thead><tr>" + head.map((c) => `<th>${c}</th>`).join("") + "</tr></thead><tbody>";
+        rows.forEach((r) => {
+          tbl += "<tr>" + r.map((c) => `<td>${c}</td>`).join("") + "</tr>";
+        });
+        tbl += "</tbody></table>";
+        h = h.replace(tableMatch[0], tbl);
+      }
+      h = h.replace(/```[\s\S]*?```/g, (m) => `<pre class="text-xs bg-zinc-950 p-3 rounded-lg overflow-x-auto text-zinc-400 my-2">${m.replace(/```/g, "")}</pre>`);
+      h = h.replace(/\n\n/g, "</p><p>");
+      return `<div>${h}</div>`;
+    }
+
+    function saveReportLocal(task, md) {
+      const list = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      const entry = {
+        id: Date.now(),
+        domain: task.domain,
+        title: `竞品报告 · ${task.domain}`,
+        date: new Date().toISOString(),
+        markdown: md,
+      };
+      list.unshift(entry);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(0, 20)));
+      return entry;
+    }
+
+    async function runAgentOffline(task) {
+      let pageText = "";
+      let fetchNote = "离线规则引擎（模拟 Tool/Browser/思维）";
+      setWorkflow("parse");
+      log("工作流 [离线]：模拟 Tool Calling + Browser", "wf");
+      log(`[离线] 解析任务：${task.domain}`, "info");
+      setWorkflow("plan", ["parse"]);
+      log("💭 规划：抓取官网并归纳功能（模拟 agent_think）", "think");
+      setWorkflow("browser", ["parse", "plan"]);
+      log("🔧 browser_open → 新标签页", "tool");
+      window.open(task.url, "_blank", "noopener,noreferrer");
+      setWorkflow("think", ["parse", "plan", "browser", "tools"]);
+      log("💭 归纳：从页面关键词提取功能与卖点（规则）", "think");
+      try {
+        pageText = await fetchPageText(task.url);
+        fetchNote = "Jina/代理抓取 + 规则模板";
+        log(`抓取约 ${pageText.length} 字`, "ok");
+      } catch (e) {
+        log(`抓取失败：${e.message}`, "warn");
+        const paste = document.getElementById("cfg-paste").value.trim();
+        if (paste) pageText = paste;
+        else if (SITE_SNAPSHOTS[task.domain]) {
+          pageText = SITE_SNAPSHOTS[task.domain].features.join("\n") + SITE_SNAPSHOTS[task.domain].tagline;
+          fetchNote = "内置快照 + 规则";
+        } else pageText = task.domain;
+      }
+      setWorkflow("tools", ["parse", "plan", "browser"]);
+      log("🔧 browser_crawl_site（单页 Jina）", "tool");
+      setWorkflow("report", ["parse", "plan", "browser", "tools", "think"]);
+      const data = extractFromText(pageText, task.domain);
+      const md = buildMarkdown(task, data, { fetchNote, rawExcerpt: pageText });
+      lastTraceJson = JSON.stringify(buildTrace(task, { thoughts: ["离线规则"], pages: [{ url: task.url }], corpus: pageText }, "offline"), null, 2);
+      setWorkflow("files", WORKFLOW_DEF.map((w) => w.id).filter((id) => id !== "files"));
+      return { md, fetchNote, files: [{ name: `competitor-${task.domain}.md`, content: md }] };
+    }
+
+    async function runAgent(task) {
+      saveConfig();
+      const mode = getMode();
+      running = true;
+      btnRun.disabled = true;
+      statusEl.textContent = mode === "full" ? "编排执行中…" : mode === "worker" ? "Worker…" : "离线…";
+      statusEl.classList.add("step-pulse");
+      logEl.innerHTML = "";
+      lastReportMd = "";
+      lastTraceJson = "";
+      WORKFLOW_DEF.forEach((s) => document.getElementById(`wf-${s.id}`)?.classList.remove("active", "done"));
+      document.getElementById("btn-copy-md").classList.add("hidden");
+      document.getElementById("btn-download-md").classList.add("hidden");
+      document.getElementById("btn-download-json").classList.add("hidden");
+      document.getElementById("btn-download-html").classList.add("hidden");
+
+      try {
+        let result;
+        if (mode === "worker") {
+          result = await runViaWorker(task);
+        } else if (mode === "full") {
+          log("若首次使用 Puter，可能需登录", "muted");
+          result = await runAgentOrchestrated(task);
+        } else {
+          result = await runAgentOffline(task);
+        }
+
+        const header = `> 模式：${mode} · ${result.fetchNote} · ${new Date().toISOString().slice(0, 16).replace("T", " ")}\n\n`;
+        lastReportMd = header + result.md;
+        previewEl.innerHTML = simpleMarkdownToHtml(lastReportMd);
+        log("保存至本地…", "info");
+        const entry = saveReportLocal(task, lastReportMd);
+        log(`完成 · 报告 #${entry.id}`, "ok");
+        document.getElementById("btn-copy-md").classList.remove("hidden");
+        document.getElementById("btn-download-md").classList.remove("hidden");
+        document.getElementById("btn-download-html").classList.remove("hidden");
+        if (lastTraceJson) document.getElementById("btn-download-json").classList.remove("hidden");
+        statusEl.textContent = "完成";
+      } catch (err) {
+        log(`失败：${err.message}`, "warn");
+        log("可试：粘贴官网文字 / 选「离线演示」/ 或请人配置「云端引擎」", "muted");
+        statusEl.textContent = "失败";
+      } finally {
+        running = false;
+        btnRun.disabled = false;
+        statusEl.classList.remove("step-pulse");
+      }
+    }
+
+    (function initConfig() {
+      const c = getConfig();
+      if (c.mode) document.getElementById("cfg-mode").value = c.mode;
+      if (c.workerUrl) document.getElementById("cfg-worker-url").value = c.workerUrl;
+      if (c.paste) document.getElementById("cfg-paste").value = c.paste;
+      document.getElementById("cfg-worker-wrap").classList.toggle("hidden", getMode() !== "worker");
+    })();
+
+    document.getElementById("agent-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (running) return;
+      const task = parseTask(inputEl.value);
+      if (!task) {
+        log("无法解析域名，请使用：分析 example.com", "warn");
+        return;
+      }
+      runAgent(task);
+    });
+
+    document.getElementById("btn-copy-md").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(lastReportMd);
+        log("报告已复制到剪贴板", "ok");
+      } catch {
+        alert("复制失败，请手动选择报告区域复制");
+      }
+    });
+
+    document.getElementById("btn-download-md").addEventListener("click", () => {
+      if (!lastReportMd) return;
+      const blob = new Blob([lastReportMd], { type: "text/markdown;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `competitor-report-${Date.now()}.md`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      log("已触发 .md 文件下载", "file");
+    });
+
+    document.getElementById("btn-download-html").addEventListener("click", () => {
+      if (!lastReportMd) return;
+      const task = parseTask(inputEl.value) || { domain: "report" };
+      const html = buildHtmlReport(`竞品报告 · ${task.domain}`, lastReportMd);
+      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `competitor-${task.domain}-${Date.now()}.html`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      log("已下载 .html（可用浏览器或 Word 打开）", "file");
+    });
+
+    document.getElementById("btn-download-json").addEventListener("click", () => {
+      if (!lastTraceJson) return;
+      const blob = new Blob([lastTraceJson], { type: "application/json;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `agent-trace-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      log("已下载 Agent Trace（含思维/工具/页面）", "file");
+    });
+
+    document.getElementById("btn-history").addEventListener("click", () => {
+      const list = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      const ul = document.getElementById("history-list");
+      if (!list.length) {
+        ul.innerHTML = '<li class="text-zinc-500">暂无保存记录</li>';
+      } else {
+        ul.innerHTML = list
+          .map(
+            (item) => `<li class="border border-zinc-800 rounded-lg p-3 flex justify-between gap-2 items-center">
+            <div><p class="font-semibold text-violet-300">${item.domain}</p><p class="text-xs text-zinc-500 mt-1">${item.date.slice(0, 19).replace("T", " ")}</p></div>
+            <button type="button" class="text-xs px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 shrink-0" data-load-id="${item.id}">打开</button></li>`
+          )
+          .join("");
+        ul.querySelectorAll("[data-load-id]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const item = list.find((x) => x.id === Number(btn.dataset.loadId));
+            if (!item) return;
+            lastReportMd = item.markdown;
+            previewEl.innerHTML = simpleMarkdownToHtml(item.markdown);
+            document.getElementById("btn-copy-md").classList.remove("hidden");
+            document.getElementById("btn-download-md").classList.remove("hidden");
+            document.getElementById("history-dialog").close();
+            log(`已加载历史报告：${item.domain}`, "info");
+          });
+        });
+      }
+      document.getElementById("history-dialog").showModal();
+    });
+
+    document.getElementById("history-close").addEventListener("click", () => {
+      document.getElementById("history-dialog").close();
+    });
+  </script>
+</body>
+</html>

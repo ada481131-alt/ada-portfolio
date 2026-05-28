@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI 产品经理简历助手 · Demo | Ada Liu</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
   <style>
     :root { --brand: #0d9488; }
     body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f8fafc; }
@@ -12,8 +14,11 @@
     .panel { display: none; }
     .panel.active { display: block; }
     .score-ring { background: conic-gradient(var(--brand) calc(var(--p) * 1%), #e2e8f0 0); }
-    pre.bullet { white-space: pre-wrap; font-family: inherit; font-size: 13px; line-height: 1.75; }
+    pre.bullet, pre.resume-out { white-space: pre-wrap; font-family: inherit; font-size: 13px; line-height: 1.85; }
     .jd-preview { max-height: 120px; object-fit: contain; }
+    .flow-hidden { display: none !important; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { animation: spin 0.8s linear infinite; }
   </style>
 </head>
 <body class="text-slate-800 text-sm min-h-screen">
@@ -21,7 +26,7 @@
     <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
       <div>
         <a href="index.html#work" class="font-semibold text-teal-700 hover:underline">← 作品集</a>
-        <p class="text-xs text-slate-500 mt-0.5">主投 AI 产品相关岗 · 以 JD 为准自动解析 · 本机处理</p>
+        <p class="text-xs text-slate-500 mt-0.5">上传简历 + JD → 完整分析 → 可选生成改稿 · 本机处理</p>
       </div>
       <a href="prd.html?p=7" class="text-xs font-semibold text-teal-700 border border-teal-200 px-3 py-1.5 rounded-full hover:bg-teal-50">PRD 摘要</a>
     </div>
@@ -29,65 +34,78 @@
 
   <main class="max-w-6xl mx-auto px-4 py-6">
     <h1 class="text-2xl md:text-3xl font-black tracking-tight">AI 产品经理 · 简历助手</h1>
-    <p class="mt-2 text-slate-600 leading-7 max-w-3xl">
-      主方向：<strong>AI 产品经理</strong>及各类相关岗（AI SaaS、AI 硬件、智能客服、大模型应用、增长向 AI 等）。
-      你上传或粘贴<strong>招聘 JD</strong>（截图请对照录入文字），系统从 JD 里识别<strong>岗位名称、薪资</strong>与能力要求，再对照简历给建议——不把你锁死在少数几个模板里。
+    <p class="mt-2 text-slate-600 leading-8 max-w-3xl">
+      上传 <strong>PDF / Word（.docx）</strong> 或粘贴简历，再粘贴目标 <strong>JD</strong>。
+      点击「开始完整分析」后一次性给出：JD 解析、匹配度、<strong>建议补充能力</strong>、优化要点、面试题、竞争力、薪资对比；
+      再询问你是否<strong>生成针对该 JD 的修改版简历稿</strong>（演示为规则改写，正式版可接大模型）。
     </p>
 
     <div class="mt-6 grid lg:grid-cols-[220px_1fr] gap-5">
       <aside class="bg-white rounded-2xl border border-slate-200 p-2 h-fit lg:sticky lg:top-20">
         <nav class="flex lg:flex-col gap-1 overflow-x-auto" id="tabs">
-          <button type="button" class="tab active flex-1 lg:flex-none text-left px-3 py-2.5 rounded-xl text-slate-600 whitespace-nowrap" data-panel="optimize">简历优化</button>
+          <button type="button" class="tab active flex-1 lg:flex-none text-left px-3 py-2.5 rounded-xl text-slate-600 whitespace-nowrap" data-panel="summary">分析汇总</button>
+          <button type="button" class="tab flex-1 lg:flex-none text-left px-3 py-2.5 rounded-xl text-slate-600 whitespace-nowrap" data-panel="optimize">简历优化</button>
+          <button type="button" class="tab flex-1 lg:flex-none text-left px-3 py-2.5 rounded-xl text-slate-600 whitespace-nowrap" data-panel="capability">能力对标</button>
           <button type="button" class="tab flex-1 lg:flex-none text-left px-3 py-2.5 rounded-xl text-slate-600 whitespace-nowrap" data-panel="match">JD 匹配</button>
           <button type="button" class="tab flex-1 lg:flex-none text-left px-3 py-2.5 rounded-xl text-slate-600 whitespace-nowrap" data-panel="interview">模拟面试</button>
           <button type="button" class="tab flex-1 lg:flex-none text-left px-3 py-2.5 rounded-xl text-slate-600 whitespace-nowrap" data-panel="compete">竞争力</button>
           <button type="button" class="tab flex-1 lg:flex-none text-left px-3 py-2.5 rounded-xl text-slate-600 whitespace-nowrap" data-panel="salary">薪资对比</button>
+          <button type="button" class="tab flex-1 lg:flex-none text-left px-3 py-2.5 rounded-xl text-slate-600 whitespace-nowrap" data-panel="draft">改稿输出</button>
         </nav>
-        <button type="button" id="run-all" class="mt-3 w-full py-2.5 rounded-xl text-white font-semibold text-sm hidden lg:block" style="background:var(--brand)">一键全流程分析</button>
       </aside>
 
       <div class="space-y-4">
-        <section class="bg-white rounded-2xl border border-slate-200 p-5">
-          <div class="flex flex-wrap justify-between gap-2 items-center mb-3">
-            <h2 class="font-bold">输入材料</h2>
+        <!-- 输入 -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 md:p-6">
+          <div class="flex flex-wrap justify-between gap-2 items-center mb-4">
+            <h2 class="font-bold text-lg">① 上传材料</h2>
             <div class="flex flex-wrap gap-2 text-xs">
               <button type="button" id="load-sample" class="px-3 py-1.5 rounded-full border border-slate-200 hover:bg-slate-50">载入示例简历</button>
               <button type="button" id="load-jd" class="px-3 py-1.5 rounded-full border border-teal-200 text-teal-800 hover:bg-teal-50">载入示例 JD</button>
             </div>
           </div>
 
-          <div class="grid md:grid-cols-2 gap-4">
+          <div class="grid md:grid-cols-2 gap-5">
             <div>
-              <label class="text-xs font-semibold text-slate-500">我的简历 / 经历</label>
-              <textarea id="resume-in" rows="9" class="mt-1 w-full border border-slate-200 rounded-xl p-3 text-sm leading-6 outline-none focus:ring-2 focus:ring-teal-200" placeholder="粘贴简历全文或经历要点…"></textarea>
+              <label class="text-xs font-semibold text-slate-500">我的简历</label>
+              <div class="mt-2 flex flex-wrap gap-2 items-center">
+                <label class="cursor-pointer px-4 py-2 rounded-full bg-teal-600 text-white text-xs font-semibold hover:bg-teal-500">
+                  上传 PDF / Word
+                  <input type="file" id="resume-file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hidden" />
+                </label>
+                <span id="resume-file-name" class="text-xs text-slate-500">未选择文件</span>
+              </div>
+              <p id="resume-parse-status" class="mt-2 text-xs text-slate-500"></p>
+              <p class="mt-1 text-[11px] text-slate-400">支持 .pdf、.docx；旧版 .doc 请另存为 .docx 或 PDF。解析后填入下方，可再手动修改。</p>
+              <textarea id="resume-in" rows="9" class="mt-2 w-full border border-slate-200 rounded-xl p-3 text-sm leading-7 outline-none focus:ring-2 focus:ring-teal-200" placeholder="上传后自动填入，或直接粘贴简历全文…"></textarea>
             </div>
             <div>
-              <label class="text-xs font-semibold text-slate-500">目标 JD（粘贴招聘详情文字）</label>
-              <div class="mt-1 mb-2 flex flex-wrap gap-2 items-center">
+              <label class="text-xs font-semibold text-slate-500">目标 JD</label>
+              <div class="mt-2 mb-2 flex flex-wrap gap-2 items-center">
                 <label class="cursor-pointer px-3 py-1.5 rounded-full border border-dashed border-teal-300 text-teal-800 text-xs font-medium hover:bg-teal-50">
                   上传 JD 截图
                   <input type="file" id="jd-image" accept="image/*" class="hidden" />
                 </label>
-                <span class="text-[11px] text-slate-400">演示：请对照截图把文字贴到下方；正式版 OCR 自动识别</span>
+                <span class="text-[11px] text-slate-400">截图仅预览，文字请粘贴到下方</span>
               </div>
               <img id="jd-preview" class="jd-preview hidden mb-2 rounded-lg border border-slate-200 max-w-full" alt="JD 截图预览" />
-              <textarea id="jd-in" rows="8" class="w-full border border-slate-200 rounded-xl p-3 text-sm leading-6 outline-none focus:ring-2 focus:ring-teal-200" placeholder="岗位名称、薪资、职责、任职要求…（BOSS/猎聘截图里的文字可复制到这里）"></textarea>
+              <textarea id="jd-in" rows="9" class="w-full border border-slate-200 rounded-xl p-3 text-sm leading-7 outline-none focus:ring-2 focus:ring-teal-200" placeholder="岗位、薪资、职责、任职要求…"></textarea>
             </div>
           </div>
 
           <div id="jd-parsed" class="mt-4 p-4 rounded-xl bg-teal-50/60 border border-teal-100 text-sm hidden">
-            <p class="text-xs font-bold text-teal-800 uppercase tracking-wide">从 JD 自动识别</p>
+            <p class="text-xs font-bold text-teal-800 uppercase tracking-wide">JD 预解析（输入时实时更新）</p>
             <div class="mt-2 grid sm:grid-cols-2 gap-3">
               <p><span class="text-slate-500">岗位名称：</span><strong id="parsed-title">—</strong></p>
               <p><span class="text-slate-500">JD 薪资：</span><strong id="parsed-salary">—</strong></p>
             </div>
-            <p class="mt-2 text-slate-500 text-xs">能力画像（参考，可重叠）：</p>
+            <p class="mt-2 text-slate-500 text-xs">能力画像（可重叠）：</p>
             <div id="parsed-tags" class="mt-1 flex flex-wrap gap-1.5"></div>
           </div>
 
           <div class="mt-4 grid sm:grid-cols-2 gap-3">
             <div>
-              <label class="text-xs text-slate-500">你所在 / 期望城市（薪资模型用，可被 JD 城市覆盖）</label>
+              <label class="text-xs text-slate-500">期望城市（薪资模型用）</label>
               <select id="city" class="mt-1 w-full border border-slate-200 rounded-lg px-2 py-2 text-sm">
                 <option value="sh">上海</option>
                 <option value="sz">深圳</option>
@@ -99,7 +117,7 @@
               </select>
             </div>
             <div>
-              <label class="text-xs text-slate-500">经验年限（JD 未写时用于估算）</label>
+              <label class="text-xs text-slate-500">经验年限</label>
               <select id="level" class="mt-1 w-full border border-slate-200 rounded-lg px-2 py-2 text-sm">
                 <option value="1-3">1–3 年</option>
                 <option value="3-5" selected>3–5 年</option>
@@ -107,52 +125,90 @@
               </select>
             </div>
           </div>
+
+          <button type="button" id="btn-analyze-full" class="mt-6 w-full sm:w-auto px-8 py-3.5 rounded-xl text-white font-bold text-base shadow-lg shadow-teal-200/50 hover:opacity-95" style="background:var(--brand)">
+            ② 开始完整分析
+          </button>
+          <p class="mt-2 text-xs text-slate-400">分析在本机完成，不上传服务器。薪资/竞争力为示意模型。</p>
         </section>
 
-        <section id="panel-optimize" class="panel active bg-white rounded-2xl border border-slate-200 p-5">
-          <h2 class="font-bold text-lg">简历优化建议</h2>
-          <p class="text-xs text-slate-500 mt-1">按<strong>当前 JD 原文</strong>提取的要求给修改建议，不写死岗位类型。</p>
-          <button type="button" class="analyze-btn mt-4 px-4 py-2 rounded-lg text-white text-sm font-semibold" data-target="optimize" style="background:var(--brand)">生成优化建议</button>
+        <!-- 分析汇总 -->
+        <section id="panel-summary" class="panel active bg-white rounded-2xl border border-slate-200 p-5 md:p-6">
+          <h2 class="font-bold text-lg">③ 分析汇总</h2>
+          <p class="text-xs text-slate-500 mt-1">完成「开始完整分析」后显示。左侧 Tab 可查看各模块详情。</p>
+          <div id="out-summary" class="mt-4 text-slate-500">请先上传/粘贴简历与 JD，并点击「开始完整分析」。</div>
+        </section>
+
+        <!-- 是否生成 -->
+        <section id="generate-gate" class="flow-hidden bg-gradient-to-br from-teal-50 to-white rounded-2xl border-2 border-teal-200 p-6 md:p-8" data-flow="result">
+          <h2 class="font-bold text-lg text-teal-900">④ 是否生成修改版简历？</h2>
+          <p class="mt-2 text-slate-600 leading-8">已根据上方分析结果，可生成一版<strong>针对当前 JD</strong>的简历稿（在原文基础上补充关键词与摘要，演示为规则改写，请人工核对后投递）。</p>
+          <div class="mt-5 flex flex-wrap gap-3">
+            <button type="button" id="btn-generate-yes" class="px-6 py-3 rounded-xl text-white font-semibold" style="background:var(--brand)">生成针对该 JD 的简历稿</button>
+            <button type="button" id="btn-generate-no" class="px-6 py-3 rounded-xl border border-slate-200 font-semibold hover:bg-slate-50">暂不需要，仅保留分析</button>
+          </div>
+        </section>
+
+        <section id="panel-optimize" class="panel bg-white rounded-2xl border border-slate-200 p-5 flow-hidden" data-flow="result">
+          <h2 class="font-bold text-lg">简历优化建议（详情）</h2>
           <div id="out-optimize" class="mt-4 space-y-3"></div>
         </section>
 
-        <section id="panel-match" class="panel bg-white rounded-2xl border border-slate-200 p-5">
-          <h2 class="font-bold text-lg">JD 匹配度</h2>
-          <button type="button" class="analyze-btn mt-4 px-4 py-2 rounded-lg text-white text-sm font-semibold" data-target="match" style="background:var(--brand)">分析匹配</button>
+        <section id="panel-capability" class="panel bg-white rounded-2xl border border-slate-200 p-5 flow-hidden" data-flow="result">
+          <h2 class="font-bold text-lg">能力对标（详情）</h2>
+          <p class="text-xs text-slate-500 mt-1">从 JD 任职要求抽取能力项，对照简历判断<strong>已具备 / 建议补充</strong>，并给出写法提示。</p>
+          <div id="out-capability" class="mt-4"></div>
+        </section>
+
+        <section id="panel-match" class="panel bg-white rounded-2xl border border-slate-200 p-5 flow-hidden" data-flow="result">
+          <h2 class="font-bold text-lg">JD 匹配度（详情）</h2>
+          <p class="text-xs text-slate-500 mt-1">关键词层面的覆盖情况（与「能力对标」互补）。</p>
           <div id="out-match" class="mt-4"></div>
         </section>
 
-        <section id="panel-interview" class="panel bg-white rounded-2xl border border-slate-200 p-5">
-          <h2 class="font-bold text-lg">模拟面试题</h2>
-          <p class="text-xs text-slate-500 mt-1">通用 AI PM 题 + 从 JD/简历抽出的定制题。</p>
-          <button type="button" class="analyze-btn mt-4 px-4 py-2 rounded-lg text-white text-sm font-semibold" data-target="interview" style="background:var(--brand)">生成面试题</button>
+        <section id="panel-interview" class="panel bg-white rounded-2xl border border-slate-200 p-5 flow-hidden" data-flow="result">
+          <h2 class="font-bold text-lg">模拟面试题（详情）</h2>
           <div id="out-interview" class="mt-4 space-y-4"></div>
         </section>
 
-        <section id="panel-compete" class="panel bg-white rounded-2xl border border-slate-200 p-5">
-          <h2 class="font-bold text-lg">竞争力评估</h2>
-          <p class="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mt-2">演示打分，非招聘平台官方测评；结合 JD 要求与简历内容生成说明。</p>
-          <button type="button" class="analyze-btn mt-4 px-4 py-2 rounded-lg text-white text-sm font-semibold" data-target="compete" style="background:var(--brand)">评估竞争力</button>
+        <section id="panel-compete" class="panel bg-white rounded-2xl border border-slate-200 p-5 flow-hidden" data-flow="result">
+          <h2 class="font-bold text-lg">竞争力评估（详情）</h2>
+          <p class="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mt-2">演示打分，非官方测评。</p>
           <div id="out-compete" class="mt-4"></div>
         </section>
 
-        <section id="panel-salary" class="panel bg-white rounded-2xl border border-slate-200 p-5">
-          <h2 class="font-bold text-lg">薪资：JD vs 市场参考</h2>
-          <p class="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mt-2">优先展示 JD 里写明的薪资；另给市场区间作谈判参考（示意模型）。</p>
-          <button type="button" class="analyze-btn mt-4 px-4 py-2 rounded-lg text-white text-sm font-semibold" data-target="salary" style="background:var(--brand)">分析薪资</button>
+        <section id="panel-salary" class="panel bg-white rounded-2xl border border-slate-200 p-5 flow-hidden" data-flow="result">
+          <h2 class="font-bold text-lg">薪资对比（详情）</h2>
           <div id="out-salary" class="mt-4"></div>
+        </section>
+
+        <section id="panel-draft" class="panel bg-white rounded-2xl border border-slate-200 p-5 flow-hidden" data-flow="result">
+          <div class="flex flex-wrap justify-between gap-3 items-center">
+            <h2 class="font-bold text-lg">⑤ 针对 JD 的简历稿</h2>
+            <button type="button" id="btn-copy-draft" class="hidden px-4 py-2 rounded-lg border border-teal-200 text-teal-800 font-semibold text-sm hover:bg-teal-50">复制全文</button>
+          </div>
+          <p class="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mt-3">【演示】规则改写，非大模型生成。投递前请核对事实与敏感信息。</p>
+          <pre id="out-draft" class="resume-out mt-4 p-4 rounded-xl bg-slate-50 border border-slate-100 text-slate-800">点击「生成针对该 JD 的简历稿」后显示。</pre>
         </section>
       </div>
     </div>
   </main>
 
   <script>
-    const SAMPLE_RESUME = `Ada Liu · AI 产品经理 · 2023 至今
+    if (typeof pdfjsLib !== "undefined") {
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+
+    const SAMPLE_RESUME = `Ada Liu · AI 产品经理
 
 【工作经历】
-海外游戏 AI 初创 · AI 产品经理 · 2025.7 至今
-- 客户运营一体化 SaaS：AI 玩家客服、人工坐席、AI 外呼、AI 营销增长
-- RAG 知识库、Prompt 验证、解决率/转人工率、PRD 与可交互 Demo 交付
+1. 某 AI 初创公司 · AI 产品经理 · 2025.7 至今
+   - 海外游戏：AI 玩家客服、人工坐席、AI 外呼、AI 营销
+2. 华为技术有限公司 · AI 产品经理 · 2024.9 — 2025.4
+3. 百度科技技术有限公司 · AI 产品助理 · 2023.11 — 2024.9
+   - 协助大模型 / 智能客服产品，PRD、评测、Demo 验证
+4. 字节跳动网络技术有限公司 · 抖火热点运营 · 2019.12 — 2022.2
 
 【技能】大模型应用 / RAG / Agent / SaaS / 数据指标 / 跨研发运营协作`;
 
@@ -190,6 +246,23 @@
       { id: "game", label: "游戏 / 出海", re: /游戏|出海|海外|发行|SLG|手游/i },
     ];
 
+    /** JD 能力项：jdRe 命中 JD 则纳入对标；core 在 AI 类 JD 下默认纳入 */
+    const CAPABILITY_ITEMS = [
+      { label: "产品规划与 PRD 交付", category: "产品", core: true, jdRe: /产品规划|PRD|需求分析|产品方案|roadmap|迭代/i, resumeRe: /PRD|需求|迭代|产品规划|方案设计|0→1/i, tip: "在最近一段经历写清：负责哪条产品线、输出 PRD、评审与上线节奏。" },
+      { label: "大模型 / LLM 应用落地", category: "AI", core: true, jdRe: /大模型|LLM|GPT|AIGC|生成式|人工智能/i, resumeRe: /大模型|LLM|GPT|AI|人工智能|AIGC/i, tip: "写清场景、模型能力边界、效果指标与 Badcase 闭环。" },
+      { label: "Prompt 工程", category: "AI", core: false, jdRe: /Prompt|提示词/i, resumeRe: /Prompt|提示词/i, tip: "补 1 句：Prompt 迭代、版本管理与 A/B 对比方法。" },
+      { label: "RAG / 知识库", category: "AI", core: false, jdRe: /RAG|检索|知识库|向量|embedding|召回/i, resumeRe: /RAG|知识库|检索|embedding|召回|切片/i, tip: "写清：分层/切片规则、转人工策略、解决率或准确率变化。" },
+      { label: "Agent / Copilot / 工作流", category: "AI", core: false, jdRe: /Agent|Copilot|工作流|编排|工具调用/i, resumeRe: /Agent|Copilot|工作流|编排/i, tip: "若有编排或工具链经验，在项目里点明用户路径与失败兜底。" },
+      { label: "评测体系与灰度上线", category: "AI", core: false, jdRe: /评测|评估|灰度|AB|A\/B|badcase|效果指标/i, resumeRe: /评测|灰度|A\/B|AB测试|badcase|效果|指标/i, tip: "补：评测集构建、上线前后对比、灰度范围与回滚条件。" },
+      { label: "低代码 / 快速验证", category: "AI", core: false, jdRe: /低代码|零代码|快速验证|原型|Demo/i, resumeRe: /低代码|零代码|Demo|原型|验证/i, tip: "强调：用 Demo 验证后再 PRD 工程化，避免只会搭壳。" },
+      { label: "数据分析与实验", category: "数据", core: false, jdRe: /数据分析|数据驱动|A\/B|实验|指标|SQL/i, resumeRe: /数据分析|A\/B|实验|指标|SQL|ROI|留存|转化/i, tip: "每条经历尽量带 1 个数字或对比（前后、同比、区间）。" },
+      { label: "B 端 / SaaS 商业化", category: "商业", core: false, jdRe: /SaaS|B端|订阅|MRR|ARR|计费|私有化|租户/i, resumeRe: /SaaS|B端|订阅|MRR|ARR|计费|私有化|租户|NDR/i, tip: "写客户类型、套餐/计费思路、续费或 ROI 若可脱敏。" },
+      { label: "智能客服 / 坐席协同", category: "场景", core: false, jdRe: /客服|坐席|呼叫中心|智能客服|转人工/i, resumeRe: /客服|坐席|转人工|解决率|工单/i, tip: "写解决率、转人工率、知识库治理与人机分工。" },
+      { label: "增长 / 营销 / 外呼", category: "场景", core: false, jdRe: /增长|营销|外呼|分群|留存|转化|LTV/i, resumeRe: /增长|营销|外呼|分群|留存|转化|LTV|ROI/i, tip: "写分群逻辑、触达渠道与收入/留存类指标。" },
+      { label: "跨团队协作", category: "协作", core: true, jdRe: /跨|协作|算法|研发|运营|销售|设计/i, resumeRe: /跨|协作|研发|算法|运营|设计|推动/i, tip: "点明协作方与你的推动动作（对齐、排期、验收）。" },
+      { label: "英语 / 出海", category: "其他", core: false, jdRe: /英语|英文|出海|海外|多语言/i, resumeRe: /英语|英文|出海|海外|多语言/i, tip: "若有海外业务或英文文档/会议，单独写一句。" },
+    ];
+
     const INTERVIEW_POOL = [
       { tags: ["ai_core"], tag: "AI 通用", q: "你如何定义一次 AI 功能「上线成功」？指标有哪些？", tip: "效果+成本+时延+安全；评测集与灰度。" },
       { tags: ["ai_core"], tag: "RAG", q: "RAG 效果不佳时，你作为 PM 的排查路径？", tip: "数据、切片、召回、Prompt、评测、Case 复盘。" },
@@ -201,8 +274,21 @@
       { tags: ["*"], tag: "项目", q: "介绍一个你负责的 0→1 或从 Demo 到上线的 AI 项目。", tip: "背景、你的决策、指标、反思。" },
     ];
 
+    const SALARY_TABLE = {
+      sh: { "1-3": [18, 30], "3-5": [25, 45], "5+": [35, 60] },
+      sz: { "1-3": [20, 32], "3-5": [28, 48], "5+": [38, 65] },
+      bj: { "1-3": [18, 30], "3-5": [26, 45], "5+": [36, 58] },
+      hz: { "1-3": [16, 28], "3-5": [22, 40], "5+": [32, 52] },
+      gz: { "1-3": [15, 26], "3-5": [20, 38], "5+": [30, 48] },
+      cd: { "1-3": [14, 24], "3-5": [18, 35], "5+": [28, 45] },
+      remote: { "1-3": [20, 38], "3-5": [30, 55], "5+": [45, 75] },
+    };
+
+    const CITY_NAME = { sh: "上海", sz: "深圳", bj: "北京", hz: "杭州", gz: "广州", cd: "成都", remote: "远程/出海" };
+
     const resumeEl = document.getElementById("resume-in");
     const jdEl = document.getElementById("jd-in");
+    let lastAnalysis = null;
 
     function saveInputs() {
       localStorage.setItem(
@@ -244,7 +330,6 @@
         /(\d{1,3})\s*[-~至到]\s*(\d{1,3})\s*[kK千](?:\s*[·\*xX]\s*(\d{1,2}))?/,
         /(\d{2,3})[kK]\s*[-~至]\s*(\d{2,3})[kK]/,
         /年薪\s*(\d{2,3})\s*[-~至]\s*(\d{2,3})\s*万/,
-        /(\d{1,2})\s*[-~至]\s*(\d{1,2})\s*万\s*\/\s*月/,
       ];
       for (const p of patterns) {
         const m = jd.match(p);
@@ -279,7 +364,6 @@
       return {
         title: parseTitle(jd),
         salary: parseSalary(jd),
-        salaryRaw: parseSalary(jd),
         themes: detectThemes(jd),
         cityFromJd: parseCityFromJd(jd),
       };
@@ -290,16 +374,16 @@
       const box = document.getElementById("jd-parsed");
       if (!jd) {
         box.classList.add("hidden");
-        return;
+        return null;
       }
       const p = parseJD(jd);
       box.classList.remove("hidden");
       document.getElementById("parsed-title").textContent = p.title;
-      document.getElementById("parsed-salary").textContent = p.salary || "JD 未写明（将用市场模型估算）";
+      document.getElementById("parsed-salary").textContent = p.salary || "JD 未写明";
       document.getElementById("parsed-tags").innerHTML =
         p.themes.length > 0
           ? p.themes.map((t) => `<span class="text-xs px-2 py-0.5 rounded-full bg-white border border-teal-200 text-teal-900">${t.label}</span>`).join("")
-          : '<span class="text-xs text-slate-500">将从 JD 全文提取关键词（不限定岗位模板）</span>';
+          : '<span class="text-xs text-slate-500">将从 JD 全文提取关键词</span>';
       if (p.cityFromJd) document.getElementById("city").value = p.cityFromJd;
       return p;
     }
@@ -309,21 +393,28 @@
       KEYWORD_POOL.forEach((kw) => {
         if (jd.includes(kw)) set.add(kw);
       });
-      const eng = jd.match(/[A-Za-z][A-Za-z0-9+/]{1,20}/g) || [];
-      eng.forEach((w) => {
+      jd.match(/[A-Za-z][A-Za-z0-9+/]{1,20}/g)?.forEach((w) => {
         if (w.length >= 2 && w.length <= 12) set.add(w);
       });
-      jd.match(/[\u4e00-\u9fa5]{2,8}/g)?.forEach((w) => {
-        if (/产品|经理|AI|智能|大模型|数据|运营|增长|设计|算法|平台|系统|管理|经验|能力|负责|熟悉|优先/.test(w)) set.add(w);
-      });
       return [...set].slice(0, 40);
+    }
+
+    function themeTips(themes) {
+      const tips = [];
+      const ids = new Set(themes.map((t) => t.id));
+      if (ids.has("ai_core") || ids.size === 0) tips.push("突出：评测集、模型边界、效果/成本指标、Badcase 闭环、可演示 Demo。");
+      if (ids.has("saas")) tips.push("突出：商业模式、续费与 ROI、API/私有化若 JD 有写。");
+      if (ids.has("hardware")) tips.push("突出：端云分工、量产/认证；软件岗写清协作边界。");
+      if (ids.has("cs")) tips.push("突出：解决率、转人工、知识库治理、人机协同。");
+      if (ids.has("growth")) tips.push("突出：实验对照、ROI、与运营/数据协作。");
+      if (ids.has("game")) tips.push("突出：出海、支付/合规、玩家运营指标。");
+      return tips;
     }
 
     function matchAnalysis() {
       const resume = resumeEl.value.trim();
       const jd = jdEl.value.trim();
       if (!resume || !jd) return null;
-
       const parsed = parseJD(jd);
       const jdKw = extractJdKeywords(jd);
       const hit = jdKw.filter((k) => resume.includes(k));
@@ -331,62 +422,254 @@
       const base = jdKw.length ? Math.round((hit.length / jdKw.length) * 100) : 50;
       const titleBonus = parsed.title.length > 4 && resume.includes("产品") ? 5 : 0;
       const score = Math.min(92, base + titleBonus);
-
-      return { score, hit, miss, jdKw, parsed, resume };
+      return { score, hit, miss, jdKw, parsed, resume, jd };
     }
 
-    function themeTips(themes) {
-      const tips = [];
-      const ids = new Set(themes.map((t) => t.id));
-      if (ids.has("ai_core") || ids.size === 0)
-        tips.push("突出：评测集、模型边界、效果/成本指标、Badcase 闭环、可演示 Demo。");
-      if (ids.has("saas"))
-        tips.push("突出：客户类型、商业模式（订阅/按量）、续费与 ROI、API/私有化若 JD 有写。");
-      if (ids.has("hardware"))
-        tips.push("突出：端云分工、量产/认证/成本；若偏软件岗，写清与硬件团队协作边界。");
-      if (ids.has("cs"))
-        tips.push("突出：解决率、转人工、知识库治理、人机协同、合规话术。");
-      if (ids.has("growth"))
-        tips.push("突出：实验对照、渗透率、LTV/ROI、与运营/数据协作。");
-      if (ids.has("game"))
-        tips.push("突出：出海、多语言、支付/合规、玩家运营指标。");
-      return tips;
+    function buildInterviewList(m) {
+      const themeIds = new Set(m.parsed.themes.map((t) => t.id));
+      const picked = [];
+      INTERVIEW_POOL.forEach((q) => {
+        if (q.tags.includes("*") || q.tags.some((t) => themeIds.has(t))) picked.push(q);
+      });
+      m.jd.split(/\n/).filter((l) => /负责|要求|熟悉|优先|经验/.test(l)).slice(0, 3).forEach((line) => {
+        picked.push({
+          tag: "JD 定制",
+          q: `针对 JD：「${line.slice(0, 48)}…」如何结合你的经历回答？`,
+          tip: "用 STAR，对应简历最近一段相关项目。",
+        });
+      });
+      const uniq = [];
+      const seen = new Set();
+      picked.forEach((q) => {
+        const k = q.q.slice(0, 28);
+        if (!seen.has(k)) {
+          seen.add(k);
+          uniq.push(q);
+        }
+      });
+      return uniq.slice(0, 8);
+    }
+
+    function buildCompeteDims(m) {
+      const r = m.resume;
+      return [
+        { name: "与 JD 匹配", score: m.score, note: "基于 JD 全文关键词" },
+        { name: "AI 落地深度", score: /RAG|Prompt|大模型|Agent|LLM|AI/i.test(r) ? 80 : 50, note: "项目可追问" },
+        { name: "量化结果", score: /%|率|ROI|MRR|提升|降低|\d/.test(r) ? 78 : 52, note: "是否有数字" },
+        { name: "交付物", score: /PRD|Demo|作品集|上线|交付/i.test(r) ? 85 : 58, note: "可验证产出" },
+        { name: "沟通协作", score: /跨|协作|运营|研发|算法/i.test(r) ? 76 : 60, note: "协作方匹配" },
+      ];
+    }
+
+    function marketEstimate(parsed, city, level, matchScore) {
+      let mult = 1;
+      const title = parsed.title;
+      if (/硬件|IoT|芯片/i.test(title)) mult *= 1.06;
+      if (/SaaS|B端|企业/i.test(title)) mult *= 1.04;
+      if (/专家|负责人|总监|高级|senior/i.test(title)) mult *= 1.1;
+      const base = SALARY_TABLE[city][level].map((v) => Math.round(v * mult));
+      const boost = matchScore >= 75 ? 3 : 0;
+      return { low: base[0] + boost, high: base[1] + boost, mid: Math.round((base[0] + base[1]) / 2) + boost };
+    }
+
+    function buildCapabilityGap(m) {
+      const { jd, resume } = m;
+      const isAiJd = /AI|大模型|智能|RAG|LLM|产品经理/i.test(jd);
+      const items = [];
+
+      CAPABILITY_ITEMS.forEach((item) => {
+        const jdNeed = item.jdRe.test(jd);
+        if (!jdNeed && !(item.core && isAiJd)) return;
+
+        const resumeHas = item.resumeRe.test(resume);
+        let jdEvidence = "";
+        const lines = jd.split(/\n/).filter((l) => item.jdRe.test(l) && l.length < 120);
+        if (lines.length) jdEvidence = lines[0].replace(/^[\d.、\s]+/, "").slice(0, 60);
+
+        items.push({
+          label: item.label,
+          category: item.category,
+          status: resumeHas ? "covered" : "missing",
+          tip: item.tip,
+          jdEvidence,
+        });
+      });
+
+      const covered = items.filter((i) => i.status === "covered");
+      const missing = items.filter((i) => i.status === "missing");
+      return { covered, missing, items };
+    }
+
+    function buildOptimizeBullets(m) {
+      const p = m.parsed;
+      const cap = m.capabilityGap || buildCapabilityGap(m);
+      const missCap = cap.missing.slice(0, 6).map((c) => c.label).join("、");
+
+      return [
+        { title: `针对岗位：${p.title}`, body: `能力画像：${p.themes.map((t) => t.label).join("、") || "通用 AI 产品"}。摘要与意向岗位名建议同向。` },
+        {
+          title: "建议补充能力（优先）",
+          body: cap.missing.length
+            ? cap.missing.map((c) => `· ${c.label}：${c.tip}`).join("\n")
+            : "JD 对标能力项已基本覆盖，重点打磨量化结果与项目深度。",
+        },
+        { title: "置顶「结果 + 指标」", body: "每条经历第一句写可量化结果，再写动作。" },
+        {
+          title: "建议补充关键词",
+          body: m.miss.length
+            ? `${m.miss.slice(0, 10).join("、")}${missCap ? `\n（与能力项重叠处可合并进同一句，如：${missCap}）` : ""}`
+            : "关键词覆盖较好。",
+        },
+        { title: "分场景提示", body: themeTips(p.themes).join("\n") },
+        { title: "STAR 骨架", body: "【情境】痛点\n【动作】你的方案与协作\n【结果】指标\n【反思】改进点" },
+      ];
+    }
+
+    function buildFullAnalysis() {
+      const m = matchAnalysis();
+      if (!m) return null;
+      const city = document.getElementById("city").value;
+      const level = document.getElementById("level").value;
+      const interviews = buildInterviewList(m);
+      const dims = buildCompeteDims(m);
+      const overall = Math.round(dims.reduce((a, d) => a + d.score, 0) / dims.length);
+      const market = marketEstimate(m.parsed, city, level, m.score);
+      const capabilityGap = buildCapabilityGap(m);
+      const withCap = { ...m, capabilityGap };
+      return {
+        ...withCap,
+        city,
+        level,
+        cityName: CITY_NAME[city],
+        interviews,
+        dims,
+        overall,
+        market,
+        capabilityGap,
+        optimizeBullets: buildOptimizeBullets(withCap),
+        jdSalary: m.parsed.salary,
+      };
+    }
+
+    function renderCapabilityHtml(cap, compact) {
+      if (!cap.items.length) {
+        return '<p class="text-slate-500">未能从 JD 抽取能力项，请确认 JD 包含任职要求。</p>';
+      }
+      const missBlock =
+        cap.missing.length === 0
+          ? '<p class="text-emerald-700 text-sm">能力与 JD 要求基本对齐，可重点优化表述与数字。</p>'
+          : `<ul class="mt-3 space-y-3 text-sm leading-7">${cap.missing
+              .map(
+                (c) => `<li class="p-3 rounded-lg bg-amber-50 border border-amber-100">
+                <p class="font-semibold text-amber-900">${c.label} <span class="text-xs font-normal text-amber-700">(${c.category})</span></p>
+                ${c.jdEvidence ? `<p class="text-xs text-slate-500 mt-1">JD：${c.jdEvidence}</p>` : ""}
+                <p class="mt-1 text-slate-700"><strong>建议：</strong>${c.tip}</p></li>`
+              )
+              .join("")}</ul>`;
+
+      const coveredTags = cap.covered
+        .map((c) => `<span class="text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-100">${c.label}</span>`)
+        .join("");
+
+      if (compact) {
+        return `
+          <div class="p-4 rounded-xl border-2 border-amber-200 bg-amber-50/40">
+            <p class="font-bold text-amber-900">建议补充能力（${cap.missing.length} 项）</p>
+            <p class="text-xs text-slate-500 mt-1">已具备 ${cap.covered.length} 项 · 详见左侧「能力对标」</p>
+            ${missBlock}
+          </div>
+          <div class="p-4 rounded-xl border border-slate-100 mt-4">
+            <p class="font-semibold text-emerald-800">已具备能力（${cap.covered.length} 项）</p>
+            <div class="mt-2 flex flex-wrap gap-1.5">${coveredTags || "—"}</div>
+          </div>`;
+      }
+
+      return `
+        <div class="grid md:grid-cols-2 gap-5">
+          <div>
+            <p class="font-bold text-amber-900">建议补充能力（${cap.missing.length}）</p>
+            ${missBlock}
+          </div>
+          <div>
+            <p class="font-bold text-emerald-800">已具备能力（${cap.covered.length}）</p>
+            <div class="mt-3 flex flex-wrap gap-1.5">${coveredTags}</div>
+            <p class="text-xs text-slate-500 mt-4 leading-6">说明：根据 JD 任职要求与简历正文规则匹配，演示结果请人工核对；有真实项目但简历未写出的，建议补进对应经历。</p>
+          </div>
+        </div>`;
+    }
+
+    function renderCapability() {
+      const a = lastAnalysis;
+      const box = document.getElementById("out-capability");
+      if (!a || !box) return;
+      box.innerHTML = renderCapabilityHtml(a.capabilityGap, false);
+    }
+
+    function showResultSections() {
+      document.querySelectorAll("[data-flow=result]").forEach((el) => el.classList.remove("flow-hidden"));
+      document.getElementById("panel-summary").classList.remove("flow-hidden");
+    }
+
+    function renderSummary(a) {
+      const scoreColor = a.score >= 75 ? "text-emerald-600" : a.score >= 55 ? "text-amber-600" : "text-rose-600";
+      const interviewPreview = a.interviews
+        .slice(0, 4)
+        .map((q, i) => `<li class="leading-7"><span class="text-teal-700 text-xs font-bold">${q.tag}</span> ${i + 1}. ${q.q}</li>`)
+        .join("");
+
+      document.getElementById("out-summary").innerHTML = `
+        <div class="space-y-6">
+          <div class="grid sm:grid-cols-2 gap-4 p-4 rounded-xl bg-teal-50/50 border border-teal-100">
+            <div><p class="text-xs text-slate-500">岗位名称</p><p class="font-bold text-lg mt-1">${a.parsed.title}</p></div>
+            <div><p class="text-xs text-slate-500">JD 薪资</p><p class="font-bold text-lg mt-1 text-teal-800">${a.jdSalary || "未写明"}</p></div>
+            <div class="sm:col-span-2 flex flex-wrap gap-1.5">${a.parsed.themes.map((t) => `<span class="text-xs px-2 py-0.5 rounded-full bg-white border border-teal-200">${t.label}</span>`).join("") || '<span class="text-xs text-slate-500">通用 AI 产品</span>'}</div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-6 p-4 rounded-xl border border-slate-100">
+            <div class="w-24 h-24 rounded-full score-ring flex items-center justify-center shrink-0" style="--p:${a.score}">
+              <div class="w-20 h-20 rounded-full bg-white flex flex-col items-center justify-center">
+                <span class="text-2xl font-black ${scoreColor}">${a.score}</span>
+                <span class="text-[10px] text-slate-500">匹配分</span>
+              </div>
+            </div>
+            <div class="flex-1 text-sm leading-8">
+              <p><strong>关键词已覆盖：</strong>${a.hit.slice(0, 10).join("、") || "—"}</p>
+              <p class="mt-1"><strong>关键词待补：</strong>${a.miss.slice(0, 6).join("、") || "—"}</p>
+            </div>
+          </div>
+
+          ${renderCapabilityHtml(a.capabilityGap, true)}
+
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+            <p class="font-semibold text-teal-800">简历优化要点</p>
+            <ul class="mt-2 text-sm leading-8 list-disc pl-5">${a.optimizeBullets.map((b) => `<li><strong>${b.title}：</strong>${b.body.replace(/\n/g, " ")}</li>`).join("")}</ul>
+          </div>
+
+          <div class="p-4 rounded-xl border border-slate-100">
+            <p class="font-semibold">模拟面试（节选 ${Math.min(4, a.interviews.length)} 题）</p>
+            <ul class="mt-2 text-sm list-none pl-0 space-y-2">${interviewPreview}</ul>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl border border-slate-100">
+              <p class="font-semibold">竞争力（示意）</p>
+              <p class="text-3xl font-black text-teal-700 mt-2">${a.overall}</p>
+              <p class="text-xs text-slate-500 mt-1">五维均分 · 非官方测评</p>
+            </div>
+            <div class="p-4 rounded-xl border border-slate-100">
+              <p class="font-semibold">薪资</p>
+              <p class="text-sm mt-2"><strong>JD：</strong>${a.jdSalary || "未识别"}</p>
+              <p class="text-sm mt-1"><strong>市场参考（${a.cityName}）：</strong>${a.market.low}–${a.market.high}K/月</p>
+            </div>
+          </div>
+        </div>`;
     }
 
     function renderOptimize() {
-      const m = matchAnalysis();
+      const a = lastAnalysis;
       const box = document.getElementById("out-optimize");
-      if (!m) {
-        box.innerHTML = '<p class="text-rose-600">请先填写简历与 JD。</p>';
-        return;
-      }
-      const p = m.parsed;
-      const bullets = [
-        {
-          title: `针对岗位：${p.title}`,
-          body: `JD 已识别能力画像：${p.themes.map((t) => t.label).join("、") || "通用 AI 产品"}。简历标题/摘要建议与 JD 岗位名同向，勿用过于窄的行业词除非 JD 要求。`,
-        },
-        {
-          title: "置顶「结果 + 指标」",
-          body: "每条经历第一句写可量化结果（效率、收入、成本、准确率、解决率、上市节奏等），再写你做了什么。",
-        },
-        {
-          title: "对齐 JD 原文",
-          body: m.miss.length
-            ? `JD 出现但简历未写清：${m.miss.slice(0, 10).join("、")}。建议在对应项目各补 1 句，勿堆砌无关词。`
-            : "关键词覆盖较好，重点打磨数字与项目深度。",
-        },
-        {
-          title: "分场景写作提示",
-          body: themeTips(p.themes).join("\n"),
-        },
-        {
-          title: "STAR 骨架（可直接套）",
-          body: "【情境】业务痛点与约束\n【动作】你定义的需求、方案、协作方\n【结果】指标变化（用区间或 %）\n【反思】一个失败点或下次改进",
-        },
-        { title: "作品集", body: "附链接；AI 岗建议可点开的 Demo/PRD；确保与 JD 提到的场景能对应上。" },
-      ];
-      box.innerHTML = bullets
+      if (!a) return;
+      box.innerHTML = a.optimizeBullets
         .map(
           (b) => `<div class="border border-slate-100 rounded-xl p-4 bg-slate-50/50">
           <p class="font-semibold text-teal-800">${b.title}</p>
@@ -396,62 +679,32 @@
     }
 
     function renderMatch() {
-      const m = matchAnalysis();
+      const a = lastAnalysis;
       const box = document.getElementById("out-match");
-      if (!m) {
-        box.innerHTML = '<p class="text-rose-600">请先填写简历与 JD。</p>';
-        return;
-      }
-      const color = m.score >= 75 ? "text-emerald-600" : m.score >= 55 ? "text-amber-600" : "text-rose-600";
+      if (!a) return;
+      const color = a.score >= 75 ? "text-emerald-600" : a.score >= 55 ? "text-amber-600" : "text-rose-600";
       box.innerHTML = `
         <div class="flex flex-wrap items-center gap-6">
-          <div class="w-28 h-28 rounded-full score-ring flex items-center justify-center shrink-0" style="--p:${m.score}">
+          <div class="w-28 h-28 rounded-full score-ring flex items-center justify-center" style="--p:${a.score}">
             <div class="w-24 h-24 rounded-full bg-white flex flex-col items-center justify-center">
-              <span class="text-3xl font-black ${color}">${m.score}</span>
+              <span class="text-3xl font-black ${color}">${a.score}</span>
               <span class="text-[10px] text-slate-500">匹配分</span>
             </div>
           </div>
-          <div class="flex-1 min-w-[200px] text-sm leading-7">
-            <p><strong>岗位：</strong>${m.parsed.title}</p>
-            <p class="mt-1"><strong>已覆盖（节选）：</strong>${m.hit.slice(0, 14).join("、") || "—"}</p>
-            <p class="mt-2"><strong>建议补充：</strong>${m.miss.slice(0, 10).join("、") || "无明显缺口"}</p>
-            <p class="mt-2 text-slate-500">${m.score >= 70 ? "与 JD 较契合，重点准备岗位名相关的项目深挖。" : "建议按 JD 补关键词后再投，或选要求更接近的岗。"}</p>
+          <div class="flex-1 text-sm leading-8">
+            <p><strong>岗位：</strong>${a.parsed.title}</p>
+            <p class="mt-1"><strong>关键词已覆盖：</strong>${a.hit.slice(0, 14).join("、") || "—"}</p>
+            <p class="mt-2"><strong>关键词待补：</strong>${a.miss.slice(0, 10).join("、") || "—"}</p>
+            <p class="mt-3 text-xs text-teal-700">能力维度对标见 Tab「能力对标」。</p>
           </div>
         </div>`;
     }
 
     function renderInterview() {
-      const m = matchAnalysis();
+      const a = lastAnalysis;
       const box = document.getElementById("out-interview");
-      if (!m) {
-        box.innerHTML = '<p class="text-rose-600">请先填写简历与 JD。</p>';
-        return;
-      }
-      const themeIds = new Set(m.parsed.themes.map((t) => t.id));
-      const picked = [];
-      INTERVIEW_POOL.forEach((q) => {
-        if (q.tags.includes("*") || q.tags.some((t) => themeIds.has(t))) picked.push(q);
-      });
-      const jdLines = jdEl.value.split(/\n/).filter((l) => /负责|要求|熟悉|优先|经验/.test(l)).slice(0, 3);
-      jdLines.forEach((line, i) => {
-        picked.push({
-          tag: "JD 定制",
-          q: `针对 JD：「${line.slice(0, 50)}…」你会如何结合经历回答？`,
-          tip: "用 STAR，对应到简历里最近一段相关项目。",
-        });
-      });
-      const uniq = [];
-      const seen = new Set();
-      picked.forEach((q) => {
-        const k = q.q.slice(0, 30);
-        if (!seen.has(k)) {
-          seen.add(k);
-          uniq.push(q);
-        }
-      });
-
-      box.innerHTML = uniq
-        .slice(0, 8)
+      if (!a) return;
+      box.innerHTML = a.interviews
         .map(
           (item, i) => `<div class="border border-slate-100 rounded-xl p-4">
           <span class="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded">${item.tag}</span>
@@ -462,27 +715,15 @@
     }
 
     function renderCompete() {
-      const m = matchAnalysis();
+      const a = lastAnalysis;
       const box = document.getElementById("out-compete");
-      if (!m) {
-        box.innerHTML = '<p class="text-rose-600">请先填写简历与 JD。</p>';
-        return;
-      }
-      const r = m.resume;
-      const dims = [
-        { name: "与 JD 匹配", score: m.score, note: "基于 JD 全文关键词" },
-        { name: "AI 落地深度", score: /RAG|Prompt|大模型|Agent|LLM|AI/i.test(r) ? 80 : 50, note: "项目可追问" },
-        { name: "量化结果", score: /%|率|ROI|MRR|提升|降低|\d/.test(r) ? 78 : 52, note: "是否有数字" },
-        { name: "交付物", score: /PRD|Demo|作品集|上线|交付/i.test(r) ? 85 : 58, note: "可验证产出" },
-        { name: "沟通协作", score: /跨|协作|运营|研发|算法|销售|硬件/i.test(r) ? 76 : 60, note: "JD 协作方匹配" },
-      ];
-      const overall = Math.round(dims.reduce((a, d) => a + d.score, 0) / dims.length);
+      if (!a) return;
       box.innerHTML = `
         <div class="flex items-center gap-4 mb-6">
-          <p class="text-4xl font-black text-teal-700">${overall}</p>
-          <div><p class="font-semibold">${m.parsed.title}</p><p class="text-xs text-slate-500">综合竞争力 · 演示</p></div>
+          <p class="text-4xl font-black text-teal-700">${a.overall}</p>
+          <div><p class="font-semibold">${a.parsed.title}</p><p class="text-xs text-slate-500">综合竞争力 · 演示</p></div>
         </div>
-        <div class="space-y-3">${dims
+        <div class="space-y-3">${a.dims
           .map(
             (d) => `<div><div class="flex justify-between text-xs mb-1"><span>${d.name}</span><span class="font-semibold">${d.score}</span></div>
           <div class="h-2 bg-slate-100 rounded-full"><div class="h-full rounded-full bg-teal-500" style="width:${d.score}%"></div></div>
@@ -491,74 +732,149 @@
           .join("")}</div>`;
     }
 
-    const SALARY_TABLE = {
-      sh: { "1-3": [18, 30], "3-5": [25, 45], "5+": [35, 60] },
-      sz: { "1-3": [20, 32], "3-5": [28, 48], "5+": [38, 65] },
-      bj: { "1-3": [18, 30], "3-5": [26, 45], "5+": [36, 58] },
-      hz: { "1-3": [16, 28], "3-5": [22, 40], "5+": [32, 52] },
-      gz: { "1-3": [15, 26], "3-5": [20, 38], "5+": [30, 48] },
-      cd: { "1-3": [14, 24], "3-5": [18, 35], "5+": [28, 45] },
-      remote: { "1-3": [20, 38], "3-5": [30, 55], "5+": [45, 75] },
-    };
-
-    function marketEstimate(parsed, city, level, matchScore) {
-      let mult = 1;
-      const title = parsed.title;
-      if (/硬件|IoT|芯片/i.test(title)) mult *= 1.06;
-      if (/SaaS|B端|企业/i.test(title)) mult *= 1.04;
-      if (/专家|负责人|总监|高级|senior/i.test(title)) mult *= 1.1;
-      const base = SALARY_TABLE[city][level].map((v) => Math.round(v * mult));
-      let boost = matchScore >= 75 ? 3 : 0;
-      return { low: base[0] + boost, high: base[1] + boost, mid: Math.round((base[0] + base[1]) / 2) + boost };
-    }
-
     function renderSalary() {
-      const m = matchAnalysis();
+      const a = lastAnalysis;
       const box = document.getElementById("out-salary");
-      if (!m) {
-        box.innerHTML = '<p class="text-rose-600">请先填写简历与 JD。</p>';
-        return;
-      }
-      const city = document.getElementById("city").value;
-      const level = document.getElementById("level").value;
-      const cityName = { sh: "上海", sz: "深圳", bj: "北京", hz: "杭州", gz: "广州", cd: "成都", remote: "远程/出海" }[city];
-      const market = marketEstimate(m.parsed, city, level, m.score);
-      const jdSal = m.parsed.salary;
-
+      if (!a) return;
       box.innerHTML = `
         <div class="grid md:grid-cols-2 gap-4">
           <div class="rounded-xl border-2 border-teal-300 bg-teal-50/50 p-5">
-            <p class="text-xs font-bold text-teal-800">JD 写明（优先参考）</p>
-            <p class="text-2xl font-black mt-2 text-teal-900">${jdSal || "未识别到薪资，请检查 JD 是否包含 20-30K 等形式"}</p>
-            <p class="text-xs text-slate-600 mt-2">谈判时以 JD/HR 口头 offer 为准；本栏为文本自动抽取。</p>
+            <p class="text-xs font-bold text-teal-800">JD 写明（优先）</p>
+            <p class="text-2xl font-black mt-2 text-teal-900">${a.jdSalary || "未识别"}</p>
           </div>
           <div class="rounded-xl border border-slate-200 p-5">
-            <p class="text-xs font-bold text-slate-500">市场参考（${cityName} · ${level.replace("-", "–")}年 · 示意）</p>
-            <p class="mt-2 text-lg"><span class="font-black">${market.low}K</span> – <span class="font-black">${market.high}K</span> / 月</p>
-            <p class="text-xs text-slate-500 mt-1">中位约 ${market.mid}K · 已按岗位头衔微调</p>
+            <p class="text-xs font-bold text-slate-500">市场参考（${a.cityName} · ${a.level.replace("-", "–")}年）</p>
+            <p class="mt-2 text-lg"><span class="font-black">${a.market.low}K</span> – <span class="font-black">${a.market.high}K</span> / 月</p>
           </div>
         </div>
-        <ul class="mt-4 text-sm text-slate-600 space-y-2 list-disc pl-5 leading-7">
-          <li>岗位：<strong>${m.parsed.title}</strong></li>
-          <li>若 JD 薪资低于市场中位：可询问绩效/期权/14/16 薪结构；若高于市场：重点准备匹配度与项目深挖</li>
-          <li>简历匹配分 ${m.score}：${m.score >= 75 ? "可尝试谈区间中上" : "建议先提升简历对齐再谈薪"}</li>
+        <ul class="mt-4 text-sm leading-8 list-disc pl-5">
+          <li>匹配分 ${a.score}：${a.score >= 75 ? "可尝试谈区间中上" : "建议先提升简历对齐"}</li>
         </ul>`;
     }
 
-    const runners = { optimize: renderOptimize, match: renderMatch, interview: renderInterview, compete: renderCompete, salary: renderSalary };
+    function renderAllDetails() {
+      renderCapability();
+      renderOptimize();
+      renderMatch();
+      renderInterview();
+      renderCompete();
+      renderSalary();
+    }
+
+    function generateTailoredResume(a) {
+      const p = a.parsed;
+      const themes = p.themes.map((t) => t.label).join("、") || "大模型应用";
+      const missLine = a.miss.length ? a.miss.slice(0, 8).join("、") : "（无明显缺口）";
+      const missCapLine = a.capabilityGap.missing.map((c) => c.label).join("、");
+
+      let body = a.resume.trim();
+      const summary = `【针对 ${p.title} 的求职摘要 · 演示改写】
+意向岗位：${p.title}
+核心匹配：${a.hit.slice(0, 8).join("、") || "见下方经历"}
+能力画像：${themes}
+（以下正文在您的简历基础上生成，【】内为建议补充或改写，投递前请删除标记并核对事实）`;
+
+      const supplement = `
+\n————————————————————
+【本稿补充说明 · 投递前删除】
+1. 建议补充能力：${missCapLine || "见分析汇总"}
+2. 建议在对应项目中各补 JD 关键词：${missLine}
+3. 每条经历首句尽量写可量化结果（解决率、ROI、效率提升等）。
+4. ${themeTips(p.themes)[0] || "突出 AI 落地与 PRD/Demo 交付。"}
+4. 作品集：https://ada481131-alt.github.io/ada-portfolio/`;
+
+      if (!body.includes("【针对")) {
+        body = summary + "\n\n" + body;
+      }
+
+      if (a.miss.length > 0 && !body.includes("【建议补充关键词】")) {
+        body += `\n\n【建议在项目描述中自然融入】${missLine}`;
+      }
+
+      body += supplement;
+      return body;
+    }
+
+    function runFullAnalysis() {
+      saveInputs();
+      updateJdParsedUI();
+      const a = buildFullAnalysis();
+      if (!a) {
+        alert("请先填写或上传解析成功的简历，并粘贴 JD。");
+        return;
+      }
+      lastAnalysis = a;
+      showResultSections();
+      renderSummary(a);
+      renderAllDetails();
+      document.getElementById("generate-gate").classList.remove("flow-hidden");
+      document.getElementById("generate-gate").scrollIntoView({ behavior: "smooth", block: "start" });
+      switchTab("summary");
+    }
+
+    function switchTab(panel) {
+      document.querySelectorAll(".tab").forEach((t) => {
+        t.classList.toggle("active", t.dataset.panel === panel);
+      });
+      document.querySelectorAll(".panel").forEach((p) => {
+        p.classList.toggle("active", p.id === "panel-" + panel);
+      });
+    }
+
+    async function extractPdfText(file) {
+      const buf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      let text = "";
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        text += content.items.map((item) => item.str).join(" ") + "\n";
+      }
+      return text.replace(/\s+\n/g, "\n").trim();
+    }
+
+    async function extractDocxText(file) {
+      const buf = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer: buf });
+      return (result.value || "").trim();
+    }
+
+    async function handleResumeFile(file) {
+      const status = document.getElementById("resume-parse-status");
+      const nameEl = document.getElementById("resume-file-name");
+      nameEl.textContent = file.name;
+      status.innerHTML = '<span class="inline-flex items-center gap-2 text-teal-700"><span class="spinner inline-block w-3 h-3 border-2 border-teal-600 border-t-transparent rounded-full"></span>正在解析…</span>';
+
+      const ext = file.name.split(".").pop().toLowerCase();
+      try {
+        let text = "";
+        if (ext === "pdf") {
+          if (typeof pdfjsLib === "undefined") throw new Error("PDF 库未加载，请刷新页面");
+          text = await extractPdfText(file);
+        } else if (ext === "docx") {
+          if (typeof mammoth === "undefined") throw new Error("Word 库未加载，请刷新页面");
+          text = await extractDocxText(file);
+        } else if (ext === "doc") {
+          throw new Error("不支持旧版 .doc，请另存为 .docx 或导出 PDF");
+        } else {
+          throw new Error("仅支持 .pdf 与 .docx");
+        }
+        if (!text || text.length < 20) {
+          throw new Error("未能提取到足够文字，可能是扫描版 PDF，请粘贴文字或换可复制文本的文件");
+        }
+        resumeEl.value = text;
+        saveInputs();
+        status.innerHTML = `<span class="text-emerald-700">已解析 ${text.length} 字，已填入下方（可编辑）</span>`;
+      } catch (err) {
+        status.innerHTML = `<span class="text-rose-600">解析失败：${err.message}</span>`;
+      }
+    }
 
     document.querySelectorAll(".tab").forEach((tab) => {
-      tab.addEventListener("click", () => {
-        document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
-        tab.classList.add("active");
-        document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
-        document.getElementById("panel-" + tab.dataset.panel).classList.add("active");
-      });
+      tab.addEventListener("click", () => switchTab(tab.dataset.panel));
     });
 
-    resumeEl.addEventListener("input", () => {
-      saveInputs();
-    });
+    resumeEl.addEventListener("input", saveInputs);
     jdEl.addEventListener("input", () => {
       saveInputs();
       updateJdParsedUI();
@@ -566,17 +882,23 @@
     document.getElementById("city").addEventListener("change", saveInputs);
     document.getElementById("level").addEventListener("change", saveInputs);
 
+    document.getElementById("resume-file").addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (file) handleResumeFile(file);
+    });
+
     document.getElementById("jd-image").addEventListener("change", (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
-      const url = URL.createObjectURL(file);
       const img = document.getElementById("jd-preview");
-      img.src = url;
+      img.src = URL.createObjectURL(file);
       img.classList.remove("hidden");
     });
 
     document.getElementById("load-sample").onclick = () => {
       resumeEl.value = SAMPLE_RESUME;
+      document.getElementById("resume-file-name").textContent = "示例文本";
+      document.getElementById("resume-parse-status").textContent = "";
       saveInputs();
     };
     document.getElementById("load-jd").onclick = () => {
@@ -585,24 +907,36 @@
       updateJdParsedUI();
     };
 
-    document.querySelectorAll(".analyze-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        saveInputs();
-        updateJdParsedUI();
-        runners[btn.dataset.target]();
-      });
+    document.getElementById("btn-analyze-full").addEventListener("click", runFullAnalysis);
+
+    document.getElementById("btn-generate-yes").addEventListener("click", () => {
+      if (!lastAnalysis) {
+        alert("请先完成完整分析");
+        return;
+      }
+      const draft = generateTailoredResume(lastAnalysis);
+      document.getElementById("out-draft").textContent = draft;
+      document.getElementById("btn-copy-draft").classList.remove("hidden");
+      switchTab("draft");
+      document.getElementById("panel-draft").scrollIntoView({ behavior: "smooth" });
     });
 
-    document.getElementById("run-all").addEventListener("click", () => {
-      saveInputs();
-      updateJdParsedUI();
-      Object.values(runners).forEach((fn) => fn());
-      alert("分析完成，请切换各 Tab 查看。");
+    document.getElementById("btn-generate-no").addEventListener("click", () => {
+      document.getElementById("generate-gate").classList.add("flow-hidden");
     });
 
-    if (!resumeEl.value) resumeEl.value = SAMPLE_RESUME;
-    if (!jdEl.value) jdEl.value = SAMPLE_JD;
+    document.getElementById("btn-copy-draft").addEventListener("click", async () => {
+      const text = document.getElementById("out-draft").textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        alert("已复制到剪贴板");
+      } catch {
+        alert("复制失败，请手动全选复制");
+      }
+    });
+
     updateJdParsedUI();
+    document.querySelectorAll("[data-flow=result]:not(#generate-gate)").forEach((el) => el.classList.add("flow-hidden"));
   </script>
 </body>
 </html>

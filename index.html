@@ -586,7 +586,7 @@
           <h2 class="mt-3 text-3xl md:text-4xl font-black tracking-tight">作品案例</h2>
         </div>
         <p class="hidden md:block text-gray-500 max-w-md text-right">
-          含 AI 客服、坐席、外呼、营销及 AI PM 简历助手等可交互演示。
+          含 AI 客服、坐席、外呼、营销、简历助手与竞品 Agent 等可交互演示。
         </p>
       </div>
 
@@ -774,6 +774,25 @@
           <div class="mt-4 space-y-2">
             <a href="demo-resume-assistant.html" class="block w-full text-center bg-teal-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-teal-500">立即体验简历助手 →</a>
             <a href="prd.html?p=7" class="block w-full text-center py-2 rounded-full border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50">PRD 摘要 →</a>
+          </div>
+        </div>
+
+        <div class="project-slide card glass rounded-[1.8rem] p-6 flex flex-col">
+          <button type="button" class="project-card group text-left flex-1" data-project="8" aria-label="查看项目说明：竞品调研 Agent">
+            <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-violet-300 to-fuchsia-200 mb-5 overflow-hidden relative">
+              <span class="absolute inset-0 flex items-center justify-center text-violet-900/50 text-sm font-bold px-4 text-center select-none">Agent · 自动调研</span>
+            </div>
+            <p class="text-sm text-violet-700 font-bold">PM 工具 · Agent</p>
+            <h3 class="mt-2 text-xl font-black group-hover:text-violet-800 transition-colors">竞品调研 · AI Agent</h3>
+            <p class="mt-3 text-gray-600 leading-7">
+              输入「分析 smartico.ai」自动跑完：Tool Calling、多页抓取、Agent 思维链，导出 .html / .md。打开网页即可用，无需部署。
+            </p>
+            <p class="mt-2 text-sm font-semibold text-violet-700/90">Tool Calling · Browser · 工作流 · 文件生成</p>
+            <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-violet-700">项目说明 <span aria-hidden="true">→</span></span>
+          </button>
+          <div class="mt-4 space-y-2">
+            <a href="demo-competitor-agent.html" class="block w-full text-center bg-violet-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-violet-500">立即体验 Agent →</a>
+            <a href="prd.html?p=8" class="block w-full text-center py-2 rounded-full border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50">PRD 摘要 →</a>
           </div>
         </div>
       </div>
@@ -1093,6 +1112,25 @@
         prdLinkText: "PRD 摘要",
         link: "resume.html",
         linkText: "查看我的简历",
+      },
+      8: {
+        label: "PM 工具 · Agent",
+        labelClass: "text-violet-700",
+        title: "竞品调研 · AI Agent",
+        desc: "默认在浏览器里一键运行：工作流自动执行、Tool Calling 调工具、Browser 多页抓取、可见 Agent 思维、生成 .html/.md/.json。无需部署云端。",
+        outcomes: [
+          "Tool Calling：Planner 调度 browser_* / agent_think / 写报告",
+          "Browser Use：自动抓首页 + pricing/about 等子页",
+          "Agent 思维：日志与报告附录展示推理链",
+          "文件生成：下载 html（Word 可开）、md、执行记录 json",
+        ],
+        tags: ["AI Agent", "竞品分析", "Markdown", "自动调研", "iGaming"],
+        demoLink: "demo-competitor-agent.html",
+        demoLinkText: "体验竞品 Agent",
+        prdLink: "prd.html?p=8",
+        prdLinkText: "PRD 摘要",
+        link: "#contact",
+        linkText: "交流 Agent 方案",
       },
     };
 

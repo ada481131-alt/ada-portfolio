@@ -6,154 +6,257 @@
   <title>竞品调研 Agent · 完整版 | Ada Liu</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://js.puter.com/v2/"></script>
+  <meta name="color-scheme" content="light dark" />
   <style>
-    :root { --brand: #7c3aed; --brand-dim: #5b21b6; }
-    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0f0f12; color: #e4e4e7; }
-  .agent-log { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; line-height: 1.65; }
-  .agent-log .line { padding: 2px 0; }
-  .agent-log .ok { color: #34d399; }
-  .agent-log .warn { color: #fbbf24; }
-  .agent-log .info { color: #a78bfa; }
-  .agent-log .muted { color: #71717a; }
-  .md-preview { font-size: 13px; line-height: 1.8; }
-  .md-preview h1 { font-size: 1.35rem; font-weight: 800; margin: 0 0 1rem; color: #fafafa; }
-  .md-preview h2 { font-size: 1.05rem; font-weight: 700; margin: 1.25rem 0 0.5rem; color: #e4e4e7; border-bottom: 1px solid #3f3f46; padding-bottom: 0.35rem; }
-  .md-preview h3 { font-size: 0.95rem; font-weight: 600; margin: 1rem 0 0.35rem; color: #d4d4d8; }
-  .md-preview p, .md-preview li { color: #a1a1aa; }
-  .md-preview ul { padding-left: 1.25rem; margin: 0.5rem 0; }
-  .md-preview table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 0.75rem 0; }
-  .md-preview th, .md-preview td { border: 1px solid #3f3f46; padding: 6px 8px; text-align: left; }
-  .md-preview th { background: #27272a; color: #e4e4e7; }
-  .step-pulse { animation: pulse 1.2s ease-in-out infinite; }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
-  .wf-step { font-size: 10px; padding: 4px 8px; border-radius: 999px; border: 1px solid #3f3f46; color: #71717a; white-space: nowrap; }
-  .wf-step.active { border-color: #7c3aed; color: #c4b5fd; background: #2e1065; }
-  .wf-step.done { border-color: #065f46; color: #6ee7b7; background: #022c22; }
-  .agent-log .think { color: #fde68a; font-style: italic; }
-  .agent-log .tool { color: #38bdf8; }
-  .agent-log .file { color: #f472b6; }
-  .agent-log .wf { color: #a78bfa; }
+    :root {
+      color-scheme: light;
+      --brand: #6d28d9;
+      --bg: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-muted: #f1f5f9;
+      --text: #18181b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --accent: #6d28d9;
+      --accent-soft: #ede9fe;
+      --ok: #059669;
+      --warn: #d97706;
+      --info: #6d28d9;
+      --think: #b45309;
+      --tool: #0369a1;
+      --file: #be185d;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --bg: #0f0f12;
+        --bg-card: #18181b;
+        --bg-muted: #27272a;
+        --text: #e4e4e7;
+        --text-muted: #a1a1aa;
+        --border: #3f3f46;
+        --accent: #a78bfa;
+        --accent-soft: #2e1065;
+        --ok: #34d399;
+        --warn: #fbbf24;
+        --info: #c4b5fd;
+        --think: #fde68a;
+        --tool: #38bdf8;
+        --file: #f472b6;
+      }
+    }
+    body.agent-page {
+      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .agent-page .text-muted { color: var(--text-muted); }
+    .agent-page .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+    }
+    .agent-page .card-header {
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+    }
+    .agent-page .site-header {
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+      backdrop-filter: blur(8px);
+    }
+    .agent-page .tip-box {
+      border: 1px solid #a7f3d0;
+      background: #ecfdf5;
+      color: #14532d;
+    }
+    @media (prefers-color-scheme: dark) {
+      .agent-page .tip-box {
+        border-color: #065f46;
+        background: #022c22;
+        color: #a7f3d0;
+      }
+    }
+    .agent-page .input-field {
+      background: var(--bg-muted);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 0.75rem;
+    }
+    .agent-page .input-field::placeholder { color: var(--text-muted); }
+    .agent-page .btn-primary {
+      background: var(--brand);
+      color: #fff;
+      border-radius: 0.75rem;
+      font-weight: 700;
+    }
+    .agent-page .btn-ghost {
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 0.5rem;
+      background: var(--bg-muted);
+    }
+    .agent-page .tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .agent-page .link-accent { color: var(--accent); }
+    .agent-page h1 { color: var(--text); }
+    .agent-log { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; line-height: 1.65; }
+    .agent-log .line { padding: 2px 0; }
+    .agent-log .ok { color: var(--ok); }
+    .agent-log .warn { color: var(--warn); }
+    .agent-log .info { color: var(--info); }
+    .agent-log .muted { color: var(--text-muted); }
+    .agent-log .think { color: var(--think); font-style: italic; }
+    .agent-log .tool { color: var(--tool); }
+    .agent-log .file { color: var(--file); }
+    .agent-log .wf { color: var(--info); }
+    .md-preview { font-size: 13px; line-height: 1.8; }
+    .md-preview h1 { font-size: 1.35rem; font-weight: 800; margin: 0 0 1rem; color: var(--text); }
+    .md-preview h2 { font-size: 1.05rem; font-weight: 700; margin: 1.25rem 0 0.5rem; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; }
+    .md-preview h3 { font-size: 0.95rem; font-weight: 600; margin: 1rem 0 0.35rem; color: var(--text); }
+    .md-preview p, .md-preview li { color: var(--text-muted); }
+    .md-preview ul { padding-left: 1.25rem; margin: 0.5rem 0; }
+    .md-preview table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 0.75rem 0; }
+    .md-preview th, .md-preview td { border: 1px solid var(--border); padding: 6px 8px; text-align: left; }
+    .md-preview th { background: var(--bg-muted); color: var(--text); }
+    .step-pulse { animation: pulse 1.2s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+    .wf-step { font-size: 10px; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-muted); white-space: nowrap; }
+    .wf-step.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    .wf-step.done { border-color: #10b981; color: #059669; background: #ecfdf5; }
+    @media (prefers-color-scheme: dark) {
+      .wf-step.done { color: #6ee7b7; background: #022c22; }
+    }
+    dialog.agent-dialog {
+      background: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
   </style>
 </head>
-<body class="min-h-screen text-sm">
-  <header class="border-b border-zinc-800 bg-zinc-950/90 backdrop-blur sticky top-0 z-20">
+<body class="agent-page min-h-screen text-sm">
+  <header class="site-header sticky top-0 z-20">
     <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
       <div>
-        <a href="index.html#work" class="text-violet-400 font-semibold hover:underline">← 作品集</a>
-        <p class="text-xs text-zinc-500 mt-0.5">完整 Agent：真抓取 + 真 LLM · 本机保存报告</p>
+        <a href="index.html#work" class="link-accent font-semibold hover:underline">← 作品集</a>
+        <p class="text-xs text-muted mt-0.5">完整 Agent：真抓取 + 真 LLM · 本机保存报告</p>
       </div>
-      <a href="prd.html?p=8" class="text-xs font-semibold text-violet-300 border border-violet-800 px-3 py-1.5 rounded-full hover:bg-violet-950">PRD 摘要</a>
+      <a href="prd.html?p=8" class="text-xs font-semibold link-accent border px-3 py-1.5 rounded-full" style="border-color:var(--border)">PRD 摘要</a>
     </div>
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-6">
-    <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">竞品调研 · AI Agent</h1>
-    <p class="mt-2 text-zinc-400 leading-8 max-w-3xl">
-      默认 <strong class="text-violet-300">Agent 编排模式</strong>：工作流自动执行 → Tool Calling → Browser 多页抓取 → Agent 思维 → 导出 .html / .md / 执行记录 .json。
+    <h1 class="text-2xl md:text-3xl font-black tracking-tight">竞品调研 · AI Agent</h1>
+    <p class="mt-2 text-muted leading-8 max-w-3xl">
+      默认 <strong class="link-accent">Agent 编排模式</strong>：工作流自动执行 → Tool Calling → Browser 多页抓取 → Agent 思维 → 导出 .html / .md / 执行记录 .json。
     </p>
-    <div class="mt-3 flex flex-wrap gap-1.5 text-[10px]">
-      <span class="px-2 py-0.5 rounded-full bg-violet-950 text-violet-300 border border-violet-800">Tool Calling</span>
-      <span class="px-2 py-0.5 rounded-full bg-sky-950 text-sky-300 border border-sky-800">Browser Use</span>
-      <span class="px-2 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-800">文件生成</span>
-      <span class="px-2 py-0.5 rounded-full bg-amber-950 text-amber-200 border border-amber-800">Agent 思维</span>
-      <span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800">工作流</span>
-      <span class="px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-600">自动执行</span>
+    <div class="mt-3 flex flex-wrap gap-1.5">
+      <span class="tag">Tool Calling</span>
+      <span class="tag">Browser Use</span>
+      <span class="tag">文件生成</span>
+      <span class="tag">Agent 思维</span>
+      <span class="tag">工作流</span>
+      <span class="tag">自动执行</span>
     </div>
 
-    <div class="mt-4 rounded-xl border border-emerald-900/50 bg-emerald-950/30 p-4 text-sm leading-7 text-zinc-300">
-      <p class="font-bold text-emerald-300">怎么用（不用懂技术）</p>
-      <ol class="mt-2 list-decimal list-inside space-y-1 text-zinc-400">
-        <li>保持下面默认模式：<strong class="text-white">推荐 · 浏览器里直接跑</strong></li>
-        <li>输入 <code class="text-violet-300">分析 smartico.ai</code>，点 <strong class="text-white">运行</strong></li>
+    <div class="mt-4 tip-box rounded-xl p-4 text-sm leading-7">
+      <p class="font-bold">怎么用（不用懂技术）</p>
+      <ol class="mt-2 list-decimal list-inside space-y-1 opacity-90">
+        <li>保持下面默认模式：<strong>推荐 · 浏览器里直接跑</strong></li>
+        <li>输入 <code class="link-accent">分析 smartico.ai</code>，点 <strong>运行</strong></li>
         <li>若弹出登录，按提示用 Puter 免费登录一次（不是你的 OpenAI 账单）</li>
-        <li>右侧看报告，可下载 Word 能打开的 <strong class="text-white">.html</strong> 或 .md</li>
+        <li>右侧看报告，可下载 Word 能打开的 <strong>.html</strong> 或 .md</li>
       </ol>
-      <p class="mt-3 text-xs text-zinc-500">
-        「云端引擎」= 可选进阶，要有人在 Cloudflare 上架一小段程序，<strong class="text-zinc-400">不是必做</strong>。
-        <a href="agent-api/怎么部署-通俗版.md" class="text-violet-400 underline" target="_blank" rel="noopener">通俗说明（给非技术）</a>
+      <p class="mt-3 text-xs opacity-80">
+        「云端引擎」= 可选进阶，不是必做。
+        <a href="agent-api/怎么部署-通俗版.md" class="link-accent underline" target="_blank" rel="noopener">通俗说明</a>
       </p>
     </div>
 
-    <details class="mt-4 rounded-xl border border-zinc-800 bg-zinc-950/80 p-4">
-      <summary class="cursor-pointer font-semibold text-violet-300 text-sm">⚙️ 运行模式与设置（一般不用改）</summary>
+    <details class="mt-4 card p-4">
+      <summary class="cursor-pointer font-semibold link-accent text-sm">⚙️ 运行模式与设置（一般不用改）</summary>
       <div class="mt-4 grid sm:grid-cols-2 gap-4 text-sm">
         <div>
-          <label class="text-xs text-zinc-500">模式</label>
-          <select id="cfg-mode" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white">
+          <label class="text-xs text-muted">模式</label>
+          <select id="cfg-mode" class="mt-1 w-full input-field px-3 py-2">
             <option value="full" selected>推荐 · 浏览器里直接跑（Tool Calling + 多页抓取 + AI）</option>
             <option value="worker">可选 · 云端引擎（需请人部署，填网址）</option>
             <option value="offline">离线演示（假 AI，只看流程）</option>
           </select>
         </div>
-        <div id="cfg-worker-wrap" class="hidden sm:col-span-2 rounded-lg border border-amber-900/40 bg-amber-950/20 p-3">
-          <label class="text-xs text-amber-200/90">云端引擎网址（部署后才有一串 https://…）</label>
-          <input id="cfg-worker-url" type="url" placeholder="https://你的程序.workers.dev" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white text-xs" />
-          <p class="text-[11px] text-zinc-500 mt-2 leading-5">
-            这是什么？= 放在 Cloudflare 机房里帮你跑 AI 的小程序，不是 GitHub 网页本身。
-            没有网址就<strong>不要选这项</strong>，用上面的「推荐」即可。
-            技术同事可看 <code class="text-violet-400">agent-api/怎么部署-通俗版.md</code>
+        <div id="cfg-worker-wrap" class="hidden sm:col-span-2 rounded-lg p-3" style="border:1px solid var(--border);background:var(--bg-muted)">
+          <label class="text-xs text-muted">云端引擎网址（部署后才有一串 https://…）</label>
+          <input id="cfg-worker-url" type="url" placeholder="https://你的程序.workers.dev" class="mt-1 w-full input-field px-3 py-2 text-xs" />
+          <p class="text-[11px] text-muted mt-2 leading-5">
+            放在 Cloudflare 机房跑 AI 的小程序。没有网址就<strong>不要选这项</strong>，用「推荐」即可。
           </p>
         </div>
         <div class="sm:col-span-2">
-          <label class="text-xs text-zinc-500">网站打不开时：把官网文字粘贴到这里（可选）</label>
-          <textarea id="cfg-paste" rows="2" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white text-xs" placeholder="从官网复制产品介绍…"></textarea>
+          <label class="text-xs text-muted">网站打不开时：把官网文字粘贴到这里（可选）</label>
+          <textarea id="cfg-paste" rows="2" class="mt-1 w-full input-field px-3 py-2 text-xs" placeholder="从官网复制产品介绍…"></textarea>
         </div>
       </div>
     </details>
 
     <div id="workflow-bar" class="mt-4 flex flex-wrap gap-2 items-center" aria-label="工作流">
-      <span class="text-[10px] text-zinc-500 uppercase tracking-wider mr-1">工作流</span>
+      <span class="text-[10px] text-muted uppercase tracking-wider mr-1">工作流</span>
     </div>
 
     <div class="mt-4 grid lg:grid-cols-[1fr_1.1fr] gap-4 min-h-[520px]">
-      <div class="rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col overflow-hidden">
-        <div class="px-4 py-3 border-b border-zinc-800 flex justify-between items-center">
-          <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Agent 执行日志</span>
-          <span id="agent-status" class="text-xs text-zinc-500">待命</span>
+      <div class="card flex flex-col overflow-hidden">
+        <div class="card-header flex justify-between items-center">
+          <span class="text-xs font-bold text-muted uppercase tracking-wider">Agent 执行日志</span>
+          <span id="agent-status" class="text-xs text-muted">待命</span>
         </div>
         <div id="agent-log" class="agent-log flex-1 p-4 overflow-y-auto max-h-[420px] lg:max-h-none min-h-[280px]">
           <div class="line muted">› 等待任务。试试：分析 smartico.ai</div>
         </div>
-        <form id="agent-form" class="p-4 border-t border-zinc-800 flex gap-2">
+        <form id="agent-form" class="p-4 flex gap-2" style="border-top:1px solid var(--border)">
           <input
             id="agent-input"
             type="text"
-            class="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-violet-600"
+            class="flex-1 input-field px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500"
             placeholder="分析 smartico.ai"
             autocomplete="off"
           />
-          <button type="submit" id="btn-run" class="shrink-0 px-5 py-3 rounded-xl font-bold text-white bg-violet-600 hover:bg-violet-500 disabled:opacity-40">
+          <button type="submit" id="btn-run" class="shrink-0 px-5 py-3 btn-primary disabled:opacity-40">
             运行
           </button>
         </form>
       </div>
 
-      <div class="rounded-2xl border border-zinc-800 bg-zinc-900/50 flex flex-col overflow-hidden">
-        <div class="px-4 py-3 border-b border-zinc-800 flex flex-wrap justify-between gap-2 items-center">
-          <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Markdown 报告</span>
+      <div class="card flex flex-col overflow-hidden">
+        <div class="card-header flex flex-wrap justify-between gap-2 items-center">
+          <span class="text-xs font-bold text-muted uppercase tracking-wider">Markdown 报告</span>
           <div class="flex flex-wrap gap-2">
-            <button type="button" id="btn-copy-md" class="hidden text-xs px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-300 hover:bg-zinc-800">复制</button>
-            <button type="button" id="btn-download-html" class="hidden text-xs px-3 py-1.5 rounded-lg bg-emerald-700 text-white font-semibold hover:bg-emerald-600">下载 .html</button>
-            <button type="button" id="btn-download-md" class="hidden text-xs px-3 py-1.5 rounded-lg bg-violet-600 text-white font-semibold hover:bg-violet-500">下载 .md</button>
-            <button type="button" id="btn-download-json" class="hidden text-xs px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-300 hover:bg-zinc-800">执行记录 .json</button>
-            <button type="button" id="btn-history" class="text-xs px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-400 hover:bg-zinc-800">历史报告</button>
+            <button type="button" id="btn-copy-md" class="hidden text-xs px-3 py-1.5 btn-ghost">复制</button>
+            <button type="button" id="btn-download-html" class="hidden text-xs px-3 py-1.5 btn-primary">下载 .html</button>
+            <button type="button" id="btn-download-md" class="hidden text-xs px-3 py-1.5 btn-primary">下载 .md</button>
+            <button type="button" id="btn-download-json" class="hidden text-xs px-3 py-1.5 btn-ghost">执行记录 .json</button>
+            <button type="button" id="btn-history" class="text-xs px-3 py-1.5 btn-ghost">历史报告</button>
           </div>
         </div>
         <div id="md-preview" class="md-preview flex-1 p-5 overflow-y-auto max-h-[480px]">
-          <p class="text-zinc-500">报告将在此预览…</p>
+          <p class="text-muted">报告将在此预览…</p>
         </div>
       </div>
     </div>
 
-    <p class="mt-4 text-xs text-zinc-600 leading-6 max-w-3xl">
-      报告仅供内部分析；请遵守目标网站 robots 与版权。生产环境建议：Playwright 多页爬取 + 自建 Worker（已提供模板）。
+    <p class="mt-4 text-xs text-muted leading-6 max-w-3xl">
+      报告仅供内部分析；请遵守目标网站 robots 与版权。界面跟随系统浅色/深色，默认浅色。
     </p>
   </main>
 
-  <dialog id="history-dialog" class="rounded-2xl border border-zinc-700 bg-zinc-900 text-zinc-200 p-0 max-w-lg w-[calc(100%-2rem)] backdrop:bg-black/60">
-    <div class="p-5 border-b border-zinc-800 flex justify-between items-center">
+  <dialog id="history-dialog" class="agent-dialog rounded-2xl p-0 max-w-lg w-[calc(100%-2rem)] backdrop:bg-black/40">
+    <div class="p-5 card-header flex justify-between items-center">
       <h2 class="font-bold">本地已保存的报告</h2>
-      <button type="button" id="history-close" class="text-zinc-400 hover:text-white text-xl leading-none">&times;</button>
+      <button type="button" id="history-close" class="text-muted hover:opacity-70 text-xl leading-none">&times;</button>
     </div>
     <ul id="history-list" class="p-4 max-h-80 overflow-y-auto text-sm space-y-2"></ul>
   </dialog>
@@ -173,10 +276,37 @@
       { id: "files", label: "文件" },
     ];
     const COMMON_PATHS = ["/", "/pricing", "/about", "/solutions", "/product", "/features"];
-    const REPORT_SYSTEM = `撰写完整中文 Markdown 竞品报告，必须含：
-## 1. 产品概览 ## 2. 核心功能 ## 3. 卖点与定位 ## 4. 竞品格局（表格）
-## 5. 与「海外游戏客户运营一体化（AI客服+坐席+外呼+营销）」对比（表格） ## 6. 风险与机会 ## 7. 建议下一步
-只基于提供的抓取内容；不确定写「待核实」。`;
+    const REPORT_SYSTEM = `你是海外 iGaming / 在线博彩行业的资深 AI 产品经理，写「对内竞品调研」，给 PM 直接开会用。
+
+【禁止】
+- 空话：加大市场推广、提升用户体验、数字化转型、AI 赋能、潜力巨大、加强合作
+- 张冠李戴：若正文是 Gamification/CRM/留存/活动/Bonus，不要写成「智能客服 SaaS」
+- 编造：融资额、客户 Logo、市场份额，除非正文明确出现
+
+【必须】
+- 从抓取正文提取真实产品名、模块名（英文可保留），每条功能写清「做什么 + 对谁有用」
+- 产品概览：一句话定位、目标客户（运营商/品牌方）、交付形态（SaaS/私有化待核实）
+- 核心功能：≥8 条，分模块（如 Gamification / CRM / Bonus / Analytics / Integration）
+- 卖点与定位：3–5 条，每条附「依据：摘自…」或引用关键词
+- 竞品格局：表格 ≥4 行，写真实竞品（如 Optimove、Fast Track、Xtremepush、BetConstruct 工具链等，按品类选）
+- 与我方对比：我方=「AI 客服 + 人工坐席 + AI 外呼 + AI 营销」；表格行=玩家问题处理、活动留存、分群触达、人力效率、数据闭环
+- 风险与机会：各 ≥3 条，具体可执行，不要套话
+- 建议下一步：4 条 PM 动作（约 Demo、要 Case Study、核对定价与牌照、内部边界工作坊）
+
+【章节标题，必须按序】
+## 1. 产品概览
+## 2. 核心功能（分模块）
+## 3. 卖点与定位
+## 4. 竞品格局
+## 5. 与「海外游戏客户运营一体化」对比
+## 6. 风险与机会
+## 7. 建议下一步（PM 动作清单）
+
+不确定一律写「待核实」。先读「事实清单 JSON」，再读抓取正文，两者冲突以正文为准。`;
+
+    const FACTS_SYSTEM = `从官网抓取文本提取结构化事实，只输出 JSON（无 markdown）：
+{"brand":"","category":"如 iGaming CRM / Gamification / 客服 / 综合","target_users":[],"modules":[{"name":"","desc":"","evidence":""}],"pricing_signals":[],"named_competitors":[],"integration_points":[]}
+只写正文里能支撑的内容，没有的字段用空数组或「未知」。`;
     const PLANNER_SYSTEM = `你是 Agent 编排器。只输出 JSON（不要 markdown 代码块），格式：
 {"thoughts":["推理1"],"tool_calls":[{"name":"工具名","arguments":{}}]}
 可用工具：
@@ -364,14 +494,55 @@
       }
     }
 
-    async function llmPuter(prompt, systemExtra = "") {
+    async function llmPuter(prompt, systemExtra = "", model = "gpt-4o-mini") {
       if (typeof puter === "undefined" || !puter.ai?.chat) {
         throw new Error("Puter.js 未加载，请检查网络或改用 Worker/离线模式");
       }
       const msg = systemExtra ? `${systemExtra}\n\n${prompt}` : prompt;
-      const resp = await puter.ai.chat(msg, { model: "gpt-4o-mini" });
-      const text = typeof resp === "string" ? resp : resp?.message?.content || resp?.text || String(resp);
+      let text = "";
+      try {
+        const resp = await puter.ai.chat(msg, { model });
+        text = typeof resp === "string" ? resp : resp?.message?.content || resp?.text || String(resp);
+      } catch (e) {
+        if (model !== "gpt-4o-mini") {
+          const resp = await puter.ai.chat(msg, { model: "gpt-4o-mini" });
+          text = typeof resp === "string" ? resp : resp?.message?.content || resp?.text || String(resp);
+        } else throw e;
+      }
       return (text || "").trim();
+    }
+
+    function cleanCorpus(text) {
+      return text
+        .replace(/!\[[^\]]*]\([^)]+\)/g, "")
+        .replace(/\[([^\]]+)]\([^)]+\)/g, "$1")
+        .replace(/^(Title|URL Source|Markdown Content):.*$/gim, "")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+    }
+
+    function domainHint(domain) {
+      const s = SITE_SNAPSHOTS[domain];
+      if (!s) return "";
+      return `\n【品类校对提示，以抓取正文为准】${s.brand}：${s.tagline}`;
+    }
+
+    async function extractFactsFromCorpus(task, corpus) {
+      log("提取结构化事实（避免报告空泛）…", "info");
+      try {
+        const raw = await llmPuter(
+          `域名：${task.domain}${domainHint(task.domain)}\n\n正文：\n${corpus.slice(0, 18000)}`,
+          FACTS_SYSTEM
+        );
+        const facts = parseJsonFromLlm(raw);
+        if (facts?.brand || facts?.modules?.length) {
+          log(`事实：${facts.brand || task.domain} · ${facts.category || "品类待核实"} · ${facts.modules?.length || 0} 模块`, "ok");
+          return facts;
+        }
+      } catch (e) {
+        log(`事实提取跳过：${e.message}`, "warn");
+      }
+      return null;
     }
 
     function parseJsonFromLlm(text) {
@@ -403,7 +574,7 @@
         try {
           const md = await fetchJinaMarkdown(url);
           ctx.pages.push({ url, path: p, chars: md.length });
-          ctx.corpus += `\n\n---\n## ${url}\n\n${md.slice(0, 10000)}`;
+          ctx.corpus += `\n\n---\n## ${url}\n\n${cleanCorpus(md).slice(0, 10000)}`;
           results.push({ path: p, ok: true, chars: md.length });
           log(`  ↳ ${md.length} 字`, "ok");
         } catch (e) {
@@ -439,7 +610,7 @@
         setWorkflow("browser", ["parse", "plan"]);
         const md = await fetchJinaMarkdown(u);
         ctx.pages.push({ url: u, chars: md.length });
-        ctx.corpus += `\n\n---\n## ${u}\n\n${md}`;
+        ctx.corpus += `\n\n---\n## ${u}\n\n${cleanCorpus(md)}`;
         return { chars: md.length };
       }
       if (name === "browser_crawl_site") {
@@ -548,7 +719,7 @@ pre{background:#f4f4f5;padding:12px;border-radius:8px;overflow:auto;font-size:12
         log("语料不足，Tool Calling 补抓首页…", "warn");
         try {
           const md = await fetchJinaMarkdown(task.url);
-          ctx.corpus += md;
+          ctx.corpus += cleanCorpus(md);
           ctx.pages.push({ url: task.url, chars: md.length, note: "fallback" });
         } catch (_) {
           attachPasteFallback(task, ctx);
@@ -566,12 +737,15 @@ pre{background:#f4f4f5;padding:12px;border-radius:8px;overflow:auto;font-size:12
         } catch (_) {}
       }
 
+      ctx.corpus = cleanCorpus(ctx.corpus);
+
       setWorkflow("think", ["parse", "plan", "browser", "tools"]);
+      const facts = await extractFactsFromCorpus(task, ctx.corpus);
       try {
         log("agent_think：根据已抓取页面做竞品推理…", "think");
         const think2 = await llmPuter(
-          `已抓取 ${ctx.pages.length} 页，共 ${ctx.corpus.length} 字。用 3-5 句话说明：①产品定位 ②目标客户 ③3 个核心功能 ④与我方（AI客服+坐席+外呼+营销）差异。只输出思考，不要 Markdown 报告。`,
-          "你是 Agent 分析师，只输出推理。"
+          `已抓取 ${ctx.pages.length} 页。${facts ? `事实摘要：${JSON.stringify(facts).slice(0, 1200)}` : ""}\n\n用 4-6 句话说明：①产品品类与定位（CRM/游戏化/客服等，勿猜错）②目标客户 ③3 个最硬的功能差异点 ④与我方（AI客服+坐席+外呼+营销）的边界。只输出推理。`,
+          "你是 iGaming 行业 Agent 分析师。"
         );
         log(think2, "think");
         ctx.thoughts.push(think2);
@@ -579,10 +753,11 @@ pre{background:#f4f4f5;padding:12px;border-radius:8px;overflow:auto;font-size:12
 
       setWorkflow("report", ["parse", "plan", "browser", "tools", "think"]);
       if (!ctx.report || ctx.report.length < 300) {
-        log("write_report_file：生成最终 Markdown 报告…", "file");
+        log("write_report_file：生成深度 Markdown 报告…", "file");
         ctx.report = await llmPuter(
-          `竞品：${task.domain}\n\nAgent 推理摘要：\n${ctx.thoughts.join("\n")}\n\n官网抓取：\n${ctx.corpus.slice(0, 22000)}`,
-          REPORT_SYSTEM
+          `竞品域名：${task.domain}${domainHint(task.domain)}\n\n## 事实清单 JSON\n${facts ? JSON.stringify(facts, null, 2) : "{}"}\n\n## Agent 推理\n${ctx.thoughts.join("\n")}\n\n## 官网抓取正文\n${ctx.corpus.slice(0, 20000)}`,
+          REPORT_SYSTEM,
+          "gpt-4o"
         );
       }
       ctx.report = appendThinkAppendix(ctx.report, ctx.thoughts);
@@ -761,12 +936,14 @@ ${riskList}
 ### 机会
 ${oppList}
 
-## 7. 建议下一步（PM 动作）
+## 7. 建议下一步（PM 动作清单）
 
-1. 预约竞品 Demo，核对 Bonus / Journey 配置深度  
-2. 要一份典型运营商 Case Study（留存、复充指标）  
-3. 与商务/合规确认目标市场牌照限制  
-4. 内部工作坊：我方「客服+外呼+营销」与该类 CRM 的边界与集成点  
+| 优先级 | 动作 | 目的 |
+|--------|------|------|
+| P0 | 预约 45min 产品 Demo，重点看 Journey / Bonus / 分群 | 验证功能深度非 PPT |
+| P0 | 索要 1 份同区域运营商 Case（留存、复充、活动 ROI） | 校验商业价值 |
+| P1 | 对照定价页与商务条款（按 MAU/站点/模块计费？） | 商务比价 |
+| P1 | 内部工作坊：划定我方「客服+外呼+营销」与该类 CRM 的集成点与不做清单 | 避免重复建设 |
 
 ---
 
@@ -786,8 +963,8 @@ ${(data.excerpt || meta.rawExcerpt || "").slice(0, 800)}
       h = h.replace(/^### (.+)$/gm, "<h3>$1</h3>");
       h = h.replace(/^## (.+)$/gm, "<h2>$1</h2>");
       h = h.replace(/^# (.+)$/gm, "<h1>$1</h1>");
-      h = h.replace(/^&gt; (.+)$/gm, '<p class="text-zinc-500 text-xs italic">$1</p>');
-      h = h.replace(/\*\*(.+?)\*\*/g, '<strong class="text-zinc-200">$1</strong>');
+      h = h.replace(/^&gt; (.+)$/gm, '<p class="text-muted text-xs italic">$1</p>');
+      h = h.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
       h = h.replace(/^- (.+)$/gm, "<li>$1</li>");
       h = h.replace(/(<li>.*<\/li>\n?)+/g, (m) => `<ul>${m}</ul>`);
       const tableMatch = h.match(/\|[^\n]+\|\n\|[-| ]+\|\n(?:\|[^\n]+\|\n?)+/);
@@ -802,7 +979,7 @@ ${(data.excerpt || meta.rawExcerpt || "").slice(0, 800)}
         tbl += "</tbody></table>";
         h = h.replace(tableMatch[0], tbl);
       }
-      h = h.replace(/```[\s\S]*?```/g, (m) => `<pre class="text-xs bg-zinc-950 p-3 rounded-lg overflow-x-auto text-zinc-400 my-2">${m.replace(/```/g, "")}</pre>`);
+      h = h.replace(/```[\s\S]*?```/g, (m) => `<pre class="text-xs p-3 rounded-lg overflow-x-auto my-2" style="background:var(--bg-muted);color:var(--text-muted)">${m.replace(/```/g, "")}</pre>`);
       h = h.replace(/\n\n/g, "</p><p>");
       return `<div>${h}</div>`;
     }
@@ -973,13 +1150,13 @@ ${(data.excerpt || meta.rawExcerpt || "").slice(0, 800)}
       const list = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
       const ul = document.getElementById("history-list");
       if (!list.length) {
-        ul.innerHTML = '<li class="text-zinc-500">暂无保存记录</li>';
+        ul.innerHTML = '<li class="text-muted">暂无保存记录</li>';
       } else {
         ul.innerHTML = list
           .map(
-            (item) => `<li class="border border-zinc-800 rounded-lg p-3 flex justify-between gap-2 items-center">
-            <div><p class="font-semibold text-violet-300">${item.domain}</p><p class="text-xs text-zinc-500 mt-1">${item.date.slice(0, 19).replace("T", " ")}</p></div>
-            <button type="button" class="text-xs px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 shrink-0" data-load-id="${item.id}">打开</button></li>`
+            (item) => `<li class="rounded-lg p-3 flex justify-between gap-2 items-center" style="border:1px solid var(--border)">
+            <div><p class="font-semibold link-accent">${item.domain}</p><p class="text-xs text-muted mt-1">${item.date.slice(0, 19).replace("T", " ")}</p></div>
+            <button type="button" class="text-xs px-2 py-1 btn-ghost shrink-0" data-load-id="${item.id}">打开</button></li>`
           )
           .join("");
         ul.querySelectorAll("[data-load-id]").forEach((btn) => {

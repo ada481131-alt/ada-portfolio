@@ -171,7 +171,8 @@
         <li>保持下面默认模式：<strong>推荐 · 浏览器里直接跑</strong></li>
         <li>输入 <code class="link-accent">分析 smartico.ai</code>，点 <strong>运行</strong></li>
         <li>若弹出登录，按提示用 Puter 免费登录一次（不是你的 OpenAI 账单）</li>
-        <li>右侧看报告，可下载 Word 能打开的 <strong>.html</strong> 或 .md</li>
+        <li>报告先出 <strong>PM 结构化草稿</strong>，再由 GPT 润色；不会自动弹竞品官网</li>
+        <li>右侧可下载 <strong>.html</strong> 或 .md</li>
       </ol>
       <p class="mt-3 text-xs opacity-80">
         「云端引擎」= 可选进阶，不是必做。
@@ -275,46 +276,19 @@
       { id: "report", label: "报告" },
       { id: "files", label: "文件" },
     ];
-    const COMMON_PATHS = ["/", "/pricing", "/about", "/solutions", "/product", "/features"];
-    const REPORT_SYSTEM = `你是海外 iGaming / 在线博彩行业的资深 AI 产品经理，写「对内竞品调研」，给 PM 直接开会用。
+    const COMMON_PATHS = ["/", "/pricing", "/about", "/solutions", "/product", "/features", "/customers", "/case-studies", "/resources"];
+    const EDITOR_SYSTEM = `你是 iGaming 赛道资深 AI 产品经理兼文档编辑。任务：在「结构化草稿」上润色为可开会的终稿。
+硬性规则：保留草稿全部章节与表格；禁止编造融资/客户名/百分比；无数据写「待 Demo 确认」；禁止空话（市场广阔、AI赋能、加强推广、提升体验）。
+品类：Gamification/CRM/Bonus/留存运营 ≠ 智能客服，除非正文明确是客服产品。`;
 
-【禁止】
-- 空话：加大市场推广、提升用户体验、数字化转型、AI 赋能、潜力巨大、加强合作
-- 张冠李戴：若正文是 Gamification/CRM/留存/活动/Bonus，不要写成「智能客服 SaaS」
-- 编造：融资额、客户 Logo、市场份额，除非正文明确出现
+    const FACTS_SYSTEM = `从官网抓取文本提取结构化事实，只输出 JSON：
+{"brand":"","category":"","target_users":[],"modules":[{"name":"","desc":"","evidence":""}],"pricing_signals":[],"named_competitors":[{"name":"","diff":""}],"integrations":[],"quotes":[{"text":"","source_url":""}],"case_studies":[{"client":"","client_type":"","scenario":"","outcomes":[],"metrics":"","source_note":""}]}
+case_studies：从正文提取客户案例/评价/testimonial，metrics 只写正文出现的数字或「未披露」；不要编造%。quotes 最多 5 条。`;
 
-【必须】
-- 从抓取正文提取真实产品名、模块名（英文可保留），每条功能写清「做什么 + 对谁有用」
-- 产品概览：一句话定位、目标客户（运营商/品牌方）、交付形态（SaaS/私有化待核实）
-- 核心功能：≥8 条，分模块（如 Gamification / CRM / Bonus / Analytics / Integration）
-- 卖点与定位：3–5 条，每条附「依据：摘自…」或引用关键词
-- 竞品格局：表格 ≥4 行，写真实竞品（如 Optimove、Fast Track、Xtremepush、BetConstruct 工具链等，按品类选）
-- 与我方对比：我方=「AI 客服 + 人工坐席 + AI 外呼 + AI 营销」；表格行=玩家问题处理、活动留存、分群触达、人力效率、数据闭环
-- 风险与机会：各 ≥3 条，具体可执行，不要套话
-- 建议下一步：4 条 PM 动作（约 Demo、要 Case Study、核对定价与牌照、内部边界工作坊）
-
-【章节标题，必须按序】
-## 1. 产品概览
-## 2. 核心功能（分模块）
-## 3. 卖点与定位
-## 4. 竞品格局
-## 5. 与「海外游戏客户运营一体化」对比
-## 6. 风险与机会
-## 7. 建议下一步（PM 动作清单）
-
-不确定一律写「待核实」。先读「事实清单 JSON」，再读抓取正文，两者冲突以正文为准。`;
-
-    const FACTS_SYSTEM = `从官网抓取文本提取结构化事实，只输出 JSON（无 markdown）：
-{"brand":"","category":"如 iGaming CRM / Gamification / 客服 / 综合","target_users":[],"modules":[{"name":"","desc":"","evidence":""}],"pricing_signals":[],"named_competitors":[],"integration_points":[]}
-只写正文里能支撑的内容，没有的字段用空数组或「未知」。`;
-    const PLANNER_SYSTEM = `你是 Agent 编排器。只输出 JSON（不要 markdown 代码块），格式：
-{"thoughts":["推理1"],"tool_calls":[{"name":"工具名","arguments":{}}]}
-可用工具：
-- agent_think(thought, step?) 记录推理
-- browser_open(url) 打开官网
-- browser_crawl_site(base_url) 多页抓取
-- browser_fetch_page(url, purpose?) 单页抓取
-第一轮建议：think → browser_open → browser_crawl_site`;
+    const PLANNER_SYSTEM = `你是 Agent 编排器。只输出 JSON：
+{"thoughts":["…"],"tool_calls":[{"name":"…","arguments":{}}]}
+工具：agent_think | browser_crawl_site | browser_fetch_page（不要 browser_open，不弹浏览器）
+建议序列：agent_think → browser_crawl_site`;
 
     /** 演示快照：抓取失败时仍可完成 Agent 全流程 */
     const SITE_SNAPSHOTS = {
@@ -343,6 +317,54 @@
         ],
         risks: ["活动配置复杂度高，需运营培训", "与本地合规/彩金规则强绑定", "依赖数据质量与事件埋点"],
         opportunities: ["与 AI 客服/外呼联动做闭环触达", "统一玩家标签与分层口径", "A/B 与 ROI 看板一体化"],
+        featureMatrix: [
+          { module: "Gamification", capability: "任务/勋章/等级/积分商店", value: "提升 DAU 与任务完成率，支撑留存活动" },
+          { module: "CRM", capability: "分群、旅程、触发式活动", value: "运营自助编排，缩短活动上线" },
+          { module: "Bonus Engine", capability: "Free spin、彩金、锦标赛", value: "复充与回流，需与合规规则绑定" },
+          { module: "Analytics", capability: "留存/活跃/付费看板", value: "活动 ROI 复盘，依赖埋点质量" },
+          { module: "Integration", capability: "API/Webhook、PAM/支付/游戏供应商", value: "嵌入现有栈，降低替换成本" },
+        ],
+        pmMetricsToConfirm: [
+          { metric: "活动从配置到上线周期", ask: "销售/Demo：典型天数与是否需要研发" },
+          { metric: "客户留存或复充提升", ask: "Case Study：区间%、统计口径、对照组" },
+          { metric: "计费模型", ask: "定价页：按 MAU / 站点 / 模块？" },
+          { metric: "多品牌/多牌照", ask: "是否支持多租户隔离与区域合规模板" },
+          { metric: "与客服渠道联动", ask: "能否在旅程中调起人工/机器人客服" },
+        ],
+        learningsForUs: [
+          "借鉴「旅程 + 触发 Bonus」闭环，我方外呼/营销触达需与活动状态同一玩家 ID",
+          "借鉴低代码活动配置，我方营销模块减少研发排期依赖",
+          "明确边界：玩家到账/玩法 FAQ 仍由 AI 客服+坐席承接，不与活动配置混为一套话术",
+        ],
+        customerCases: [
+          {
+            client: "Casino.ua",
+            client_type: "在线赌场运营商（乌克兰）",
+            scenario: "CRM 自动化 + 游戏化模块 + Bonus Engine；强调集成快、文档清晰",
+            outcomes: ["玩家留存与满意度提升", "可按品牌定制玩法与活动"],
+            metrics: "官网未披露具体 %（客户证言）",
+            source: "smartico.ai 首页客户评价",
+            credibility: "官网引用 · 建议向销售索要同名 Case PDF",
+          },
+          {
+            client: "多品牌平台商（官网匿名）",
+            client_type: "Casino + Sportsbetting · 200+ white-label 品牌",
+            scenario: "统一活动编排；各品牌独立样式/币种/语言；Gamification 积分商店自助领 Bonus",
+            outcomes: ["LTV 提升", "对照组（control group）验证 KPI 增长", "切换自其他 CRM 约 7 个月"],
+            metrics: "未披露具体 %；强调用对照组验证（非单纯前后对比）",
+            source: "smartico.ai / AI Agents 页客户评价",
+            credibility: "官网引用 · Demo 时追问对照组口径与统计周期",
+          },
+          {
+            client: "官网背书规模（非单客户）",
+            client_type: "平台侧",
+            scenario: "服务 iGaming 多品牌运营",
+            outcomes: ["对外称数百至上千品牌使用其方案（见官网营销表述）"],
+            metrics: "需核实：品牌数统计口径（活跃/签约/白标）",
+            source: "官网营销文案",
+            credibility: "作规模参考，不作单案例 ROI",
+          },
+        ],
       },
     };
 
@@ -527,6 +549,98 @@
       return `\n【品类校对提示，以抓取正文为准】${s.brand}：${s.tagline}`;
     }
 
+    function mergeSnapData(data, snap) {
+      if (!snap) return data;
+      return {
+        ...data,
+        brand: snap.brand,
+        tagline: snap.tagline,
+        features: [...new Set([...(snap.features || []), ...(data.features || [])])],
+        sellingPoints: snap.sellingPoints?.length ? snap.sellingPoints : data.sellingPoints,
+        competitors: snap.competitors?.length ? snap.competitors : data.competitors,
+        risks: snap.risks?.length ? snap.risks : data.risks,
+        opportunities: snap.opportunities?.length ? snap.opportunities : data.opportunities,
+        featureMatrix: snap.featureMatrix || [],
+        pmMetricsToConfirm: snap.pmMetricsToConfirm || [],
+        learningsForUs: snap.learningsForUs || [],
+        customerCases: snap.customerCases?.length ? snap.customerCases : data.customerCases || [],
+      };
+    }
+
+    function mergeCaseStudies(data, facts) {
+      const cases = [...(data.customerCases || [])];
+      (facts?.case_studies || []).forEach((c) => {
+        if (!c?.client && !c?.scenario) return;
+        if (cases.some((x) => x.client === c.client && x.scenario === c.scenario)) return;
+        cases.push({
+          client: c.client || "（抓取）",
+          client_type: c.client_type || "待核实",
+          scenario: c.scenario || "",
+          outcomes: Array.isArray(c.outcomes) ? c.outcomes : [c.outcomes].filter(Boolean),
+          metrics: c.metrics || "见抓取",
+          source: c.source_note || "官网抓取",
+          credibility: "抓取提取 · 需人工核对",
+        });
+      });
+      return cases;
+    }
+
+    async function generateFinalReport(task, ctx, facts) {
+      const snap = SITE_SNAPSHOTS[task.domain];
+      let data = extractFromText(ctx.corpus || "", task.domain);
+      data = mergeSnapData(data, snap);
+      if (facts?.modules?.length) {
+        const fromFacts = facts.modules.map((m) => `${m.name}：${m.desc || ""}（依据：${(m.evidence || "").slice(0, 80)}）`);
+        data.features = [...new Set([...fromFacts, ...data.features])];
+      }
+      if (facts?.named_competitors?.length) {
+        data.competitors = facts.named_competitors.map((c) => ({
+          name: c.name || c,
+          note: c.diff || c.note || "待补充",
+        }));
+      }
+      data.customerCases = mergeCaseStudies(data, facts);
+
+      const draft = buildMarkdown(task, data, {
+        fetchNote: `后台抓取 ${ctx.pages.length} 页 · PM 结构化草稿`,
+        rawExcerpt: ctx.corpus.slice(0, 1500),
+        facts,
+      });
+
+      const quotesBlock =
+        facts?.quotes?.length > 0
+          ? facts.quotes.map((q) => `- 「${q.text}」${q.source_url ? `（${q.source_url}）` : ""}`).join("\n")
+          : "";
+
+      const editorUser = `润色以下竞品报告草稿为终稿（${task.domain}）。
+
+要求：
+1. 保留全部 ## 章节与表格，可增补行，不要删表
+2. 用官网抓取补充「依据：」；抓取里没有的数字不要编
+3. 第 2 节功能矩阵、第 4 节客户案例（保留表格，可从抓取增补行）、第 9/10 节要具体
+4. 客户案例：有数字写数字+来源；无数字写「未披露」并写清应问销售什么
+5. 竞品表写真实公司名 + 一句差异
+6. 全文中文，像资深 PM 文档，不要小作文
+
+${quotesBlock ? `原文摘录候选：\n${quotesBlock}\n` : ""}
+
+## 官网抓取
+${ctx.corpus.slice(0, 20000)}
+
+## 草稿
+${draft}`;
+
+      log("生成 PM 结构化草稿 → GPT 润色终稿…", "info");
+      try {
+        const final = await llmPuter(editorUser, EDITOR_SYSTEM, "gpt-4o");
+        if (final && final.length > 500 && /##\s*1\./.test(final)) return final.trim();
+        log("润色结果异常，使用结构化草稿", "warn");
+      } catch (e) {
+        log(`润色失败：${e.message}，使用结构化草稿`, "warn");
+      }
+      return draft;
+    }
+
     async function extractFactsFromCorpus(task, corpus) {
       log("提取结构化事实（避免报告空泛）…", "info");
       try {
@@ -600,10 +714,9 @@
       }
       if (name === "browser_open") {
         const u = args.url || task.url;
-        log(`Browser Use: 打开 ${u}`, "tool");
-        window.open(u, "_blank", "noopener,noreferrer");
+        log(`Browser：已记录 ${u}（后台抓取，不弹窗）`, "tool");
         setWorkflow("browser", ["parse", "plan"]);
-        return { opened: true };
+        return { recorded: true, url: u, popup: false };
       }
       if (name === "browser_fetch_page") {
         const u = args.url || task.url;
@@ -631,8 +744,7 @@
       return {
         thoughts: ["先打开官网，再爬取首页与定价/方案等子页，最后写报告"],
         tool_calls: [
-          { name: "agent_think", arguments: { thought: "规划：需要首页 + pricing/about 了解定位与功能边界", step: "plan" } },
-          { name: "browser_open", arguments: { url: task.url } },
+          { name: "agent_think", arguments: { thought: "规划：后台多页抓取首页/pricing/about，不打扰用户弹窗", step: "plan" } },
           { name: "browser_crawl_site", arguments: { base_url: task.url } },
         ],
       };
@@ -696,7 +808,7 @@ pre{background:#f4f4f5;padding:12px;border-radius:8px;overflow:auto;font-size:12
       try {
         log("Planner：请求 LLM 生成 tool_calls 计划…", "info");
         const planText = await llmPuter(
-          `目标：${task.domain}\nURL：${task.url}\n输出 JSON 的 tool_calls（含 agent_think、browser_open、browser_crawl_site）。`,
+          `目标：${task.domain}\nURL：${task.url}\n输出 JSON tool_calls（agent_think、browser_crawl_site，不要 browser_open）。`,
           PLANNER_SYSTEM
         );
         const parsed = parseJsonFromLlm(planText);
@@ -752,15 +864,8 @@ pre{background:#f4f4f5;padding:12px;border-radius:8px;overflow:auto;font-size:12
       } catch (_) {}
 
       setWorkflow("report", ["parse", "plan", "browser", "tools", "think"]);
-      if (!ctx.report || ctx.report.length < 300) {
-        log("write_report_file：生成深度 Markdown 报告…", "file");
-        ctx.report = await llmPuter(
-          `竞品域名：${task.domain}${domainHint(task.domain)}\n\n## 事实清单 JSON\n${facts ? JSON.stringify(facts, null, 2) : "{}"}\n\n## Agent 推理\n${ctx.thoughts.join("\n")}\n\n## 官网抓取正文\n${ctx.corpus.slice(0, 20000)}`,
-          REPORT_SYSTEM,
-          "gpt-4o"
-        );
-      }
-      ctx.report = appendThinkAppendix(ctx.report, ctx.thoughts);
+      log("write_report_file：结构化草稿 + 润色…", "file");
+      ctx.report = await generateFinalReport(task, ctx, facts);
 
       const mdName = `competitor-${task.domain}.md`;
       const htmlName = `competitor-${task.domain}.html`;
@@ -848,6 +953,10 @@ pre{background:#f4f4f5;padding:12px;border-radius:8px;overflow:auto;font-size:12
           competitors: snap.competitors,
           risks: snap.risks,
           opportunities: snap.opportunities,
+          featureMatrix: snap.featureMatrix,
+          pmMetricsToConfirm: snap.pmMetricsToConfirm,
+          learningsForUs: snap.learningsForUs,
+          customerCases: snap.customerCases,
           source: "snapshot+page",
           excerpt: text.slice(0, 400),
         };
@@ -881,23 +990,48 @@ pre{background:#f4f4f5;padding:12px;border-radius:8px;overflow:auto;font-size:12
         .join("\n");
       const riskList = data.risks.map((r) => `- ${r}`).join("\n");
       const oppList = data.opportunities.map((o) => `- ${o}`).join("\n");
+      const matrixRows = (data.featureMatrix || [])
+        .map((r) => `| ${r.module} | ${r.capability} | ${r.value} |`)
+        .join("\n");
+      const metricsRows = (data.pmMetricsToConfirm || [])
+        .map((m) => `| ${m.metric} | 待 Demo 确认 | ${m.ask} |`)
+        .join("\n");
+      const learnList = (data.learningsForUs || []).map((l) => `- ${l}`).join("\n");
+      const caseRows = (data.customerCases || [])
+        .map(
+          (c) =>
+            `| ${c.client} | ${c.client_type || "—"} | ${c.scenario} | ${(c.outcomes || []).join("；") || "—"} | ${c.metrics || "未披露"} | ${c.source || "—"} | ${c.credibility || "待核实"} |`
+        )
+        .join("\n");
 
       return `# 竞品调研报告 · ${data.brand}
 
 > 生成时间：${date}  
 > 目标：${task.url}（${task.domain}）  
 > 数据来源：${meta.fetchNote}  
-> 说明：作品集 Agent Demo，仅供面试/内部分析框架参考
+> 品类提示：${data.tagline}
 
 ## 1. 产品概览
 
-**${data.brand}** — ${data.tagline}
+| 项 | 内容 |
+|----|------|
+| 品牌 | **${data.brand}** |
+| 一句话定位 | ${data.tagline} |
+| 目标客户 | iGaming / 在线博彩运营商（市场、运营、CRM） |
+| 交付形态 | SaaS 为主（待 Demo 确认私有化） |
+| 与我方关系 | 偏「留存+活动+CRM」，我方偏「客服+坐席+外呼+营销」，可集成不宜重复建设 |
 
-## 2. 核心功能（从官网提取）
+## 2. 核心功能矩阵
+
+| 模块 | 能力点 | 运营价值 |
+|------|--------|----------|
+${matrixRows || "| （待从抓取补充） | | |"}
+
+### 2.1 功能清单（摘录）
 
 ${featList}
 
-## 3. 卖点与定位分析
+## 3. 卖点与定位（需有依据）
 
 ${spList}
 
@@ -910,13 +1044,28 @@ ${spList}
 
 ${data.features.slice(0, 6).map((f) => `- ${f}`).join("\n")}
 
-## 4. 竞品格局（整理）
+## 4. 客户案例与公开成果（参考性）
+
+> 说明：仅收录官网/抓取可核对信息；无 % 的不编造，标注「未披露」及 Demo 时应追问项。
+
+| 客户/来源 | 客户类型 | 使用场景 | 公开成果 | 数据指标 | 来源 | 可信度 / 下一步 |
+|-----------|----------|----------|----------|----------|------|----------------|
+${caseRows || "| （抓取未识别到案例，Demo 时索要 Case Study 列表） | | | | | | |"}
+
+### 4.1 向销售追问的 Case 清单（建议）
+
+- 同区域、同业态（Casino / Sports）的 **1 份可对外 Case PDF**
+- 留存 / 复充 / LTV / DAU 提升的 **区间 %、周期、对照组设置**
+- 活动上线周期：从运营配置到上线的 **中位数天数**
+- 200+ 品牌场景下的 **多租户与权限** 实施成本
+
+## 5. 竞品格局（整理）
 
 | 竞品/替代 | 简要对比 |
 |-----------|----------|
 ${compRows}
 
-## 5. 与我方产品对照（${OUR_PRODUCT.name}）
+## 6. 与我方产品对照（${OUR_PRODUCT.name}）
 
 | 维度 | ${data.brand}（竞品） | 我方（示意） |
 |------|------------------------|--------------|
@@ -928,7 +1077,7 @@ ${compRows}
 **可借鉴：** ${data.opportunities[0] || "旅程与分群能力"}  
 **需规避：** ${data.risks[0] || "活动与客服话术口径不一致"}
 
-## 6. 风险与机会
+## 7. 风险与机会
 
 ### 风险
 ${riskList}
@@ -936,14 +1085,24 @@ ${riskList}
 ### 机会
 ${oppList}
 
-## 7. 建议下一步（PM 动作清单）
+## 8. 建议下一步（PM 动作清单）
 
 | 优先级 | 动作 | 目的 |
 |--------|------|------|
 | P0 | 预约 45min 产品 Demo，重点看 Journey / Bonus / 分群 | 验证功能深度非 PPT |
-| P0 | 索要 1 份同区域运营商 Case（留存、复充、活动 ROI） | 校验商业价值 |
+| P0 | 索要 1 份可对外 Case PDF（含对照组、% 区间、周期） | 校验案例真实性 |
 | P1 | 对照定价页与商务条款（按 MAU/站点/模块计费？） | 商务比价 |
 | P1 | 内部工作坊：划定我方「客服+外呼+营销」与该类 CRM 的集成点与不做清单 | 避免重复建设 |
+
+## 9. 待销售 / Demo 核实的数据指标
+
+| 指标 | 公开数据 | 应问销售的问题 |
+|------|----------|----------------|
+${metricsRows || "| 活动上线周期 | 待 Demo 确认 | 从配置到上线典型几天？ |"}
+
+## 10. 对我方产品的借鉴点（可落地）
+
+${learnList || "- 待结合抓取内容与内部路线图补充"}
 
 ---
 
@@ -1007,8 +1166,7 @@ ${(data.excerpt || meta.rawExcerpt || "").slice(0, 800)}
       setWorkflow("plan", ["parse"]);
       log("💭 规划：抓取官网并归纳功能（模拟 agent_think）", "think");
       setWorkflow("browser", ["parse", "plan"]);
-      log("🔧 browser_open → 新标签页", "tool");
-      window.open(task.url, "_blank", "noopener,noreferrer");
+      log("🔧 browser_crawl_site（后台抓取，不弹窗）", "tool");
       setWorkflow("think", ["parse", "plan", "browser", "tools"]);
       log("💭 归纳：从页面关键词提取功能与卖点（规则）", "think");
       try {
@@ -1027,7 +1185,8 @@ ${(data.excerpt || meta.rawExcerpt || "").slice(0, 800)}
       setWorkflow("tools", ["parse", "plan", "browser"]);
       log("🔧 browser_crawl_site（单页 Jina）", "tool");
       setWorkflow("report", ["parse", "plan", "browser", "tools", "think"]);
-      const data = extractFromText(pageText, task.domain);
+      let data = extractFromText(pageText, task.domain);
+      data = mergeSnapData(data, SITE_SNAPSHOTS[task.domain]);
       const md = buildMarkdown(task, data, { fetchNote, rawExcerpt: pageText });
       lastTraceJson = JSON.stringify(buildTrace(task, { thoughts: ["离线规则"], pages: [{ url: task.url }], corpus: pageText }, "offline"), null, 2);
       setWorkflow("files", WORKFLOW_DEF.map((w) => w.id).filter((id) => id !== "files"));

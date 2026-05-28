@@ -308,39 +308,54 @@
           { t: "meta", rows: [
             ["定位", "PM 侧竞品快速调研 Agent；作品集展示完整 Agent 能力（非表单、非固定模板）"],
             ["输入", "自然语言，如「分析 smartico.ai」；抓取失败可粘贴官网文字"],
-            ["输出", ".html / .md 报告 + 执行记录 .json + 报告附录「Agent 思维链」+ 浏览器本地历史"],
-            ["默认用法", "打开 Demo → 保持「推荐·浏览器里直接跑」→ 点运行（无需部署云端）"],
-            ["Demo 边界", "Browser = Jina 多页 HTTP（非 Playwright 点 DOM）；可选「云端引擎」见 agent-api/怎么部署-通俗版.md"],
+            ["输出", ".html / .md + trace.json；报告含功能矩阵、<strong>客户案例表</strong>、竞品对比、待核实指标、借鉴点；思维链仅在 json 日志"],
+            ["默认用法", "推荐·浏览器里直接跑；<strong>不弹竞品官网</strong>，后台多页抓取"],
+            ["Demo 边界", "Browser = Jina 后台 HTTP（/customers 等）；非 Playwright；不编造 Case 百分比"],
           ]},
-          { t: "html", html: `<h2>0. Agent 能力矩阵（v0.2 已实现）</h2>
+          { t: "html", html: `<h2>0. Agent 能力矩阵（v0.3）</h2>
 <table class="compact"><tr><th>能力</th><th>Demo 实现</th></tr>
-<tr><td>Tool Calling</td><td>Planner 产出 tool_calls → 执行 browser_* / agent_think / 写报告；可选云端引擎为 OpenAI 原生 tools 多轮</td></tr>
-<tr><td>Browser Use</td><td>browser_open（新标签）+ browser_crawl_site（/、/pricing、/about…）；语料不足时第二轮补抓定价页</td></tr>
-<tr><td>文件生成</td><td>.md + .html（Word 可开）+ agent-trace.json；localStorage 历史</td></tr>
-<tr><td>Agent 思维</td><td>日志 💭 + 报告附录「思维链」；抓取后二次推理再写报告</td></tr>
-<tr><td>工作流</td><td>顶栏 7 步：解析→规划→Browser→Tools→思维→报告→文件（自动高亮）</td></tr>
+<tr><td>Tool Calling</td><td>Planner → browser_crawl_site / browser_fetch_page / agent_think；不弹窗</td></tr>
+<tr><td>Browser Use</td><td>后台多页：/、/pricing、/about、/customers、/case-studies…；语料不足补抓定价页</td></tr>
+<tr><td>文件生成</td><td>.md + .html + trace.json；PM 结构化草稿 → GPT 润色终稿</td></tr>
+<tr><td>客户案例</td><td>## 4 专用表格：客户/场景/成果/指标（未披露则标明）+ 追问清单；Smartico 含 Casino.ua 等官网证言</td></tr>
+<tr><td>Agent 思维</td><td>日志 💭；终稿报告不塞思维附录，避免空话</td></tr>
+<tr><td>工作流</td><td>顶栏 7 步自动高亮；界面默认浅色、跟随系统深色</td></tr>
 <tr><td>自动执行</td><td>一次「运行」跑完全链路</td></tr></table>
-<h2>1. 三种运行模式</h2>
-<table class="compact"><tr><th>模式</th><th>说明</th></tr>
-<tr><td><strong>推荐·浏览器里直接跑</strong></td><td>Puter 真 LLM + Jina 真抓取；面试/访客默认用这个</td></tr>
-<tr><td>可选·云端引擎</td><td>Cloudflare Worker + 自有 OpenAI；需技术同事部署，非必做</td></tr>
-<tr><td>离线演示</td><td>规则模板，无 AI，只看流程</td></tr></table>
-<h2>2. 执行链路</h2>
+<h2>1. 报告结构（10 节）</h2>
 <ol class="compact">
-<li>解析任务 → Planner 生成工具计划（失败则用默认序列）</li>
-<li>Tool Calling：打开官网、多页抓取、记录思维</li>
-<li>LLM 生成 7 章竞品报告 + 思维链附录</li>
-<li>导出文件并写入本地历史</li>
+<li>产品概览（表格式）</li>
+<li>核心功能矩阵</li>
+<li>卖点与定位</li>
+<li><strong>客户案例与公开成果</strong></li>
+<li>竞品格局</li>
+<li>与我方（客服+坐席+外呼+营销）对比</li>
+<li>风险与机会</li>
+<li>建议下一步</li>
+<li>待销售核实指标</li>
+<li>对我方借鉴点</li>
+</ol>
+<h2>2. 三种运行模式</h2>
+<table class="compact"><tr><th>模式</th><th>说明</th></tr>
+<tr><td><strong>推荐·浏览器里直接跑</strong></td><td>结构化草稿 + GPT 润色；默认</td></tr>
+<tr><td>可选·云端引擎</td><td>Worker + OpenAI Tool Calling；非必做</td></tr>
+<tr><td>离线演示</td><td>规则草稿（含案例表），无 LLM 润色</td></tr></table>
+<h2>3. 执行链路</h2>
+<ol class="compact">
+<li>多页后台抓取 → 抽事实 JSON（含 case_studies）</li>
+<li>合并行业快照 → 生成 PM 结构化 Markdown 草稿</li>
+<li>GPT 润色终稿（禁止空话、禁止编造 %）</li>
+<li>导出并 localStorage 历史</li>
 </ol>` },
           { t: "decision", title: "D-01 为什么是 Agent 而不是表单", body: "用户说「分析 smartico.ai」即可；左侧日志展示 Tool / Browser / 思维，右侧报告可下载，便于面试讲清 Agent 编排。" },
           { t: "decision", title: "D-02 为何默认不部署云端", body: "GitHub Pages 是静态页，访客应零门槛体验。浏览器模式已含真抓取+真 LLM；云端引擎仅在有 OpenAI Key、要更稳 Tool Calling 时选用。" },
           { t: "decision", title: "D-03 抓取合规", body: "仅公开页面；遵守 robots；报告注明来源与时间；不爬登录后内容。" },
           { t: "decision", title: "D-04 产品化演进", body: "Playwright 多页+截图、批量竞品、Notion/飞书导出、人工审核节点。" },
-          { t: "scenario", title: "Case · 分析 smartico.ai", body: `<p>输入后自动打开官网、多页抓取、输出 iGaming CRM/游戏化/卖点/竞品表/与我方客服+营销对照；可下载 html 给业务方阅读。</p>` },
+          { t: "scenario", title: "Case · 分析 smartico.ai", body: `<p>输入后<strong>不弹窗</strong>，后台抓取；报告含 Casino.ua、多品牌 200+ white-label 等官网案例行（无 % 则标「未披露」）、Optimove 等竞品表、功能矩阵与 PM 借鉴点。可下载 html。</p>` },
           { t: "callout", kind: "ok", html: `<strong>给非技术同学：</strong>不用懂 Worker。打开 <code>demo-competitor-agent.html</code>，默认模式点运行即可。部署说明见 <code>agent-api/怎么部署-通俗版.md</code>。` },
           { t: "callout", kind: "warn", html: `<strong>合规：</strong>报告仅供内部分析；敏感材料勿上传公网 Demo。` },
           { t: "changelog", items: [
-            "v0.2 Agent 编排：Tool Calling + Browser 多页 + 思维链附录 + html/md/json 导出 + 白话使用说明",
+            "v0.3 客户案例专节 + PM 草稿润色 + 不弹窗 + 浅色跟随系统 + Smartico 案例快照",
+            "v0.2 Agent 编排：Tool Calling + Browser 多页 + html/md/json",
             "v0.1 初版：规则模板 + 单页抓取",
             "规划 v1.0：Playwright + 批量竞品 + 企业导出",
           ] },

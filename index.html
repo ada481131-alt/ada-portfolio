@@ -331,6 +331,7 @@
         <a href="#work" class="hover:text-gray-950">作品案例</a>
         <a href="#life" class="hover:text-gray-950">生活一面</a>
         <a href="resume.html" class="hover:text-gray-950">简历</a>
+        <a href="career.html" class="hover:text-gray-950">成长中心</a>
         <a href="#contact" class="hover:text-gray-950">联系我</a>
       </div>
 
@@ -361,6 +362,7 @@
         <a href="#work" class="mobile-nav-link py-1">作品案例</a>
         <a href="#life" class="mobile-nav-link py-1">生活一面</a>
         <a href="resume.html" class="py-1">查看简历</a>
+        <a href="career.html" class="py-1">职业成长中心</a>
         <a href="#contact" class="mobile-nav-link py-1">联系我</a>
       </div>
     </div>
@@ -412,6 +414,9 @@
           </a>
           <a href="resume.html" target="_blank" rel="noopener noreferrer" class="bg-white border border-gray-200 px-6 py-3 rounded-full font-semibold hover:bg-gray-50">
             查看简历
+          </a>
+          <a href="career.html" class="bg-rose-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-rose-500">
+            职业成长中心
           </a>
           <a href="#contact" class="bg-white border border-gray-200 px-6 py-3 rounded-full font-semibold hover:bg-gray-50">
             联系我
@@ -795,6 +800,42 @@
             <a href="prd.html?p=8" class="block w-full text-center py-2 rounded-full border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50">PRD 摘要 →</a>
           </div>
         </div>
+
+        <div class="project-slide card glass rounded-[1.8rem] p-6 flex flex-col">
+          <button type="button" class="project-card group text-left flex-1" data-project="9" aria-label="查看项目说明：Skills 人设试玩">
+            <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-indigo-200 to-sky-100 mb-5 overflow-hidden relative">
+              <span class="absolute inset-0 flex items-center justify-center text-indigo-900/50 text-sm font-bold px-4 text-center select-none">左选人 · 右对话 · 拉群</span>
+            </div>
+            <p class="text-sm text-indigo-700 font-bold">PM 工具 · Skills</p>
+            <h3 class="mt-2 text-xl font-black group-hover:text-indigo-800 transition-colors">Skills 人设试玩</h3>
+            <p class="mt-3 text-gray-600 leading-7">
+              Marcus Chen（产品）、Ira Kaplan（算法）、Leo Park（研发）— 职场英文名人设，沉浸对话；可群聊拉齐立项/评审。
+            </p>
+            <p class="mt-2 text-sm font-semibold text-indigo-700/90">图灵导向 · 忌菜单腔 · Puter 真 AI</p>
+            <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-indigo-700">项目说明 <span aria-hidden="true">→</span></span>
+          </button>
+          <div class="mt-4 space-y-2">
+            <a href="demo-skills-playground.html" class="block w-full text-center bg-indigo-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-indigo-500">立即体验人设试玩 →</a>
+          </div>
+        </div>
+
+        <div class="project-slide card glass rounded-[1.8rem] p-6 flex flex-col">
+          <button type="button" class="project-card group text-left flex-1" data-project="10" aria-label="查看项目说明：Ada Career OS">
+            <div class="project-thumb h-40 rounded-2xl bg-gradient-to-br from-rose-200 to-orange-100 mb-5 overflow-hidden relative">
+              <span class="absolute inset-0 flex items-center justify-center text-rose-900/50 text-sm font-bold px-4 text-center select-none">作业 · 雷达 · 简历进化</span>
+            </div>
+            <p class="text-sm text-rose-700 font-bold">个人 · Career OS</p>
+            <h3 class="mt-2 text-xl font-black group-hover:text-rose-800 transition-colors">职业成长中心</h3>
+            <p class="mt-3 text-gray-600 leading-7">
+              Skills 驱动：Marcus 出题考核、高薪岗位雷达、创业机会侦察；网页看本周作业与目标薪资，Cursor 交作业更新简历。
+            </p>
+            <p class="mt-2 text-sm font-semibold text-rose-700/90">你是主人 · 简历须确认才改</p>
+            <span class="project-cta mt-3 inline-flex items-center gap-1 text-sm font-semibold text-rose-700">项目说明 <span aria-hidden="true">→</span></span>
+          </button>
+          <div class="mt-4 space-y-2">
+            <a href="career.html" class="block w-full text-center bg-rose-600 text-white py-2.5 rounded-full text-sm font-semibold hover:bg-rose-500">打开成长中心 →</a>
+          </div>
+        </div>
       </div>
       </div>
     </section>
@@ -1131,6 +1172,40 @@
         prdLinkText: "PRD 摘要",
         link: "#contact",
         linkText: "交流 Agent 方案",
+      },
+      9: {
+        label: "PM 工具 · Skills",
+        labelClass: "text-indigo-700",
+        title: "Skills 人设试玩",
+        desc: "Marcus Chen · Ira Kaplan · Leo Park：职场向英文名，口语像真人同事，避免 AI 菜单腔。左栏选人、右侧对话。",
+        outcomes: [
+          "Marcus Chen：SVP Product，全能产品面",
+          "Ira Kaplan / Leo Park：ML 与 Tech Lead",
+          "群聊：Chen+Park / Chen+Kaplan 等",
+          "演示模式或 Puter 真 AI",
+        ],
+        tags: ["Marcus Chen", "Ira Kaplan", "Leo Park", "沉浸人设", "群聊"],
+        demoLink: "demo-skills-playground.html",
+        demoLinkText: "体验人设试玩",
+        link: "#contact",
+        linkText: "交流 Skills 用法",
+      },
+      10: {
+        label: "个人 · Career OS",
+        labelClass: "text-rose-700",
+        title: "职业成长中心 · Ada Career OS",
+        desc: "用 Cursor Skills 让简历与能力持续进化：Marcus 出 PM 任务并考核、市场雷达扫高薪 JD、机会侦察看副业风口。网页指挥台 + 本机 Skill 引擎；简历仅主人确认后更新。",
+        outcomes: [
+          "成长教练：每周作业、STAR、指标挖掘、打分进简历提案队列",
+          "市场雷达：深圳/远程/新加坡高薪岗，方向你拍板",
+          "机会侦察：兼职创业简报，默认求职优先",
+          "网页入口：本周作业勾选、交作业口令一键复制",
+        ],
+        tags: ["职业规划", "简历进化", "高薪 JD", "Skills", "Marcus Chen"],
+        demoLink: "career.html",
+        demoLinkText: "打开成长中心",
+        link: "resume.html",
+        linkText: "查看简历",
       },
     };
 

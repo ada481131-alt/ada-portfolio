@@ -1,0 +1,9 @@
+{
+  "armed": true,
+  "interval": "1w",
+  "seconds": 604800,
+  "started": "2026-05-29",
+  "sentinel": "AGENT_LOOP_TICK_CAREER_OS",
+  "prompt": "读 Ada Career OS：weekly + growth-log + career/data，给 Ada 本周待办与雷达要点，有待确认简历则追问要/不要",
+  "stop_hint": "在 Cursor 说「停止 Career OS loop」"
+}

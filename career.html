@@ -8,8 +8,8 @@
   <style>
     body { font-family: -apple-system, "PingFang SC", sans-serif; }
     .glass { background: rgba(255,255,255,.85); backdrop-filter: blur(12px); border: 1px solid #f1f5f9; }
-    .pillar { transition: box-shadow .2s; }
-    .pillar:hover { box-shadow: 0 8px 30px rgba(0,0,0,.06); }
+    .intel-item { cursor: pointer; border-radius: .75rem; padding: .5rem; margin: -.5rem; transition: background .15s; }
+    .intel-item:hover { background: #f8fafc; }
     .cmd-btn { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
     .task-done label { opacity: .55; text-decoration: line-through; }
   </style>
@@ -25,37 +25,17 @@
   </header>
 
   <main class="max-w-5xl mx-auto px-5 py-10 md:py-14">
-    <div class="mb-10">
+    <div class="mb-6">
       <p class="text-xs font-bold text-rose-600 uppercase tracking-widest">Ada Career OS</p>
       <h1 class="mt-2 text-3xl md:text-4xl font-black tracking-tight">职业成长中心</h1>
-      <p class="mt-4 text-gray-600 leading-8 max-w-2xl">
-        你是<strong>主人</strong>。系统会<strong>主动推</strong>：每周自动更新下方雷达/风口；在 Cursor 打开本仓库时 Agent 会先汇报待办（不用你记口令）。
-        你只需要：<strong>有空交作业</strong>、对简历改动用<strong>确认/不要</strong>点头。
+      <p class="mt-3 text-gray-600 leading-7 max-w-2xl text-sm">
+        打开先看<strong>本周作业</strong>；做完在 Cursor 说<strong>交作业</strong>。简历改动需你点头才更新。
       </p>
-    </div>
-
-    <!-- 三大能力 -->
-    <div class="grid md:grid-cols-3 gap-4 mb-10">
-      <div class="pillar glass rounded-2xl p-5">
-        <p class="text-2xl">🎯</p>
-        <h2 class="mt-2 font-bold">成长教练</h2>
-        <p class="mt-2 text-sm text-gray-600 leading-7">Marcus 出 PM 任务 → 你交付 → 打分 → 达标才提案更新简历。</p>
-      </div>
-      <div class="pillar glass rounded-2xl p-5">
-        <p class="text-2xl">📡</p>
-        <h2 class="mt-2 font-bold">市场雷达</h2>
-        <p class="mt-2 text-sm text-gray-600 leading-7">扫高薪 JD、比方向，你确认走哪条赛道后再定向提升。</p>
-      </div>
-      <div class="pillar glass rounded-2xl p-5">
-        <p class="text-2xl">🌊</p>
-        <h2 class="mt-2 font-bold">机会侦察</h2>
-        <p class="mt-2 text-sm text-gray-600 leading-7">兼职 / 创业 / 风口简报，辅助选择（默认求职优先）。</p>
-      </div>
     </div>
 
     <div class="grid lg:grid-cols-5 gap-6 mb-10">
       <!-- 本周作业 -->
-      <section class="lg:col-span-3 glass rounded-2xl p-6">
+      <section id="coach-section" class="lg:col-span-3 glass rounded-2xl p-6">
         <div class="flex flex-wrap justify-between gap-2 items-start">
           <div>
             <h2 class="text-lg font-black">本周作业</h2>
@@ -128,7 +108,7 @@
 
     <!-- 雷达 & 创业 -->
     <section class="grid md:grid-cols-2 gap-4 mb-6">
-      <div class="glass rounded-2xl p-6">
+      <div id="radar-section" class="glass rounded-2xl p-6 scroll-mt-24">
         <div class="flex flex-wrap justify-between gap-2 items-start">
           <h2 class="font-bold">高薪岗位雷达</h2>
           <span id="radar-updated" class="text-[10px] text-gray-400"></span>
@@ -137,7 +117,7 @@
         <ul id="radar-list" class="mt-4 space-y-3 text-sm max-h-72 overflow-y-auto"></ul>
         <button type="button" class="cmd-btn mt-3 text-xs text-indigo-600 font-semibold" data-copy="跑市场雷达">复制：跑市场雷达 →</button>
       </div>
-      <div class="glass rounded-2xl p-6">
+      <div id="scout-section" class="glass rounded-2xl p-6 scroll-mt-24">
         <div class="flex flex-wrap justify-between gap-2 items-start">
           <h2 class="font-bold">兼职 · 创业风口</h2>
           <span id="scout-updated" class="text-[10px] text-gray-400"></span>
@@ -158,6 +138,8 @@
   </main>
 
   <script>
+const INTEL_EMBED = {"radar": {"type": "radar", "updated": "2026-05-29T14:55:51+08:00", "source": "github-actions", "cadence": "每周一自动更新", "items": [{"title": "「深圳行业ai产品经理招聘信息」-BOSS直聘", "snippet": "BOSS直聘为您提供2026年深圳行业ai产品经理信息，BOSS直聘在线开聊约面试，及时反馈，让深圳行业ai产品经理更便捷，找工作就上BOSS直聘!", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.zhipin.com%2Fzhaopin%2Fc207d63fab4a3f3403R509S8Ew~~%2F&amp;rut=ff07c30a4fd437d60f7d78db497165397395a7fcd81941ea7928b4ec9d42c337", "region": "深圳", "tags": ["AI PM", "深圳"]}, {"title": "深圳ai产品经理招聘_就业前景大数据 - 谈职", "snippet": "深圳AI产品经理平均月薪工资多少？ 谈职根据全网19份数据计算得出深圳AI产品经理平均工资为￥34800，谈职为你提供深圳AI产品经理最新热招职位信息，收入对比，城市对比，就业前景，谈职全网职位大数据助力求职者寻找理想工作。", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.tanzhi.cn%2Fshenzhen%2F2e5d1def%2D71b4%2D45d3%2D98d5%2Dcee9fcb4bf7b%2F&amp;rut=106c61ef47a5387a1513173affdc5fd4ed7912b6661ea3adcef5acfa3cec294a", "region": "深圳", "tags": ["AI PM", "深圳"]}, {"title": "深圳ai产品经理工资待遇（招聘要求） - 职友集", "snippet": "深圳ai产品经理招聘工资收入多少钱一个月？ 招聘待遇怎么样？ 据统计，深圳ai产品经理71.8%的岗位拿20-50K，取自1204份样本。 深圳ai产品经理就业前景怎么样？ 市场需求：2026年招聘职位725个，占深圳0.149%。", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.jobui.com%2Fsalary%2Fshenzhen%2Daichanpinjingli%2F&amp;rut=c8d015f3ec29dac4c5c6fcd64adbe6441a6aaefa2b41d51c2094d99062cfd82b", "region": "深圳", "tags": ["AI PM", "深圳"]}, {"title": "从应届生到产品总监：深圳产品经理年薪分布全解析 - 今日头条", "snippet": "在快速发展的科技行业中，产品经理作为连接技术与市场的关键角色，其重要性不言而喻。而薪资水平作为衡量职业吸引力的重要指标之一，一直备受关注。近日，一份关于2024年深圳不同规模企业中产品经理薪资情况的调查报告引起了广泛热议。", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.toutiao.com%2Farticle%2F7555673150357324298%2F&amp;rut=3bddcb459666d1e8d1de17a93290e8b3427387fdd11f0881d6df2dcbc49ac929", "region": "深圳", "tags": ["AI PM", "深圳"]}, {"title": "深圳产品经理工资待遇（招聘要求） - 职友集", "snippet": "深圳产品经理招聘工资收入多少钱一个月？招聘待遇怎么样？据统计，深圳产品经理71.7%的岗位拿20-50K，取自21553份样本。深圳 ...", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.jobui.com%2Fsalary%2Fshenzhen%2Dchanpinjingli%2F&amp;rut=6d08b10bb3c6da82f69eef0b38eea7fbdd7b15e034bcb26aa7c80a3c15000496", "region": "深圳", "tags": ["AI PM", "深圳"]}, {"title": "ai product manager jobs in Remote - Indeed", "snippet": "Browse 524 Ai Product Manager job openings from Remote. Discover flexible, work-from-home opportunities on Indeed in fields like tech, admin, and customer service.", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.indeed.com%2Fq%2Dai%2Dproduct%2Dmanager%2Dl%2Dremote%2Djobs.html&amp;rut=f431499eacfe2d2caaa55e99e32ea1c1497d880ac9239ad52e8af283db60eed8", "region": "远程", "tags": ["AI PM", "远程"]}, {"title": "Remote AI Product Manager Jobs", "snippet": "290 AI Product Manager jobs available for remote work from home. Apply for positions such as Product Manager - AI, AI Product Manager, Product Manager - AI and more! Discover the best work-from-home or hybrid, full- and part-time jobs.", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fdailyremote.com%2Fremote%2Dai%2Dproduct%2Dmanager%2Djobs&amp;rut=633498366bb5fb5d52f6e3c2b5f892acec333b8b7c456915516b2e6e232ae237", "region": "远程", "tags": ["AI PM", "远程"]}, {"title": "256 Artificial intelligence ai product manager jobs in Remote", "snippet": "Search Artificial intelligence ai product manager jobs in Remote with company ratings &amp; salaries. 256 open jobs for Artificial intelligence ai product manager in Remote.", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.glassdoor.com%2FJob%2Fremote%2Dartificial%2Dintelligence%2Dai%2Dproduct%2Dmanager%2Djobs%2DSRCH_IL.0%2C6_IS11047_KO7%2C49.htm&amp;rut=9e863651c3a554e0408227dced502a90dc8bf5058c3c182f23830ef681fabd46", "region": "远程", "tags": ["AI PM", "远程"]}, {"title": "Ai Product Manager Jobs in Singapore (with Salaries) - Jobstreet", "snippet": "Find your ideal job at Jobstreet with 1945 Ai Product Manager jobs found in Singapore. View all our Ai Product Manager vacancies now with new jobs added daily!", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fsg.jobstreet.com%2Fai%2Dproduct%2Dmanager%2Djobs&amp;rut=b6e62d13897fd87cd1baea6061648d060911b4d2a28cc0f7db1e12cfbbbcac9a", "region": "新加坡", "tags": ["AI PM", "新加坡"]}, {"title": "Hytech hiring Product Manager - AI in Singapore, Singapore | LinkedIn", "snippet": "About Hytech Hytech is a leading management consulting firm headquartered in Australia and Singapore, specialising in digital transformation for fintech and financial services companies. We provide comprehensive consulting solutions, as well as middle- and back-office support, to", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fsg.linkedin.com%2Fjobs%2Fview%2Fproduct%2Dmanager%2Dai%2Dat%2Dhytech%2D4405477797&amp;rut=76d2dbcd1bd79ac835abdea09577ccf5a4a0a4e500468efb44ec1f5e0f0cac53", "region": "新加坡", "tags": ["AI PM", "新加坡"]}, {"title": "1,626 ai product manager jobs in Singapore, May 2026 | Glassdoor", "snippet": "Search Ai product manager jobs in Singapore with company ratings and salaries. 1,626 open jobs for Ai product manager in Singapore.", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.glassdoor.sg%2FJob%2Fsingapore%2Dai%2Dproduct%2Dmanager%2Djobs%2DSRCH_IL.0%2C9_IC3235921_KO10%2C28.htm&amp;rut=913a4fc78743917ecb06f112c1885dd5ce2e4abd8175966b0b5516b9ceedad75", "region": "新加坡", "tags": ["AI PM", "新加坡"]}], "disclaimer": "公开摘要，投递前请核实 JD 与薪资"}, "scout": {"type": "scout", "updated": "2026-05-29T14:55:59+08:00", "source": "github-actions", "cadence": "每周五自动更新", "items": [{"title": "AI Funding Tracker | AI Startup Investment Roundups 2026", "snippet": "Jeff Bezos&#x27; stealth AI startup, known internally as Project Prometheus, entered talks for a $10 billion funding round at a $38 billion valuation, with JPMorgan and BlackRock named as new investors, according to the Financial Times. The company launched in November 2025 with ", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Faifundingtracker.com%2F&amp;rut=5facdb27b5d6c984f0bb14cbe84a25b07d9c538364f1f447add937a6dd0dff31", "category": "AI SaaS", "suggestion": "观察"}, {"title": "List of Funded SaaS Startups (2026) - Fundraise Insider", "snippet": "SaaS Startups By Funding Round Pre-Seed startups Seed stage startups Series A startups Series B startups Series C startups Series D startups Series E startups B2C startups How To Get More SaaS Startup Clients 1. Why should I target recently funded SaaS startups instead of older, ", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Ffundraiseinsider.com%2Fblog%2Frecently%2Dfunded%2Dsaas%2Dstartups%2F&amp;rut=1ffbc6d977740d5c40e078c4a5514448c30d1c7f221c67f89e3e1fab57430d83", "category": "AI SaaS", "suggestion": "观察"}, {"title": "9,953 Funded AI Startups 2026 | Weekly Updated B2B Lead Database", "snippet": "Looking for recently funded AI startups? This AI startup database tracks 9,953+ verified companies with founder emails, funding details, and decision-maker contacts updated every week. AI startups raised $42.97 billion in 2024 and are on pace to surpass that in 2025, making them ", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fgrowthlist.co%2Fai%2Dstartups%2F&amp;rut=7392c7b806585b3c45554e07ede145f5b73a34c220eecac159c1c53ebe3063b3", "category": "AI SaaS", "suggestion": "观察"}, {"title": "从169家初创公司，我看到了ai创业这两个趋势 - 36氪", "snippet": "上周，全球创投圈的&quot;风向标&quot;YC，它的2025夏季演示日落下帷幕，169多家初创公司集中亮相。 AI依旧是舞台中央，但和往年不同，今年最强烈的信号 ...", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.36kr.com%2Fp%2F3477783373912454&amp;rut=8f35bd5b64a2d81ce6bad4ff009f58a5276b6830487b2399e9614eec57cf40d8", "category": "AI客服", "suggestion": "观察"}, {"title": "完成亿级融资，20家ai创业公司背后的&quot;云力量&quot; - 搜狐", "snippet": "这个阶段，百度智能云提供算力补贴与模型工具包，帮助企业&quot;0基础启动&quot;。 目前，百度智能云联合投资机构、政府机构发起&quot;AI创投加速计划&quot;，为入选企业提供亿级算力补贴、专属融资通道及政策申报支持，过去一年，这一计划帮助了20家企业完成亿元级 ...", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.sohu.com%2Fa%2F923527514_120157439&amp;rut=ab49f8585b8dc446b6e1f0980260058adb76fc17eca614b9d80a56e7efd3e53e", "category": "AI客服", "suggestion": "观察"}, {"title": "完成亿级融资，20家ai创业公司背后的&quot;云力量&quot; - 知乎", "snippet": "这个阶段，百度智能云提供算力补贴与模型工具包，帮助企业&quot;0基础启动&quot;。 目前，百度智能云联合投资机构、政府机构发起&quot;AI创投加速计划&quot;，为入选企业提供亿级算力补贴、专属融资通道及政策申报支持，过去一年，这一计划帮助了20家企业完成亿元级 ...", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fzhuanlan.zhihu.com%2Fp%2F1938914708708102890&amp;rut=379c240ac996125a77ae9ceb392e3ee90fb8c8a6ee745b5fa8554e3ed5d39fc0", "category": "AI客服", "suggestion": "观察"}, {"title": "AI and Marketing Trends Reshaping the iGaming Industry in 2026", "snippet": "The iGaming industry is moving faster than ever, and in 2026 the biggest shift is clear: AI is no longer just a tool — it is becoming the foundation of how operators acquire, retain, and engage ...", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.linkedin.com%2Fpulse%2Fai%2Dmarketing%2Dtrends%2Dreshaping%2Digaming%2Dindustry%2D2026%2Dcresenette%2Dc%2D%2Dhionc&amp;rut=5026b7ac2cb63a40e39da5973723f751fcf96fef2608b5bf0ce317e781dd6af1", "category": "iGaming AI", "suggestion": "观察"}, {"title": "Gambling news, data, and analysis - iGB", "snippet": "For 20 years we have been publishing online gambling news, in-depth analysis, data dashboards, and webinars for the igaming industry.", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Figamingbusiness.com%2F&amp;rut=372a1e74be2693d072971776f543357287573886fb15aab61255c7c8335ebad6", "category": "iGaming AI", "suggestion": "观察"}, {"title": "AI Trends in iGaming 2025: From Hype to Practical Implementation", "snippet": "Case studies in 2024 demonstrated the growing role of AI in analytics. In 2025, SOFTSWISS&#x27;s AI-Driven Event Streaming enabled real-time data processing to enhance engagement and operational insights, while Blask&#x27;s AI, a Market Analytics Tool, helped operators optimise p", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.softswiss.com%2Fnews%2Fai%2Dtrends%2Digaming%2Dsoftswiss%2D2025%2F&amp;rut=2a0048956a71aac8a91a90d45f450117a65fda71ca0d23662c1a945124f30b33", "category": "iGaming AI", "suggestion": "观察"}, {"title": "10 AI PM Side Projects That Will Get You Hired", "snippet": "The 10 best AI PM side project ideas to build your portfolio this weekend. Demonstrates real AI product skills — product thinking, technical understanding, and execution.", "url": "//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.institutepm.com%2Fknowledge%2Dhub%2Fai%2Dpm%2Dside%2Dprojects&amp;rut=24baab72ec036884cb9e68f00f08913f583a03c041320cd6f0fc6d430b91a586", "category": "副业", "suggestion": "观察"}], "disclaimer": "不构成投资建议；默认求职优先于副业"}, "sched": {"radar": {"label": "高薪岗位雷达", "cadence": "每周一 08:00（北京时间）", "cron_utc": "0 0 * * 1", "note": "GitHub Action 抓公开搜索摘要；精投 JD 在 Cursor 说「跑市场雷达」"}, "scout": {"label": "兼职 · 创业风口", "cadence": "每周五 08:00（北京时间）", "cron_utc": "0 0 * * 5", "note": "周五看一周风口；重大事件可在 Cursor 随时补跑"}, "cursor_deep_dive": "Marcus 人工复核、打分、写 direction.md — 比自动摘要更准", "disclaimer": "自动结果为公开信息摘要，不构成求职/投资建议；投递前请自行核实"}};
+
     const STORAGE = "ada-career-tasks-v1";
     const WEEKS = {
       transition: {
@@ -236,37 +218,62 @@
       alert("已复制「本周任务」— 去 Cursor 粘贴发送");
     });
 
-    async function loadIntel() {
-      const esc = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;");
-      try {
-        const [radar, scout, sched] = await Promise.all([
-          fetch("career/data/radar-latest.json").then((r) => r.json()),
-          fetch("career/data/scout-latest.json").then((r) => r.json()),
-          fetch("career/data/schedule.json").then((r) => r.json()).catch(() => ({})),
-        ]);
-        document.getElementById("radar-updated").textContent = "更新 " + (radar.updated || "").slice(0, 10);
-        document.getElementById("scout-updated").textContent = "更新 " + (scout.updated || "").slice(0, 10);
-        const radarUl = document.getElementById("radar-list");
-        radarUl.innerHTML = (radar.items || []).map((it) => `
-          <li class="border-b border-gray-100 pb-2">
-            <span class="text-[10px] font-bold text-indigo-600">${esc(it.region)}</span>
-            <p class="font-semibold text-gray-900 mt-0.5">${esc(it.title)}</p>
-            <p class="text-gray-600 text-xs mt-1 leading-6">${esc(it.snippet)}</p>
-            ${it.url ? `<a href="${esc(it.url)}" target="_blank" rel="noopener" class="text-xs text-indigo-600">链接 →</a>` : ""}
-          </li>`).join("");
-        const scoutUl = document.getElementById("scout-list");
-        scoutUl.innerHTML = (scout.items || []).map((it) => `
-          <li class="border-b border-gray-100 pb-2">
-            <span class="text-[10px] font-bold text-violet-600">${esc(it.category)} · ${esc(it.suggestion || "观察")}</span>
-            <p class="font-semibold text-gray-900 mt-0.5">${esc(it.title)}</p>
-            <p class="text-gray-600 text-xs mt-1 leading-6">${esc(it.snippet)}</p>
-            ${it.url ? `<a href="${esc(it.url)}" target="_blank" rel="noopener" class="text-xs text-violet-600">链接 →</a>` : ""}
-          </li>`).join("");
-        document.getElementById("intel-disclaimer").textContent =
-          (sched.disclaimer || radar.disclaimer || "") + " · 精投请 Cursor「跑市场雷达」";
-      } catch (e) {
-        document.getElementById("radar-list").innerHTML = "<li class='text-xs text-gray-500'>加载失败，请用本地服务器打开 career.html</li>";
+    async function fetchJson(paths) {
+      for (const url of paths) {
+        try {
+          const r = await fetch(url);
+          if (r.ok) return r.json();
+        } catch (_) {}
       }
+      throw new Error("missing " + paths[0]);
+    }
+
+    function normHref(url) {
+      let u = String(url || "").replace(/&amp;/g, "&").trim();
+      if (!u) return "";
+      if (u.startsWith("//")) return "https:" + u;
+      return u;
+    }
+
+    function intelItem(it, accent, esc) {
+      const href = normHref(it.url);
+      const inner = `
+        <span class="text-[10px] font-bold ${accent}">${esc(it.region || it.category)}${it.suggestion ? " · " + esc(it.suggestion) : ""}</span>
+        <p class="font-semibold text-gray-900 mt-0.5">${esc(it.title)}</p>
+        <p class="text-gray-600 text-xs mt-1 leading-6">${esc(it.snippet)}</p>
+        ${href ? `<p class="text-xs ${accent} mt-1 font-semibold">打开链接 →</p>` : ""}`;
+      if (!href) return `<li class="border-b border-gray-100 pb-2">${inner}</li>`;
+      return `<li class="border-b border-gray-100 pb-2">
+        <a href="${esc(href)}" target="_blank" rel="noopener noreferrer" class="intel-item block no-underline text-inherit">${inner}</a>
+      </li>`;
+    }
+
+    function renderIntel(radar, scout, sched) {
+      const esc = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;");
+      document.getElementById("radar-updated").textContent = "更新 " + (radar.updated || "").slice(0, 10);
+      document.getElementById("scout-updated").textContent = "更新 " + (scout.updated || "").slice(0, 10);
+      document.getElementById("radar-list").innerHTML = (radar.items || []).map((it) => intelItem(it, "text-indigo-600", esc)).join("");
+      document.getElementById("scout-list").innerHTML = (scout.items || []).map((it) => intelItem(it, "text-violet-600", esc)).join("");
+      document.getElementById("intel-disclaimer").textContent =
+        (sched.disclaimer || radar.disclaimer || "") + " · 精投请 Cursor「跑市场雷达」";
+    }
+
+    async function loadIntel() {
+      let radar = INTEL_EMBED.radar;
+      let scout = INTEL_EMBED.scout;
+      let sched = INTEL_EMBED.sched || {};
+      renderIntel(radar, scout, sched);
+      try {
+        const [r, s, sch] = await Promise.all([
+          fetchJson(["radar-latest.json", "career/data/radar-latest.json"]),
+          fetchJson(["scout-latest.json", "career/data/scout-latest.json"]),
+          fetchJson(["schedule.json", "career/data/schedule.json"]).catch(() => null),
+        ]);
+        if (r && (r.items || []).length) radar = r;
+        if (s && (s.items || []).length) scout = s;
+        if (sch) sched = sch;
+        renderIntel(radar, scout, sched);
+      } catch (_) {}
     }
 
     renderTasks();

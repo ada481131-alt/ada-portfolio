@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skills 人设试玩 | Ada Liu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    if (location.protocol !== "file:") {
+      var s = document.createElement("script");
+      s.src = "https://js.puter.com/v2/";
+      document.head.appendChild(s);
+    }
+  </script>
+  <script src="skills-playground/personas.js"></script>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root { --bg: #f1f5f9; --card: #fff; --border: #e2e8f0; --text: #18181b; --sidebar: 272px; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #09090b; --card: #18181b; --border: #3f3f46; --text: #e4e4e7; }
+    }
+    html, body { height: 100%; margin: 0; overflow: hidden; }
+    body { font-family: -apple-system, "PingFang SC", sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; }
+    .app-row { flex: 1; display: flex; min-height: 0; }
+    .sidebar {
+      width: var(--sidebar); flex-shrink: 0; display: flex; flex-direction: column;
+      background: var(--card); border-right: 1px solid var(--border);
+    }
+    .chat-main {
+      flex: 1; min-width: 0; display: flex; flex-direction: column;
+      background: var(--card);
+    }
+    .persona-card {
+      border: 2px solid transparent; background: var(--bg); border-radius: 12px;
+      cursor: pointer; text-align: left; width: 100%; padding: 10px 12px;
+    }
+    .persona-card:hover { background: color-mix(in srgb, var(--pc) 6%, var(--bg)); }
+    .persona-card.active { border-color: var(--pc); background: color-mix(in srgb, var(--pc) 10%, var(--bg)); }
+    .persona-card.in-group { border-color: var(--pc); }
+    .mode-tab { font-size: 11px; padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border); flex: 1; }
+    .mode-tab.on { background: #6d28d9; color: #fff; border-color: #6d28d9; }
+    #chat-area {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+      background: var(--card);
+    }
+    .chat-pane {
+      width: 100%;
+      padding: 10px 20px 16px;
+      box-sizing: border-box;
+    }
+    .demo-strip {
+      font-size: 10px;
+      line-height: 1.4;
+      color: #92400e;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 6px 10px;
+      margin-bottom: 10px;
+      max-width: 100%;
+    }
+    @media (prefers-color-scheme: dark) {
+      .demo-strip { color: #fde68a; background: #422006; border-color: #92400e; }
+    }
+    .chat-empty {
+      padding: 32px 20px;
+      text-align: center;
+      font-size: 13px;
+      opacity: 0.5;
+      line-height: 1.6;
+    }
+    .msg-row {
+      display: flex;
+      margin-bottom: 6px;
+      width: 100%;
+      clear: both;
+    }
+    .msg-row.user { justify-content: flex-end; padding-left: 15%; }
+    .msg-row.ai { justify-content: flex-start; padding-right: 15%; }
+    .bubble-user,
+    .bubble-ai {
+      display: inline-block;
+      width: auto;
+      max-width: 100%;
+      padding: 7px 11px;
+      font-size: 13px;
+      line-height: 1.45;
+      word-break: break-word;
+      white-space: pre-wrap;
+      box-sizing: border-box;
+    }
+    .bubble-user {
+      background: #6d28d9;
+      color: #fff;
+      border-radius: 16px 16px 4px 16px;
+    }
+    .bubble-ai {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px 16px 16px 4px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    }
+    .bubble-ai .sender {
+      font-size: 10px;
+      font-weight: 600;
+      opacity: 0.55;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .chip { font-size: 11px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); }
+    .chip:hover { border-color: #6d28d9; }
+    .preset-btn { font-size: 10px; padding: 4px 6px; border-radius: 6px; border: 1px dashed var(--border); }
+    .role-zh { color: #6d28d9; font-weight: 600; }
+    @media (prefers-color-scheme: dark) { .role-zh { color: #a78bfa; } }
+    .check-dot { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--border); font-size: 10px; display: flex; align-items: center; justify-content: center; }
+    .persona-card.in-group .check-dot { background: var(--pc); border-color: var(--pc); color: #fff; }
+    @media (max-width: 640px) { :root { --sidebar: 108px; } .persona-card .pc-hide { display: none; } }
+  </style>
+</head>
+<body>
+  <header class="flex-shrink-0 flex items-center justify-between gap-3 px-4 py-2 border-b" style="border-color: var(--border); background: var(--card)">
+    <div class="flex items-center gap-3 min-w-0">
+      <a href="index.html" class="text-xs opacity-60 shrink-0">← 作品集</a>
+      <h1 class="text-sm font-bold truncate">Skills 试玩</h1>
+      <span class="text-[10px] opacity-50 hidden sm:inline">左选人 · 右对话</span>
+    </div>
+    <button type="button" id="btn-clear" class="text-xs px-2.5 py-1 rounded-lg border shrink-0 font-semibold" style="border-color:#c4b5fd;color:#5b21b6">清空对话</button>
+  </header>
+
+  <div id="file-warn" class="hidden flex-shrink-0 px-4 py-2 text-xs border-b border-amber-300 bg-amber-50 text-amber-900">
+    请用 <code>http://localhost:8080/demo-skills-playground.html</code> 打开
+  </div>
+  <div id="puter-warn" class="hidden flex-shrink-0 px-4 py-2 text-xs border-b" style="border-color:#c4b5fd;background:#ede9fe;color:#4c1d95">
+    <strong>弹出空白 Puter 页？</strong> 那是登录窗口。请在新标签完成登录/注册后关掉，回到本页重试；或勾选左侧<strong>「演示模式」</strong>（无需 Puter，立刻有示例回复）。
+  </div>
+
+  <div class="app-row">
+    <!-- 左侧：人设 -->
+    <aside class="sidebar">
+      <div class="p-3 border-b space-y-2" style="border-color: var(--border)">
+        <div class="flex gap-1">
+          <button type="button" class="mode-tab on" id="tab-solo">单聊</button>
+          <button type="button" class="mode-tab" id="tab-group">群聊</button>
+        </div>
+        <div id="group-toolbar" class="hidden space-y-1.5">
+          <div class="flex flex-wrap gap-1" id="preset-btns"></div>
+        </div>
+      </div>
+      <p class="px-3 pt-2 pb-1 text-[10px] font-semibold opacity-50" id="list-label">选择人设</p>
+      <div id="persona-list" class="flex-1 overflow-y-auto px-2 pb-2 space-y-1.5 min-h-0"></div>
+      <div class="px-3 py-2 border-t space-y-2" style="border-color: var(--border)">
+        <label class="flex items-start gap-2 text-[11px] cursor-pointer leading-snug">
+          <input type="checkbox" id="demo-mode" class="mt-0.5 rounded" />
+          <span><strong>演示模式</strong>（范例话术）<br/>适合面试演示；随便聊请取消勾选并登录 Puter。</span>
+        </label>
+        <p id="puter-status" class="text-[10px] opacity-60 leading-snug">AI 通道：检测中…</p>
+        <div id="real-ai-panel" class="hidden space-y-1.5">
+          <p class="text-[11px] leading-snug" style="color:#5b21b6">
+            <strong>真 AI 不会自动弹窗。</strong>请先点下面按钮登录（需允许弹窗），成功后再发送。
+          </p>
+          <button type="button" id="btn-puter-login" class="w-full py-2.5 rounded-xl text-xs font-bold text-white bg-violet-600 hover:bg-violet-500">
+            ① 点击登录 Puter
+          </button>
+        </div>
+      </div>
+      <details class="px-3 py-2 border-t text-[10px] opacity-50" style="border-color: var(--border)">
+        <summary class="cursor-pointer">说明</summary>
+        <p class="mt-1 leading-relaxed">真 Cursor Skills 在 ~/.cursor/skills。线上 GitHub Pages 与本地一样都要 Puter 登录；面试演示可开演示模式。</p>
+      </details>
+    </aside>
+
+    <!-- 右侧：对话 -->
+    <section class="chat-main">
+      <div class="px-4 py-3 border-b flex items-center gap-2 shrink-0" style="border-color: var(--border)">
+        <div id="header-solo" class="flex items-center gap-2 min-w-0">
+          <span id="active-icon" class="text-2xl shrink-0">🎯</span>
+          <div class="min-w-0">
+            <div id="active-name" class="font-bold text-sm truncate">—</div>
+            <div id="active-tag" class="text-xs opacity-60 truncate">—</div>
+          </div>
+        </div>
+        <div id="header-group" class="hidden min-w-0">
+          <div class="font-bold text-sm">群聊</div>
+          <div id="group-member-labels" class="text-xs opacity-60 mt-0.5 flex flex-wrap gap-1"></div>
+        </div>
+      </div>
+
+      <div id="chat-area"></div>
+
+      <div class="shrink-0 px-4 py-2 border-t" style="border-color: var(--border); background: var(--bg)">
+        <p class="text-[10px] opacity-50 mb-1">快捷试句</p>
+        <div id="starters" class="flex flex-wrap gap-1 mb-2"></div>
+        <form id="chat-form" class="flex gap-2">
+          <input id="chat-input" type="text" autocomplete="off" placeholder="输入问题，回车发送…"
+            class="flex-1 text-sm px-3 py-2.5 rounded-xl border outline-none focus:ring-2 focus:ring-violet-400 min-w-0"
+            style="background: var(--card); border-color: var(--border); color: var(--text)" />
+          <button type="submit" id="btn-send" class="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-violet-600 hover:bg-violet-500 disabled:opacity-50 shrink-0">发送</button>
+        </form>
+        <p id="group-hint" class="hidden text-[10px] mt-1 opacity-40">群聊按成员依次回复，人数多会较慢</p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "skills-playground-v8";
+    const STORAGE_SCHEMA = 11;
+    const personas = window.SKILL_PERSONAS || [];
+    const presets = window.SKILL_GROUP_PRESETS || [];
+    let mode = "solo";
+    let activeId = personas[0]?.id;
+    let groupMembers = new Set(["ai-pm", "ai-algo", "ai-fullstack"]);
+    let histories = {};
+    let sending = false;
+    let demoMode = true;
+    let puterReady = false;
+    let puterSignedIn = false;
+
+    function withTimeout(promise, ms, msg) {
+      return Promise.race([
+        promise,
+        new Promise((_, rej) => setTimeout(() => rej(new Error(msg)), ms)),
+      ]);
+    }
+
+    async function waitForPuter(maxMs = 12000) {
+      const t0 = Date.now();
+      while (Date.now() - t0 < maxMs) {
+        if (typeof puter !== "undefined" && puter.ai?.chat) return true;
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      return false;
+    }
+
+    function updatePuterStatus() {
+      const el = document.getElementById("puter-status");
+      if (!el) return;
+      syncDemoBanner();
+      if (demoMode) {
+        el.textContent = "当前：演示模式（固定范例）";
+        return;
+      }
+      if (location.protocol === "file:") {
+        el.textContent = "请用 http://localhost 打开";
+        return;
+      }
+      if (puterSignedIn) {
+        el.textContent = "真 AI：已登录 Puter，可直接聊";
+        return;
+      }
+      el.textContent = "真 AI：请先点「① 登录 Puter」";
+    }
+
+    const HUMAN_STYLE = `
+【沉浸】新加坡总部、华人为主团队的 open international 氛围。说话风格 = 新加坡 VP 式中英文混聊：中文为主，自然夹英文业务词（sync、scope、go/no-go、handoff、badcase、eval、staging），像飞书/Slack 回同事。
+禁止：### 标题、很高兴为您服务、I'm an AI、happy to help、客服菜单、单字敷衍（在。/ Hey.）、纯英文长段装洋人、纯官腔中文。
+寒暄要有场景（刚开完会、刚看 overnight 数据）；问身份 = 名字+职位+一句引导。用户说中文你就中文混英；用户说英文也可以英文混一点中文，但别全程纯英。`;
+
+    const BAN_TAIL = /[。．.]\s*(anything else I can help|how can I assist|is there anything|有什么问题吗|还有什么可以帮您)/gi;
+
+    function humanizeReply(text, persona, userLine) {
+      let t = String(text || "")
+        .replace(/^#{1,6}\s*.+$/gm, "")
+        .replace(/#{1,6}\s*/g, "")
+        .replace(/很高兴为您服务|请问有什么我可以帮助您|我是(?:一个)?AI产品经理/gi, "")
+        .replace(/happy to help|how can I assist you|I'm an AI/gi, "")
+        .replace(/专注于为海外博彩[^。\n]*/gi, "")
+        .replace(/您想讨论的具体主题或问题是什么/gi, "")
+        .replace(/感谢(?:您|你)的问候[！!。.]?\s*/gi, "")
+        .replace(/欢迎交流/gi, "")
+        .replace(BAN_TAIL, "")
+        .replace(/有什么问题吗[？?]?/gi, "")
+        .replace(/还有什么可以帮您[吗嘛]?[？?]?/gi, "")
+        .replace(/[。.]{2,}/g, "。")
+        .replace(/\n{3,}/g, "\n")
+        .trim();
+
+      if (/AI产品经理|很高兴|happy to help|I can help|###/i.test(t) && persona) {
+        t = demoReply(persona, userLine || "");
+      }
+      if (/^(在|嗯|Hey|行|好|Ok|Yeah)[。.!?]?$/i.test(t) && persona && userLine) {
+        t = demoReply(persona, userLine);
+      }
+      if (/^Marcus Chen[,，.—\s]*(product|Product|SVP)[。.]?\s*$/i.test(t) && persona?.id === "ai-pm") {
+        t = demoReply(persona, userLine || "你是谁");
+      }
+      const noZh = !/[\u4e00-\u9fff]/.test(t);
+      const longPureEn = noZh && t.length > 80;
+      if (longPureEn && persona && userLine) t = demoReply(persona, userLine);
+      if (t.length < 8 && persona && userLine) return demoReply(persona, userLine);
+      return t;
+    }
+
+    function sanitizeAllHistories() {
+      Object.keys(histories).forEach((key) => {
+        let lastUser = "";
+        histories[key] = (histories[key] || []).map((m) => {
+          if (m.role === "user") {
+            lastUser = m.content;
+            return m;
+          }
+          const p = m.personaId ? getPersona(m.personaId) : personas[0];
+          return { ...m, content: humanizeReply(m.content, p, lastUser) };
+        });
+      });
+    }
+
+    function demoReply(persona, userText) {
+      const t = userText.trim();
+
+      if (/^(早上好|早|good\s*morning)/i.test(t)) {
+        if (persona.id === "ai-pm") return "早，刚扫完 overnight CS digest。你说——客服还是 outbound，还是竞品那边？";
+        if (persona.id === "ai-algo") return "早，昨晚 badcase 还在看。什么问题？";
+        if (persona.id === "ai-fullstack") return "早。今天 demo 还是联调？env 先说清楚。";
+      }
+
+      if (/^(你好|嗨|hi|hello|hey)\s*$/i.test(t)) {
+        if (persona.id === "ai-pm") return "Hey，说吧。我这边 ten mins 空档，刚下完 prioritisation sync。";
+        if (persona.id === "ai-algo") return "嗯，讲。eval set 还是线上 case？";
+        if (persona.id === "ai-fullstack") return "在，说。localhost 还是 Pages？";
+      }
+
+      if (/在吗|在么|有空|忙吗|you there|free\?/i.test(t)) {
+        if (persona.id === "ai-pm") return "在，大概十五分钟。长的事我们 book 个 sync。";
+        if (persona.id === "ai-algo") return "在，不过下午三点 model review。快问。";
+        if (persona.id === "ai-fullstack") return "在。要是 deploy 问题，error 和 URL 贴过来。";
+      }
+
+      if (/name|名字|叫什么|你是谁|哪位|怎么称呼|who are you/i.test(t)) {
+        if (persona.id === "ai-pm") {
+          return "Marcus Chen，产品 SVP。我们给 iGaming 运营商做 AI SaaS——客服 RAG、坐席、外呼、营销 touch。你今天卡在哪一块？";
+        }
+        if (persona.id === "ai-algo") return "Ira Kaplan，算法 Head of ML。RAG、意图、外呼 NLU、幻觉和 cost 都归我。具体什么问题？";
+        if (persona.id === "ai-fullstack") return "Leo Park，工程 Tech Lead。demo 站、Puter 接 GPT、坐席联调找我。什么 env？";
+      }
+
+      if (/人机|机器人|你是AI|是不是bot|真人吗|are you (a )?bot|real person/i.test(t)) {
+        if (persona.id === "ai-pm") return "真人啊，product 这边。要测 bot 找 Leo 拉 staging；找我是拍 scope 和 go/no-go。";
+        if (persona.id === "ai-algo") return "真人。model 效果看 eval report，别在这猜。";
+        if (persona.id === "ai-fullstack") return "真人。open-ended 对话去 playground 关 demo mode；我管 delivery。";
+      }
+
+      if (/谢谢|thanks|thx/i.test(t)) {
+        if (persona.id === "ai-pm") return "👍 有进展丢我，别 go dark。";
+        if (persona.id === "ai-algo") return "嗯，numbers 出来再 @ 我。";
+        if (persona.id === "ai-fullstack") return "行，通了 shout 一声。";
+      }
+
+      if (/怎么样|how are you|近况|how'?s it going/i.test(t)) {
+        if (persona.id === "ai-pm") return "还行，这周在盯 multi-lang rollout，还有跟客户聊 Smartico integration 的 narrative。你那边呢？";
+        if (persona.id === "ai-algo") return "忙，新一批 outbound intent 在标，recall 还没稳住。";
+        if (persona.id === "ai-fullstack") return "在赶 demo 和 Pages deploy，还行。你卡哪了？";
+      }
+
+      if (persona.id === "ai-pm" && /30|语言|language|go\/no/i.test(t)) {
+        return (
+          "我会 hold 这一版：别一键 ship 30 languages。\n\n" +
+          "FAQ 和 terminology 没 sign off，wrong answer 一定上来；各区 compliance copy 也不一样。坐席和 bot 得同一套 KB version，不然对不上。\n\n" +
+          "真要上，先挑 3～5 个 core market 跑两周，看 FCR 和 escalation，再扩。"
+        );
+      }
+      if (persona.id === "ai-pm" && /smartico|竞品|competitor/i.test(t)) {
+        return "Smartico 做 promo CRM，不是跟我们在 CS 赛道硬碰。我们打到账、玩法、坐席、外呼。能接他们 data 做 outreach，别重复造活动 engine。数字让他们拿 case study，我们不编。";
+      }
+      if (persona.id === "ai-pm" && /外呼|handoff|转人工|escalat/i.test(t)) {
+        return "外呼转坐席这周先保 handoff context 别断——玩家说了啥、intent tag、compliance disclaimer，坐席屏上必须齐。bot over-promise 的事，人工要能一眼看见。";
+      }
+      if (persona.id === "ai-fullstack" && /预览|localhost|pages|gpt|puter|deploy|preview/i.test(t)) {
+        return "别 double-click html。终端 cd 进项目：python3 -m http.server 8080，浏览器走 localhost。真 GPT 要关 demo mode、登录 Puter。Pages push 完等一分钟 hard refresh。";
+      }
+      if (persona.id === "ai-algo" && /rag|答非所问|幻觉|hallucin|retriev/i.test(t)) {
+        return "别先换大 model。先看 recall 有没有召对，再看 generation 有没有越权，badcase 有没有回流。eval set 都没有就别谈上线。";
+      }
+
+      const fallbacks = {
+        "ai-pm": "这句我需要更多 context。先把场景讲清楚——谁的用户、要什么 outcome、deadline 什么时候。（demo mode 范例有限，关演示 + Puter 可细聊）",
+        "ai-algo": "signal 不够我没法 call。贴一下现象、sample size、当前 metrics。（demo mode 范例有限）",
+        "ai-fullstack": "env、报错、expected behaviour 说清楚，我再给 steps。（demo mode 范例有限）",
+      };
+      return fallbacks[persona.id] || fallbacks["ai-pm"];
+    }
+
+    function syncDemoBanner() {
+      document.getElementById("real-ai-panel")?.classList.toggle("hidden", demoMode);
+    }
+
+    async function checkPuterSignedIn() {
+      try {
+        if (typeof puter !== "undefined" && puter.auth?.isSignedIn) {
+          return await puter.auth.isSignedIn();
+        }
+      } catch (_) {}
+      return false;
+    }
+
+    async function handlePuterLogin() {
+      if (location.protocol === "file:") {
+        alert("请用 http://localhost:8080/demo-skills-playground.html 打开");
+        return;
+      }
+      if (typeof puter === "undefined" || !puter.auth?.signIn) {
+        window.open("https://puter.com/", "_blank", "noopener,noreferrer");
+        alert("已打开 Puter 官网。请在新标签注册/登录后，回到本页再点「发送」。");
+        return;
+      }
+      const btn = document.getElementById("btn-puter-login");
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "登录窗口已打开…";
+      }
+      try {
+        await puter.auth.signIn();
+        puterSignedIn = true;
+        puterReady = true;
+        if (btn) btn.textContent = "✓ 已登录";
+        updatePuterStatus();
+      } catch (e) {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "① 点击登录 Puter";
+        }
+        alert("登录未完成或被拦截。\n\n请：1）允许本网站弹窗  2）在弹出页完成登录  3）再点一次本按钮\n\n或改勾选「演示模式」免登录。");
+      }
+    }
+
+    function groupKey() {
+      return "__group__:" + [...groupMembers].sort().join(",");
+    }
+    function chatKey() {
+      return mode === "group" ? groupKey() : activeId;
+    }
+    function getPersona(id) {
+      return personas.find((p) => p.id === (id || activeId));
+    }
+
+    function loadStore() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const o = JSON.parse(raw);
+          if (o.schema === STORAGE_SCHEMA) {
+            histories = o.histories || {};
+            activeId = o.activeId || activeId;
+            mode = o.mode || mode;
+            if (o.groupMembers) groupMembers = new Set(o.groupMembers);
+            if (typeof o.demoMode === "boolean") demoMode = o.demoMode;
+            sanitizeAllHistories();
+          } else {
+            histories = {};
+          }
+        }
+      } catch (_) {}
+      personas.forEach((p) => {
+        if (!histories[p.id]) histories[p.id] = [];
+      });
+      if (!histories[groupKey()]) histories[groupKey()] = [];
+    }
+
+    function saveStore() {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          schema: STORAGE_SCHEMA,
+          activeId,
+          mode,
+          groupMembers: [...groupMembers],
+          histories,
+          demoMode,
+        })
+      );
+    }
+
+    function focusInput() {
+      document.getElementById("chat-input")?.focus();
+    }
+
+    function setMode(m) {
+      mode = m;
+      document.getElementById("tab-solo").classList.toggle("on", m === "solo");
+      document.getElementById("tab-group").classList.toggle("on", m === "group");
+      document.getElementById("group-toolbar").classList.toggle("hidden", m !== "group");
+      document.getElementById("header-solo").classList.toggle("hidden", m === "group");
+      document.getElementById("header-group").classList.toggle("hidden", m !== "group");
+      document.getElementById("group-hint").classList.toggle("hidden", m !== "group");
+      document.getElementById("list-label").textContent = m === "group" ? "群成员" : "选择人设";
+      document.getElementById("chat-input").placeholder =
+        m === "group" ? "向群里提问…" : "输入问题，回车发送…";
+      renderPersonaList();
+      renderHeader();
+      renderStarters();
+      renderChat();
+      saveStore();
+    }
+
+    function applyPreset(presetId) {
+      const pr = presets.find((x) => x.id === presetId);
+      if (!pr) return;
+      groupMembers = new Set(pr.members.filter((id) => personas.some((p) => p.id === id)));
+      if (mode !== "group") setMode("group");
+      else {
+        renderPersonaList();
+        renderHeader();
+        renderChat();
+        saveStore();
+      }
+      focusInput();
+    }
+
+    function renderPresets() {
+      const box = document.getElementById("preset-btns");
+      box.innerHTML = presets
+        .map((pr) => `<button type="button" class="preset-btn" data-preset="${pr.id}">${pr.label}</button>`)
+        .join("");
+      box.querySelectorAll("[data-preset]").forEach((b) => {
+        b.addEventListener("click", () => applyPreset(b.dataset.preset));
+      });
+    }
+
+    function renderPersonaList() {
+      const el = document.getElementById("persona-list");
+      el.innerHTML = personas
+        .map((p) => {
+          const inG = groupMembers.has(p.id);
+          const soloActive = mode === "solo" && p.id === activeId;
+          return `
+        <button type="button" class="persona-card ${soloActive ? "active" : ""} ${mode === "group" && inG ? "in-group" : ""}"
+          data-id="${p.id}" style="--pc: ${p.accent}">
+          <div class="flex items-center gap-2">
+            ${mode === "group" ? `<span class="check-dot shrink-0">${inG ? "✓" : ""}</span>` : ""}
+            <span class="text-lg shrink-0">${p.icon}</span>
+            <div class="min-w-0 pc-hide">
+              <div class="font-semibold text-xs leading-tight">${p.name}</div>
+              <div class="text-[11px] role-zh leading-tight mt-0.5">${p.titleZh || ""}</div>
+              <div class="text-[9px] opacity-45 truncate">${p.title || ""}</div>
+            </div>
+          </div>
+        </button>`;
+        })
+        .join("");
+
+      el.querySelectorAll(".persona-card").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.id;
+          if (mode === "solo") {
+            activeId = id;
+            renderHeader();
+            renderStarters();
+            renderChat();
+            renderPersonaList();
+            saveStore();
+            focusInput();
+          } else {
+            if (groupMembers.has(id)) groupMembers.delete(id);
+            else groupMembers.add(id);
+            if (!groupMembers.size) groupMembers.add(id);
+            if (!histories[groupKey()]) histories[groupKey()] = [];
+            renderHeader();
+            renderPersonaList();
+            saveStore();
+            focusInput();
+          }
+        });
+      });
+    }
+
+    function renderHeader() {
+      if (mode === "solo") {
+        const p = getPersona();
+        if (!p) return;
+        document.getElementById("active-icon").textContent = p.icon;
+        document.getElementById("active-name").textContent = p.name;
+        document.getElementById("active-tag").textContent = `${p.titleZh || ""} · ${p.title || ""}`;
+      } else {
+        const labels = document.getElementById("group-member-labels");
+        const list = personas.filter((p) => groupMembers.has(p.id));
+        labels.innerHTML = list.length
+          ? list.map((p) => `<span title="${p.title}">${p.name}</span>`).join(" · ")
+          : "请选成员";
+      }
+    }
+
+    function renderStarters() {
+      const box = document.getElementById("starters");
+      let items = [];
+      if (mode === "solo") items = getPersona()?.starters || [];
+      else {
+        personas.filter((p) => groupMembers.has(p.id)).forEach((p) => {
+          (p.starters || []).slice(0, 1).forEach((s) => items.push(s));
+        });
+      }
+      box.innerHTML = items
+        .map((s) => `<button type="button" class="chip" data-q="${encodeURIComponent(s)}">${s}</button>`)
+        .join("");
+      box.querySelectorAll(".chip").forEach((b) => {
+        b.addEventListener("click", () => {
+          const q = decodeURIComponent(b.dataset.q);
+          document.getElementById("chat-input").value = q;
+          onSend(q);
+        });
+      });
+    }
+
+    function renderChat() {
+      const area = document.getElementById("chat-area");
+      const key = chatKey();
+      if (!histories[key]) histories[key] = [];
+      const msgs = histories[key];
+      if (!msgs.length) {
+        const p0 = getPersona();
+        const name = mode === "group" ? `${groupMembers.size} 位同事` : p0 ? `${p0.name}` : "";
+        const strip = demoMode ? `<div class="demo-strip">演示模式 · 固定范例。取消左侧勾选并登录 Puter = 真 AI 对话。</div>` : "";
+        area.innerHTML = `<div class="chat-pane">${strip}<div class="chat-empty"><p style="font-size:24px;margin:0 0 8px">${mode === "group" ? "👥" : getPersona()?.icon || "💬"}</p><p>与 <strong>${name}</strong> 对话</p><p style="margin-top:8px;font-size:11px">输入或点下方快捷试句</p></div></div>`;
+        return;
+      }
+      const strip = demoMode ? `<div class="demo-strip">演示模式 · 固定范例</div>` : "";
+      area.innerHTML =
+        '<div class="chat-pane">' +
+        strip +
+        msgs
+          .map((m) => {
+            if (m.role === "user") {
+              return `<div class="msg-row user"><div class="bubble-user">${escapeHtml(m.content.trim())}</div></div>`;
+            }
+            const p = m.personaId ? getPersona(m.personaId) : getPersona();
+            const label = p ? `${p.name} · ${p.titleZh || p.title}` : "";
+            const body = humanizeReply(m.content, p, "").trim();
+            const sender = mode === "group" && label ? `<span class="sender">${escapeHtml(label)}</span>` : "";
+            return `<div class="msg-row ai"><div class="bubble-ai">${sender}${escapeHtml(body)}</div></div>`;
+          })
+          .join("") +
+        "</div>";
+      area.scrollTop = area.scrollHeight;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function formatGroupHistory(hist) {
+      let t = "";
+      hist.slice(-16).forEach((m) => {
+        if (m.role === "user") t += `用户：${m.content}\n\n`;
+        else {
+          const name = m.personaId ? getPersona(m.personaId)?.name : "助手";
+          t += `[${name}]：${m.content}\n\n`;
+        }
+      });
+      return t || "（无）";
+    }
+
+    function buildSoloPrompt(userText) {
+      const p = getPersona();
+      const hist = histories[activeId] || [];
+      return `【扮演】${p.name}，${p.titleZh || p.title}。不出戏。\n${p.system}${HUMAN_STYLE}\n\n【历史】\n${formatGroupHistory(hist)}\n【对方】${userText}\n\n【输出】1～3 句，新加坡 VP 式中英文混聊（华人团队 open international）。中文为主、自然夹英文业务词。禁止 markdown、客服腔、单字敷衍、纯英装洋人。`;
+    }
+
+    function buildGroupPrompt(userText, persona, hist) {
+      const others = personas
+        .filter((x) => groupMembers.has(x.id) && x.id !== persona.id)
+        .map((x) => x.name)
+        .join("、");
+      return `【扮演】${persona.name}（${persona.title}），不出戏。\n${persona.system}${HUMAN_STYLE}\n\n【同群】${others || "无"}\n【记录】\n${formatGroupHistory(hist)}\n【对方】${userText}\n\n仅以 ${persona.name} 口吻发言，80～120 字，中英文自然混聊，不替他人答。`;
+    }
+
+    async function llmChat(prompt, persona, userLine) {
+      if (demoMode) {
+        await new Promise((r) => setTimeout(r, 400));
+        return demoReply(persona || getPersona(), userLine || prompt);
+      }
+      if (location.protocol === "file:") {
+        throw new Error("请用 http://localhost 打开，不要 file://");
+      }
+      const signed = puterSignedIn || (await checkPuterSignedIn());
+      if (!signed) {
+        throw new Error("还没登录 Puter。请先点左侧紫色「① 点击登录 Puter」按钮（取消勾选不会自动弹窗）。");
+      }
+      puterSignedIn = true;
+      const resp = await withTimeout(
+        puter.ai.chat(prompt, { model: "gpt-4o-mini" }),
+        35000,
+        "请求超时。请确认已登录 Puter，或改回「演示模式」"
+      );
+      const text = typeof resp === "string" ? resp : resp?.message?.content || resp?.text || String(resp);
+      if (!text || text === "[object Object]") throw new Error("Puter 返回为空，请登录 Puter 或改用演示模式");
+      return humanizeReply(text.trim(), persona, userLine);
+    }
+
+    function appendTyping(label) {
+      const typing = document.createElement("div");
+      typing.className = "typing-hint text-xs opacity-50 text-center py-2";
+      typing.textContent = label;
+      const area = document.getElementById("chat-area");
+      const box = area.querySelector(".chat-pane");
+      (box || area).appendChild(typing);
+      area.scrollTop = area.scrollHeight;
+      return typing;
+    }
+
+    function clearTyping() {
+      document.querySelectorAll(".typing-hint").forEach((el) => el.remove());
+    }
+
+    async function onSend(text) {
+      if (!text.trim() || sending) return;
+
+      if (!demoMode) {
+        const signed = puterSignedIn || (await checkPuterSignedIn());
+        if (!signed) {
+          syncDemoBanner();
+          document.getElementById("real-ai-panel")?.classList.remove("hidden");
+          const area = document.getElementById("chat-area");
+          area.innerHTML = `<p class="text-sm text-center py-8 leading-relaxed opacity-80">
+            <strong>还不能发真 AI 消息</strong><br/><br/>
+            取消「演示模式」<strong>不会</strong>自动弹登录窗。<br/>
+            请先点左侧 <strong>「① 点击登录 Puter」</strong>（允许弹窗），<br/>
+            登录成功后再点发送。<br/><br/>
+            <span class="text-xs">不想登录 → 勾选回「演示模式」+ 点快捷试句</span>
+          </p>`;
+          return;
+        }
+        puterSignedIn = true;
+        updatePuterStatus();
+      }
+
+      sending = true;
+      document.getElementById("btn-send").disabled = true;
+      const key = chatKey();
+      if (!histories[key]) histories[key] = [];
+
+      histories[key].push({ role: "user", content: text.trim() });
+      renderChat();
+      saveStore();
+
+      try {
+        if (mode === "solo") {
+          const p = getPersona();
+          appendTyping(`${p.name} ${demoMode ? "生成示例" : "思考"}中…`);
+          try {
+            let reply = await llmChat(buildSoloPrompt(text.trim()), p, text.trim());
+            reply = humanizeReply(reply, p, text.trim());
+            histories[key].push({ role: "assistant", content: reply });
+          } catch (e) {
+            histories[key].push({
+              role: "assistant",
+              content: `⚠️ ${e.message}\n\n💡 勾选左侧「演示模式」可立即体验，无需 Puter。`,
+            });
+          }
+        } else {
+          const members = personas.filter((p) => groupMembers.has(p.id));
+          for (const p of members) {
+            appendTyping(`${p.icon} ${p.name} ${demoMode ? "示例" : "输入"}中…`);
+            try {
+              let reply = await llmChat(buildGroupPrompt(text.trim(), p, histories[key]), p, text.trim());
+              reply = humanizeReply(reply, p, text.trim());
+              histories[key].push({ role: "assistant", personaId: p.id, content: reply });
+              renderChat();
+              clearTyping();
+            } catch (e) {
+              histories[key].push({ role: "assistant", personaId: p.id, content: `⚠️ ${e.message}` });
+              renderChat();
+              clearTyping();
+            }
+          }
+        }
+      } finally {
+        clearTyping();
+        renderChat();
+        saveStore();
+        sending = false;
+        document.getElementById("btn-send").disabled = false;
+        focusInput();
+      }
+    }
+
+    document.getElementById("chat-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = document.getElementById("chat-input");
+      const t = input.value;
+      input.value = "";
+      onSend(t);
+    });
+
+    document.getElementById("btn-clear").addEventListener("click", () => {
+      const label = mode === "group" ? "当前群聊" : getPersona()?.name;
+      if (!confirm(`清空「${label}」记录？`)) return;
+      histories[chatKey()] = [];
+      renderChat();
+      saveStore();
+    });
+
+    document.getElementById("tab-solo").addEventListener("click", () => setMode("solo"));
+    document.getElementById("tab-group").addEventListener("click", () => setMode("group"));
+
+    if (location.protocol === "file:") document.getElementById("file-warn").classList.remove("hidden");
+
+    document.getElementById("demo-mode").checked = demoMode;
+    document.getElementById("demo-mode").addEventListener("change", (e) => {
+      demoMode = e.target.checked;
+      updatePuterStatus();
+      syncDemoBanner();
+      saveStore();
+      if (!demoMode) {
+        document.getElementById("chat-area").innerHTML = `<p class="text-sm text-center py-8 leading-relaxed opacity-75">
+          已切换为 <strong>真 AI</strong>。<br/>请先点左侧 <strong>「① 点击登录 Puter」</strong>，再提问。
+        </p>`;
+      } else {
+        renderChat();
+      }
+    });
+
+    document.getElementById("btn-puter-login").addEventListener("click", () => handlePuterLogin());
+
+    loadStore();
+    document.getElementById("demo-mode").checked = demoMode;
+    renderPresets();
+    if (!activeId && personas[0]) activeId = personas[0].id;
+    setMode(mode);
+    updatePuterStatus();
+    focusInput();
+
+    (async () => {
+      puterReady = await waitForPuter();
+      puterSignedIn = await checkPuterSignedIn();
+      updatePuterStatus();
+      syncDemoBanner();
+    })();
+  </script>
+</body>
+</html>

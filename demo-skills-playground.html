@@ -152,7 +152,7 @@
       <div class="px-3 py-2 border-t space-y-2" style="border-color: var(--border)">
         <label class="flex items-start gap-2 text-[11px] cursor-pointer leading-snug">
           <input type="checkbox" id="demo-mode" class="mt-0.5 rounded" />
-          <span><strong>演示模式</strong>（范例话术）<br/>适合面试演示；随便聊请取消勾选并登录 Puter。</span>
+          <span><strong>演示模式</strong>（离线范例）<br/>图灵感最强：取消勾选 → 登录 Puter → 真 AI 按人设回。</span>
         </label>
         <p id="puter-status" class="text-[10px] opacity-60 leading-snug">AI 通道：检测中…</p>
         <div id="real-ai-panel" class="hidden space-y-1.5">
@@ -221,17 +221,117 @@
     });
 
     const STORAGE_KEY = "skills-playground-v8";
-    const STORAGE_SCHEMA = 11;
+    const STORAGE_SCHEMA = 13;
     const personas = window.SKILL_PERSONAS || [];
     const presets = window.SKILL_GROUP_PRESETS || [];
     let mode = "solo";
     let activeId = personas[0]?.id;
     let groupMembers = new Set(["ai-pm", "ai-algo", "ai-fullstack"]);
     let histories = {};
+    let userProfiles = {};
     let sending = false;
     let demoMode = true;
     let puterReady = false;
     let puterSignedIn = false;
+
+    function getProfile() {
+      const k = chatKey();
+      if (!userProfiles[k]) userProfiles[k] = { role: "", goal: "", tone: "" };
+      return userProfiles[k];
+    }
+
+    function profileReady(prof) {
+      return !!(prof?.role && prof?.goal);
+    }
+
+    /** 根据对方职级/目标，自动设定总监（你）怎么说话——不问对方要什么风格 */
+    function inferDirectorTone(role, goal, personaId) {
+      const r = role || "";
+      const g = goal || "";
+      if (personaId === "ai-algo") {
+        if (/新人|实习|助理|校招/.test(r)) return "cold";
+        if (/产品|PM|运营/.test(r)) return "professional";
+        return "professional";
+      }
+      if (personaId === "ai-fullstack") {
+        if (/新人|实习|助理/.test(r)) return "cold";
+        return "professional";
+      }
+      if (/新人|实习|助理|校招/.test(r)) return "cold";
+      if (/产品|PM|运营|增长|市场/.test(r)) return "cold";
+      if (/算法|研发|工程|Tech/.test(r)) return "professional";
+      return "professional";
+    }
+
+    function applyDirectorTone(prof, personaId) {
+      if (prof?.role && prof?.goal) prof.tone = inferDirectorTone(prof.role, prof.goal, personaId);
+    }
+
+    function tryParseProfile(text, prof) {
+      const t = String(text || "").trim();
+      if (!t || !prof) return;
+      if (/产品|PM|产品经理|Product\s*Manager/i.test(t)) prof.role = prof.role || "产品经理";
+      else if (/算法|ML|机器学习|数据科学/i.test(t)) prof.role = prof.role || "算法";
+      else if (/研发|工程|Tech|前端|后端|全栈|开发/i.test(t)) prof.role = prof.role || "研发";
+      else if (/运营|增长|市场|商务/i.test(t)) prof.role = prof.role || "运营";
+      else if (/实习|校招|新人|助理/i.test(t)) prof.role = prof.role || "新人";
+      if (/工作计划|年度计划|今年.*(计划|重点|规划)|roadmap|优先级|对齐|汇报|整体/i.test(t)) prof.goal = prof.goal || "工作计划对齐";
+      else if (/竞品|smartico|competitor|对标/i.test(t)) prof.goal = prof.goal || "竞品对标";
+      else if (/客服|CS|FCR|转人工|handoff|坐席/i.test(t)) prof.goal = prof.goal || "客服坐席";
+      else if (/外呼|outbound|召回/i.test(t)) prof.goal = prof.goal || "外呼";
+      else if (/demo|部署|pages|联调|技术/i.test(t)) prof.goal = prof.goal || "技术交付";
+    }
+
+    function isExemptFromIntake(userText) {
+      const t = userText.trim();
+      return (
+        /^(你好|嗨|hi|hello|hey|早|早上好|在吗|在么|有空|忙吗|谢谢|thanks|thx)\s*$/i.test(t) ||
+        /name|名字|叫什么|你是谁|哪位|怎么称呼|who are you/i.test(t) ||
+        /人机|机器人|你是AI|是不是bot|真人吗/i.test(t) ||
+        /怎么样|how are you|近况/i.test(t)
+      );
+    }
+
+    function needsIntake(persona, userText) {
+      if (!persona || isExemptFromIntake(userText)) return false;
+      return !profileReady(getProfile());
+    }
+
+    /** 未建档时只问对方职位、目标；不答实质问题 */
+    function intakeReply(persona, userText) {
+      const prof = getProfile();
+      tryParseProfile(userText, prof);
+      if (!prof.role) {
+        if (persona.id === "ai-pm") return "谁？什么 title——要拍板还是只对齐？";
+        if (persona.id === "ai-algo") return "你 PM 还是 eng？先说清楚。";
+        return "谁？localhost 还是 Pages？";
+      }
+      if (!prof.goal) {
+        if (persona.id === "ai-pm") return `好，${prof.role}。这次要结论、deadline，还是只要 context？`;
+        if (persona.id === "ai-algo") return `${prof.role}，eval 还是线上 case？`;
+        return "要解决啥，一句话。";
+      }
+      applyDirectorTone(prof, persona.id);
+      return null;
+    }
+
+    function profilePromptBlock(personaId) {
+      const prof = getProfile();
+      if (!profileReady(prof)) {
+        return "【强制 intake】还不知道对方职位、本次目标。像真人 VP 在飞书里盘问：只问 title+目的，一句半，不答实质。禁止问沟通风格、禁止承认 AI。";
+      }
+      applyDirectorTone(prof, personaId || activeId);
+      const toneHint =
+        prof.tone === "cold"
+          ? "你对这位下属：更高位、时间紧，brief 略高冷，≤40字，可把长事推去 sync"
+          : "你对这位协作方（算法/研发）：对等 professional，≤55字";
+      return `【对方】职位=${prof.role}；目标=${prof.goal}。\n【你作为真人的说话方式】${toneHint}。\n【图灵】绝不说自己是 AI/模型/助手，不提演示/Playground/Puter。`;
+    }
+
+    function humanTypingMs(replyText) {
+      const n = (replyText || "").length;
+      return Math.min(1400, 320 + n * 14 + Math.random() * 180);
+    }
 
     function withTimeout(promise, ms, msg) {
       return Promise.race([
@@ -269,10 +369,11 @@
     }
 
     const HUMAN_STYLE = `
-【沉浸】新加坡总部、华人为主团队的 open international 氛围。说话风格 = 新加坡 VP 式中英文混聊：中文为主，自然夹英文业务词（sync、scope、go/no-go、handoff、badcase、eval、staging），像飞书/Slack 回同事。
-【篇幅】对方只问一句时，你只回 1～2 句，总字数 ≤80；先给判断 + 最多一个追问。禁止开会式长文、教训下属。
-禁止：### 标题、很高兴为您服务、I'm an AI、happy to help、客服菜单、单字敷衍（在。/ Hey.）、纯英文长段装洋人、纯官腔中文。
-寒暄要有场景（刚开完会、刚看 overnight 数据）；问身份 = 名字+职位+一句引导。用户说中文你就中文混英；用户说英文也可以英文混一点中文，但别全程纯英。`;
+【图灵测试】你是真人同事，在飞书/Slack 回消息。成功标准：对方感觉不到 AI。
+【绝不出戏】禁止：我是 AI/语言模型/助手、很高兴为您服务、happy to help、### 标题、菜单式「选1/2/3」、演示模式/Playground/Puter/prompt。
+【社会层级】VP 对下属 PM：更短、更冷、常推 sync；对算法/研发：专业对等仍简短。
+【建档】不知对方职位+目的前只问这两项；职级自动决定你怎么说话，禁止问对方要什么风格。
+【篇幅】1～2 句；下属≤40字；禁止对方一句你一篇。`;
 
     const BAN_TAIL = /[。．.]\s*(anything else I can help|how can I assist|is there anything|有什么问题吗|还有什么可以帮您)/gi;
 
@@ -281,7 +382,9 @@
         .replace(/^#{1,6}\s*.+$/gm, "")
         .replace(/#{1,6}\s*/g, "")
         .replace(/很高兴为您服务|请问有什么我可以帮助您|我是(?:一个)?AI产品经理/gi, "")
-        .replace(/happy to help|how can I assist you|I'm an AI/gi, "")
+        .replace(/作为(?:一个)?AI|我是(?:由)?(?:OpenAI|大模型|语言模型)/gi, "")
+        .replace(/happy to help|how can I assist you|I'm an AI|language model/gi, "")
+        .replace(/演示模式|Playground|Puter|prompt engineering/gi, "")
         .replace(/专注于为海外博彩[^。\n]*/gi, "")
         .replace(/您想讨论的具体主题或问题是什么/gi, "")
         .replace(/感谢(?:您|你)的问候[！!。.]?\s*/gi, "")
@@ -309,17 +412,25 @@
       return capReplyForShortAsk(t, userLine, persona);
     }
 
+    function maxLenForPersona(persona) {
+      const prof = getProfile();
+      if (persona?.id === "ai-pm" && prof.tone === "cold") return 42;
+      if (persona?.id === "ai-pm") return 62;
+      return 88;
+    }
+
     /** 下属一句问，总监别回一大段 */
     function capReplyForShortAsk(text, userLine, persona) {
       const u = (userLine || "").trim();
-      if (!u || u.length > 100 || !persona) return text;
+      if (!persona) return text;
       let t = String(text || "").trim();
-      if (t.length <= 100) return t;
+      const maxLen = maxLenForPersona(persona);
+      if (t.length <= maxLen) return t;
       const demo = demoReply(persona, u);
-      if (demo && demo.length <= 120 && !/demo mode 范例有限/i.test(demo)) return demo;
+      if (demo && demo.length <= maxLen + 20 && !/demo mode 范例有限/i.test(demo)) return demo.slice(0, maxLen);
       const parts = t.split(/(?<=[。！？!?])\s*/).filter((s) => s.trim());
-      if (parts.length >= 2) return parts.slice(0, 2).join("").trim().slice(0, 96);
-      return t.slice(0, 96).trim() + "… 你先说重点。";
+      const one = parts[0] || t;
+      return one.slice(0, maxLen).trim();
     }
 
     function sanitizeAllHistories() {
@@ -338,6 +449,17 @@
 
     function demoReply(persona, userText) {
       const t = userText.trim();
+      const prof = getProfile();
+      tryParseProfile(t, prof);
+
+      const intake = intakeReply(persona, t);
+      if (intake) return intake;
+      applyDirectorTone(prof, persona.id);
+
+      if (persona.id === "ai-pm" && /工作计划|年度计划|今年.*(计划|重点)|roadmap|priorities/i.test(t)) {
+        if (prof.tone === "cold") return "你 own 哪条？全线别在 thread 铺，要 sync 我拉 30min。";
+        return "今年就三条：touch、CS FCR、合规 handoff。你 pick 一条 deep dive。";
+      }
 
       if (/^(早上好|早|good\s*morning)/i.test(t)) {
         if (persona.id === "ai-pm") return "早，刚扫完 overnight CS digest。你说——客服还是 outbound，还是竞品那边？";
@@ -358,17 +480,15 @@
       }
 
       if (/name|名字|叫什么|你是谁|哪位|怎么称呼|who are you/i.test(t)) {
-        if (persona.id === "ai-pm") {
-          return "Marcus Chen，产品 SVP。我们给 iGaming 运营商做 AI SaaS——客服 RAG、坐席、外呼、营销 touch。你今天卡在哪一块？";
-        }
-        if (persona.id === "ai-algo") return "Ira Kaplan，算法 Head of ML。RAG、意图、外呼 NLU、幻觉和 cost 都归我。具体什么问题？";
-        if (persona.id === "ai-fullstack") return "Leo Park，工程 Tech Lead。demo 站、Puter 接 GPT、坐席联调找我。什么 env？";
+        if (persona.id === "ai-pm") return "Marcus，产品 SVP。iGaming AI SaaS，客服/外呼这块。你说事。";
+        if (persona.id === "ai-algo") return "Ira，ML。RAG、eval、外呼 NLU。什么问题？";
+        if (persona.id === "ai-fullstack") return "Leo，工程。env 先说。";
       }
 
-      if (/人机|机器人|你是AI|是不是bot|真人吗|are you (a )?bot|real person/i.test(t)) {
-        if (persona.id === "ai-pm") return "真人啊，product 这边。要测 bot 找 Leo 拉 staging；找我是拍 scope 和 go/no-go。";
-        if (persona.id === "ai-algo") return "真人。model 效果看 eval report，别在这猜。";
-        if (persona.id === "ai-fullstack") return "真人。open-ended 对话去 playground 关 demo mode；我管 delivery。";
+      if (/图灵|人机|机器人|你是AI|是不是bot|真人吗|大模型|语言模型|ChatGPT|GPT|程序|are you (a )?bot|real person|generated/i.test(t)) {
+        if (persona.id === "ai-pm") return "……真人啊，刚下会。要测 bot 找 Leo；找我是 scope 和 go/no-go。";
+        if (persona.id === "ai-algo") return "真人。看 eval，别猜。";
+        if (persona.id === "ai-fullstack") return "真人，Leo。说 env 和 log。";
       }
 
       if (/谢谢|thanks|thx/i.test(t)) {
@@ -384,29 +504,29 @@
       }
 
       if (persona.id === "ai-pm" && /30|语言|language|go\/no/i.test(t)) {
-        return (
-          "我会 hold 这一版：别一键 ship 30 languages。\n\n" +
-          "FAQ 和 terminology 没 sign off，wrong answer 一定上来；各区 compliance copy 也不一样。坐席和 bot 得同一套 KB version，不然对不上。\n\n" +
-          "真要上，先挑 3～5 个 core market 跑两周，看 FCR 和 escalation，再扩。"
-        );
+        return prof.tone === "cold"
+          ? "Hold：别一次 30 languages。先 3 market 两周看 FCR。"
+          : "我会 hold：别一键 30 languages。先 3～5 market 跑两周看 FCR，再扩。";
       }
       if (persona.id === "ai-pm" && /smartico|竞品|competitor|where do we stand/i.test(t)) {
         return "Smartico = promo CRM，我们不硬刚 CS。我们打到账+坐席+外呼，能接他们 data。你要 narrative 还是 integration scope？";
       }
       if (persona.id === "ai-pm" && /外呼|handoff|转人工|escalat/i.test(t)) {
-        return "外呼转坐席这周先保 handoff context 别断——玩家说了啥、intent tag、compliance disclaimer，坐席屏上必须齐。bot over-promise 的事，人工要能一眼看见。";
+        return prof.tone === "cold"
+          ? "Handoff context 先齐：intent + disclaimer。别的下周。"
+          : "这周先保 handoff context 齐——intent、disclaimer，坐席屏上一眼能看。";
       }
       if (persona.id === "ai-fullstack" && /预览|localhost|pages|gpt|puter|deploy|preview/i.test(t)) {
-        return "别 double-click html。终端 cd 进项目：python3 -m http.server 8080，浏览器走 localhost。真 GPT 要关 demo mode、登录 Puter。Pages push 完等一分钟 hard refresh。";
+        return "别 double-click。cd 项目目录 python3 -m http.server 8080，走 localhost。Pages 推完等一分钟硬刷。";
       }
       if (persona.id === "ai-algo" && /rag|答非所问|幻觉|hallucin|retriev/i.test(t)) {
         return "别先换大 model。先看 recall 有没有召对，再看 generation 有没有越权，badcase 有没有回流。eval set 都没有就别谈上线。";
       }
 
       const fallbacks = {
-        "ai-pm": "这句我需要更多 context。先把场景讲清楚——谁的用户、要什么 outcome、deadline 什么时候。（demo mode 范例有限，关演示 + Puter 可细聊）",
-        "ai-algo": "signal 不够我没法 call。贴一下现象、sample size、当前 metrics。（demo mode 范例有限）",
-        "ai-fullstack": "env、报错、expected behaviour 说清楚，我再给 steps。（demo mode 范例有限）",
+        "ai-pm": "没 context。你谁，什么线？",
+        "ai-algo": "现象呢？sample 多大？",
+        "ai-fullstack": "log 和 URL 贴一下。",
       };
       return fallbacks[persona.id] || fallbacks["ai-pm"];
     }
@@ -469,8 +589,9 @@
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const o = JSON.parse(raw);
-          if (o.schema === STORAGE_SCHEMA) {
+            if (o.schema === STORAGE_SCHEMA) {
             histories = o.histories || {};
+            userProfiles = o.userProfiles || {};
             activeId = o.activeId || activeId;
             mode = o.mode || mode;
             if (o.groupMembers) groupMembers = new Set(o.groupMembers);
@@ -496,6 +617,7 @@
           mode,
           groupMembers: [...groupMembers],
           histories,
+          userProfiles,
           demoMode,
         })
       );
@@ -639,14 +761,12 @@
       if (!msgs.length) {
         const p0 = getPersona();
         const name = mode === "group" ? `${groupMembers.size} 位同事` : p0 ? `${p0.name}` : "";
-        const strip = demoMode ? `<div class="demo-strip">演示模式 · 固定范例。取消左侧勾选并登录 Puter = 真 AI 对话。</div>` : "";
+        const strip = "";
         area.innerHTML = `<div class="chat-pane">${strip}<div class="chat-empty"><p style="font-size:24px;margin:0 0 8px">${mode === "group" ? "👥" : getPersona()?.icon || "💬"}</p><p>与 <strong>${name}</strong> 对话</p><p style="margin-top:8px;font-size:11px">输入或点下方快捷试句</p></div></div>`;
         return;
       }
-      const strip = demoMode ? `<div class="demo-strip">演示模式 · 固定范例</div>` : "";
       area.innerHTML =
         '<div class="chat-pane">' +
-        strip +
         msgs
           .map((m) => {
             if (m.role === "user") {
@@ -687,11 +807,15 @@
     function buildSoloPrompt(userText) {
       const p = getPersona();
       const hist = histories[activeId] || [];
-      const shortAsk = userText.trim().length <= 80;
-      const lenRule = shortAsk
-        ? "【对方只问一句】你只回 1～2 句，≤80 字：一句判断 + 可选一个追问。不要长文。"
-        : "【输出】最多 3 句，≤120 字。";
-      return `【扮演】${p.name}，${p.titleZh || p.title}。不出戏。\n${p.system}${HUMAN_STYLE}\n\n【历史】\n${formatGroupHistory(hist)}\n【对方】${userText}\n\n${lenRule} 新加坡 VP 式中英文混聊。禁止 markdown、客服腔、开会式长篇。`;
+      tryParseProfile(userText, getProfile());
+      const prof = getProfile();
+      applyDirectorTone(prof, p.id);
+      const lenRule = profileReady(prof)
+        ? prof.tone === "cold"
+          ? "【输出】1～2 句，≤40 字，像 VP 回下属飞书。"
+          : "【输出】1～2 句，≤55 字，像同事 Slack。"
+        : "【输出】只问职位+目的，≤35 字，像真人盘问。";
+      return `【扮演】${p.name}，${p.titleZh || p.title}。你是真人，永久不出戏。\n${p.system}\n${HUMAN_STYLE}\n\n${profilePromptBlock(p.id)}\n\n【历史】\n${formatGroupHistory(hist)}\n【对方】${userText}\n\n${lenRule}`;
     }
 
     function buildGroupPrompt(userText, persona, hist) {
@@ -699,13 +823,14 @@
         .filter((x) => groupMembers.has(x.id) && x.id !== persona.id)
         .map((x) => x.name)
         .join("、");
-      return `【扮演】${persona.name}（${persona.title}），不出戏。\n${persona.system}${HUMAN_STYLE}\n\n【同群】${others || "无"}\n【记录】\n${formatGroupHistory(hist)}\n【对方】${userText}\n\n仅以 ${persona.name} 口吻发言，80～120 字，中英文自然混聊，不替他人答。`;
+      return `【扮演】${persona.name}（${persona.title}），真人不出戏。\n${persona.system}${HUMAN_STYLE}\n\n【同群】${others || "无"}\n【记录】\n${formatGroupHistory(hist)}\n【对方】${userText}\n\n仅以 ${persona.name} 口吻，1～3 句，≤70 字，像群聊真人，不替他人答。`;
     }
 
     async function llmChat(prompt, persona, userLine) {
       if (demoMode) {
-        await new Promise((r) => setTimeout(r, 400));
-        return demoReply(persona || getPersona(), userLine || prompt);
+        const draft = demoReply(persona || getPersona(), userLine || prompt);
+        await new Promise((r) => setTimeout(r, humanTypingMs(draft)));
+        return draft;
       }
       if (location.protocol === "file:") {
         throw new Error("请用 http://localhost 打开，不要 file://");
@@ -769,15 +894,22 @@
       if (!histories[key]) histories[key] = [];
 
       histories[key].push({ role: "user", content: text.trim() });
+      tryParseProfile(text.trim(), getProfile());
       renderChat();
       saveStore();
 
       try {
         if (mode === "solo") {
           const p = getPersona();
-          appendTyping(`${p.name} ${demoMode ? "生成示例" : "思考"}中…`);
+          appendTyping(`${p.name} 正在输入…`);
           try {
-            let reply = await llmChat(buildSoloPrompt(text.trim()), p, text.trim());
+            let reply;
+            if (demoMode && needsIntake(p, text.trim())) {
+              reply = intakeReply(p, text.trim()) || demoReply(p, text.trim());
+              await new Promise((r) => setTimeout(r, humanTypingMs(reply)));
+            } else {
+              reply = await llmChat(buildSoloPrompt(text.trim()), p, text.trim());
+            }
             reply = humanizeReply(reply, p, text.trim());
             histories[key].push({ role: "assistant", content: reply });
           } catch (e) {
@@ -789,7 +921,7 @@
         } else {
           const members = personas.filter((p) => groupMembers.has(p.id));
           for (const p of members) {
-            appendTyping(`${p.icon} ${p.name} ${demoMode ? "示例" : "输入"}中…`);
+            appendTyping(`${p.icon} ${p.name} 正在输入…`);
             try {
               let reply = await llmChat(buildGroupPrompt(text.trim(), p, histories[key]), p, text.trim());
               reply = humanizeReply(reply, p, text.trim());
@@ -823,8 +955,10 @@
 
     document.getElementById("btn-clear").addEventListener("click", () => {
       const label = mode === "group" ? "当前群聊" : getPersona()?.name;
-      if (!confirm(`清空「${label}」记录？`)) return;
-      histories[chatKey()] = [];
+      if (!confirm(`清空「${label}」记录？（含职位/目标建档）`)) return;
+      const k = chatKey();
+      histories[k] = [];
+      delete userProfiles[k];
       renderChat();
       saveStore();
     });

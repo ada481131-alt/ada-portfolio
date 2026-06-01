@@ -270,6 +270,7 @@
 
     const HUMAN_STYLE = `
 【沉浸】新加坡总部、华人为主团队的 open international 氛围。说话风格 = 新加坡 VP 式中英文混聊：中文为主，自然夹英文业务词（sync、scope、go/no-go、handoff、badcase、eval、staging），像飞书/Slack 回同事。
+【篇幅】对方只问一句时，你只回 1～2 句，总字数 ≤80；先给判断 + 最多一个追问。禁止开会式长文、教训下属。
 禁止：### 标题、很高兴为您服务、I'm an AI、happy to help、客服菜单、单字敷衍（在。/ Hey.）、纯英文长段装洋人、纯官腔中文。
 寒暄要有场景（刚开完会、刚看 overnight 数据）；问身份 = 名字+职位+一句引导。用户说中文你就中文混英；用户说英文也可以英文混一点中文，但别全程纯英。`;
 
@@ -305,7 +306,20 @@
       const longPureEn = noZh && t.length > 80;
       if (longPureEn && persona && userLine) t = demoReply(persona, userLine);
       if (t.length < 8 && persona && userLine) return demoReply(persona, userLine);
-      return t;
+      return capReplyForShortAsk(t, userLine, persona);
+    }
+
+    /** 下属一句问，总监别回一大段 */
+    function capReplyForShortAsk(text, userLine, persona) {
+      const u = (userLine || "").trim();
+      if (!u || u.length > 100 || !persona) return text;
+      let t = String(text || "").trim();
+      if (t.length <= 100) return t;
+      const demo = demoReply(persona, u);
+      if (demo && demo.length <= 120 && !/demo mode 范例有限/i.test(demo)) return demo;
+      const parts = t.split(/(?<=[。！？!?])\s*/).filter((s) => s.trim());
+      if (parts.length >= 2) return parts.slice(0, 2).join("").trim().slice(0, 96);
+      return t.slice(0, 96).trim() + "… 你先说重点。";
     }
 
     function sanitizeAllHistories() {
@@ -376,8 +390,8 @@
           "真要上，先挑 3～5 个 core market 跑两周，看 FCR 和 escalation，再扩。"
         );
       }
-      if (persona.id === "ai-pm" && /smartico|竞品|competitor/i.test(t)) {
-        return "Smartico 做 promo CRM，不是跟我们在 CS 赛道硬碰。我们打到账、玩法、坐席、外呼。能接他们 data 做 outreach，别重复造活动 engine。数字让他们拿 case study，我们不编。";
+      if (persona.id === "ai-pm" && /smartico|竞品|competitor|where do we stand/i.test(t)) {
+        return "Smartico = promo CRM，我们不硬刚 CS。我们打到账+坐席+外呼，能接他们 data。你要 narrative 还是 integration scope？";
       }
       if (persona.id === "ai-pm" && /外呼|handoff|转人工|escalat/i.test(t)) {
         return "外呼转坐席这周先保 handoff context 别断——玩家说了啥、intent tag、compliance disclaimer，坐席屏上必须齐。bot over-promise 的事，人工要能一眼看见。";
@@ -611,7 +625,7 @@
       box.querySelectorAll(".chip").forEach((b) => {
         b.addEventListener("click", () => {
           const q = decodeURIComponent(b.dataset.q);
-          document.getElementById("chat-input").value = q;
+          document.getElementById("chat-input").value = "";
           onSend(q);
         });
       });
@@ -640,7 +654,12 @@
             }
             const p = m.personaId ? getPersona(m.personaId) : getPersona();
             const label = p ? `${p.name} · ${p.titleZh || p.title}` : "";
-            const body = humanizeReply(m.content, p, "").trim();
+            let lastU = "";
+            const idx = msgs.indexOf(m);
+            for (let i = idx - 1; i >= 0; i--) {
+              if (msgs[i].role === "user") { lastU = msgs[i].content; break; }
+            }
+            const body = humanizeReply(m.content, p, lastU).trim();
             const sender = mode === "group" && label ? `<span class="sender">${escapeHtml(label)}</span>` : "";
             return `<div class="msg-row ai"><div class="bubble-ai">${sender}${escapeHtml(body)}</div></div>`;
           })
@@ -668,7 +687,11 @@
     function buildSoloPrompt(userText) {
       const p = getPersona();
       const hist = histories[activeId] || [];
-      return `【扮演】${p.name}，${p.titleZh || p.title}。不出戏。\n${p.system}${HUMAN_STYLE}\n\n【历史】\n${formatGroupHistory(hist)}\n【对方】${userText}\n\n【输出】1～3 句，新加坡 VP 式中英文混聊（华人团队 open international）。中文为主、自然夹英文业务词。禁止 markdown、客服腔、单字敷衍、纯英装洋人。`;
+      const shortAsk = userText.trim().length <= 80;
+      const lenRule = shortAsk
+        ? "【对方只问一句】你只回 1～2 句，≤80 字：一句判断 + 可选一个追问。不要长文。"
+        : "【输出】最多 3 句，≤120 字。";
+      return `【扮演】${p.name}，${p.titleZh || p.title}。不出戏。\n${p.system}${HUMAN_STYLE}\n\n【历史】\n${formatGroupHistory(hist)}\n【对方】${userText}\n\n${lenRule} 新加坡 VP 式中英文混聊。禁止 markdown、客服腔、开会式长篇。`;
     }
 
     function buildGroupPrompt(userText, persona, hist) {
@@ -719,6 +742,7 @@
 
     async function onSend(text) {
       if (!text.trim() || sending) return;
+      document.getElementById("chat-input").value = "";
 
       if (!demoMode) {
         const signed = puterSignedIn || (await checkPuterSignedIn());

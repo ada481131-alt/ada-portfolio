@@ -52,6 +52,14 @@
           <button type="button" class="tab flex-1 lg:flex-none text-left px-3 py-2.5 rounded-xl text-slate-600 whitespace-nowrap" data-panel="salary">薪资对比</button>
           <button type="button" class="tab flex-1 lg:flex-none text-left px-3 py-2.5 rounded-xl text-slate-600 whitespace-nowrap" data-panel="draft">改稿输出</button>
         </nav>
+        <div class="mt-3 pt-3 border-t border-slate-100 px-1 pb-2">
+          <div class="flex justify-between items-center gap-1 px-2 mb-2">
+            <p class="text-xs font-bold text-slate-500">JD 对标历史</p>
+            <button type="button" id="history-clear-all" class="text-[10px] text-rose-600 hover:underline hidden">清空全部</button>
+          </div>
+          <ul id="history-list" class="max-h-52 overflow-y-auto space-y-1 px-1"></ul>
+          <p id="history-empty" class="px-2 text-[10px] text-slate-400 leading-5 mt-1">完成「开始完整分析」后自动保存 · 仅本机浏览器 · 可点载入 / 删除</p>
+        </div>
       </aside>
 
       <div class="space-y-4">
@@ -288,7 +296,111 @@
 
     const resumeEl = document.getElementById("resume-in");
     const jdEl = document.getElementById("jd-in");
+    const HISTORY_KEY = "demo-resume-assistant-history";
+    const MAX_HISTORY = 40;
     let lastAnalysis = null;
+
+    function loadHistory() {
+      try {
+        const list = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+        return Array.isArray(list) ? list : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveHistoryList(list) {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, MAX_HISTORY)));
+    }
+
+    function pushHistoryEntry(a) {
+      const entry = {
+        id: String(Date.now()),
+        title: a.parsed.title || "（未识别岗位）",
+        score: a.score,
+        salary: a.jdSalary || "",
+        city: a.cityName || "",
+        capCovered: a.capabilityGap?.covered?.length ?? 0,
+        capTotal: a.capabilityGap?.items?.length ?? 0,
+        createdAt: new Date().toLocaleString("zh-CN", { hour12: false }),
+        jd: (a.jd || "").slice(0, 16000),
+        cityKey: a.city,
+        levelKey: a.level,
+      };
+      const list = loadHistory();
+      list.unshift(entry);
+      saveHistoryList(list);
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const list = loadHistory();
+      const ul = document.getElementById("history-list");
+      const empty = document.getElementById("history-empty");
+      const clearBtn = document.getElementById("history-clear-all");
+      if (!ul) return;
+      clearBtn?.classList.toggle("hidden", list.length === 0);
+      empty?.classList.toggle("hidden", list.length > 0);
+      if (!list.length) {
+        ul.innerHTML = "";
+        return;
+      }
+      ul.innerHTML = list
+        .map((h) => {
+          const sc = h.score >= 75 ? "text-emerald-700" : h.score >= 55 ? "text-amber-700" : "text-rose-700";
+          const cap =
+            h.capTotal > 0 ? `<span class="text-slate-400"> · ${h.capCovered}/${h.capTotal} 项</span>` : "";
+          return `<li class="group rounded-lg border border-slate-100 hover:border-teal-200 hover:bg-teal-50/40 p-2">
+            <div class="flex justify-between gap-1 items-start">
+              <button type="button" class="history-load text-left flex-1 min-w-0" data-id="${h.id}" title="载入 JD 并重新分析">
+                <p class="font-semibold text-slate-800 truncate">${escapeHtml(h.title)}</p>
+                <p class="mt-0.5"><span class="font-black ${sc}">${h.score}</span><span class="text-slate-400"> 分</span>${cap}</p>
+                <p class="text-[10px] text-slate-400 mt-0.5 truncate">${escapeHtml(h.createdAt)}${h.salary ? " · " + escapeHtml(h.salary) : ""}</p>
+              </button>
+              <button type="button" class="history-del shrink-0 text-slate-300 hover:text-rose-600 px-1" data-id="${h.id}" title="删除">×</button>
+            </div>
+          </li>`;
+        })
+        .join("");
+      ul.querySelectorAll(".history-load").forEach((btn) => {
+        btn.addEventListener("click", () => loadHistoryEntry(btn.dataset.id));
+      });
+      ul.querySelectorAll(".history-del").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          deleteHistoryEntry(btn.dataset.id);
+        });
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function loadHistoryEntry(id) {
+      const h = loadHistory().find((x) => x.id === id);
+      if (!h) return;
+      jdEl.value = h.jd || "";
+      if (h.cityKey) document.getElementById("city").value = h.cityKey;
+      if (h.levelKey) document.getElementById("level").value = h.levelKey;
+      saveInputs();
+      updateJdParsedUI();
+      document.querySelector(".panel")?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+      if (resumeEl.value.trim()) runFullAnalysis();
+      else {
+        alert("已载入该条 JD。请确认左侧简历已粘贴全文，再点「开始完整分析」。");
+        document.getElementById("btn-analyze-full").scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+
+    function deleteHistoryEntry(id) {
+      saveHistoryList(loadHistory().filter((x) => x.id !== id));
+      renderHistory();
+    }
 
     function saveInputs() {
       localStorage.setItem(
@@ -388,13 +500,16 @@
       return p;
     }
 
+    /** 只认产品词表 + 常见英文技术词，避免 JD 里公司英文名把分打穿 */
+    const JD_EN_WHITELIST = /^(AI|LLM|GPT|RAG|Agent|Copilot|Prompt|SaaS|API|ROI|MRR|ARR|ERP|UAT|SQL|IoT|B2B|B2C|NDR|LTV|ARPU|AIGC|PM|PRD)$/i;
+
     function extractJdKeywords(jd) {
       const set = new Set();
       KEYWORD_POOL.forEach((kw) => {
         if (jd.includes(kw)) set.add(kw);
       });
-      jd.match(/[A-Za-z][A-Za-z0-9+/]{1,20}/g)?.forEach((w) => {
-        if (w.length >= 2 && w.length <= 12) set.add(w);
+      jd.match(/[A-Za-z][A-Za-z0-9]{1,19}/g)?.forEach((w) => {
+        if (w.length >= 2 && w.length <= 12 && JD_EN_WHITELIST.test(w)) set.add(w);
       });
       return [...set].slice(0, 40);
     }
@@ -420,9 +535,12 @@
       const hit = jdKw.filter((k) => resume.includes(k));
       const miss = jdKw.filter((k) => !hit.includes(k));
       const base = jdKw.length ? Math.round((hit.length / jdKw.length) * 100) : 50;
+      const cap = buildCapabilityGap({ jd, resume, parsed });
+      const capTotal = cap.items.length;
+      const capScore = capTotal ? Math.round((cap.covered.length / capTotal) * 100) : base;
       const titleBonus = parsed.title.length > 4 && resume.includes("产品") ? 5 : 0;
-      const score = Math.min(92, base + titleBonus);
-      return { score, hit, miss, jdKw, parsed, resume, jd };
+      const score = Math.min(92, Math.round(base * 0.45 + capScore * 0.55) + titleBonus);
+      return { score, hit, miss, jdKw, parsed, resume, jd, capScore, keywordScore: base };
     }
 
     function buildInterviewList(m) {
@@ -635,6 +753,7 @@
             <div class="flex-1 text-sm leading-8">
               <p><strong>关键词已覆盖：</strong>${a.hit.slice(0, 10).join("、") || "—"}</p>
               <p class="mt-1"><strong>关键词待补：</strong>${a.miss.slice(0, 6).join("、") || "—"}</p>
+              ${a.score < 40 ? '<p class="mt-2 text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">匹配分偏严常见原因：① 简历未粘全（需含千帆/华为/现司全文）；② JD 含大量企业专有词。请以下方「已具备能力」和 Marcus 人工对标为准，勿因低分放弃投递。</p>' : ""}
             </div>
           </div>
 
@@ -804,6 +923,7 @@
         return;
       }
       lastAnalysis = a;
+      pushHistoryEntry(a);
       showResultSections();
       renderSummary(a);
       renderAllDetails();
@@ -908,6 +1028,15 @@
     };
 
     document.getElementById("btn-analyze-full").addEventListener("click", runFullAnalysis);
+
+    document.getElementById("history-clear-all")?.addEventListener("click", () => {
+      if (!loadHistory().length) return;
+      if (!confirm("确定清空全部 JD 对标历史？仅影响本机浏览器。")) return;
+      saveHistoryList([]);
+      renderHistory();
+    });
+
+    renderHistory();
 
     document.getElementById("btn-generate-yes").addEventListener("click", () => {
       if (!lastAnalysis) {

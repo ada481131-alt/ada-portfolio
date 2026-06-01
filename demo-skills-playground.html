@@ -12,7 +12,6 @@
       document.head.appendChild(s);
     }
   </script>
-  <script src="skills-playground/personas.js"></script>
   <meta name="color-scheme" content="light dark" />
   <style>
     :root { --bg: #f1f5f9; --card: #fff; --border: #e2e8f0; --text: #18181b; --sidebar: 272px; }
@@ -204,6 +203,23 @@
   </div>
 
   <script>
+    (async function boot() {
+    await new Promise((resolve) => {
+      if (window.SKILL_PERSONAS?.length) return resolve();
+      const paths = ["personas.js", "skills-playground/personas.js"];
+      let i = 0;
+      const tryNext = () => {
+        if (window.SKILL_PERSONAS?.length) return resolve();
+        if (i >= paths.length) return resolve();
+        const s = document.createElement("script");
+        s.src = paths[i++];
+        s.onload = () => (window.SKILL_PERSONAS?.length ? resolve() : tryNext());
+        s.onerror = tryNext;
+        document.head.appendChild(s);
+      };
+      tryNext();
+    });
+
     const STORAGE_KEY = "skills-playground-v8";
     const STORAGE_SCHEMA = 11;
     const personas = window.SKILL_PERSONAS || [];
@@ -824,6 +840,12 @@
       puterSignedIn = await checkPuterSignedIn();
       updatePuterStatus();
       syncDemoBanner();
+    })();
+
+    if (!personas.length) {
+      document.getElementById("persona-list").innerHTML =
+        '<p class="px-3 py-4 text-xs text-rose-600 leading-6">人设未加载：请确认 GitHub 上有 <code class="bg-rose-50 px-1 rounded">personas.js</code>（根目录）或 <code class="bg-rose-50 px-1 rounded">skills-playground/personas.js</code></p>';
+    }
     })();
   </script>
 </body>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>客服 · 置信度/阈值/转人工 · 口播+QA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .prose blockquote { border-left: 3px solid #818cf8; padding-left: 1rem; color: #334155; font-style: normal; }
+    @media print { .no-print { display: none !important; } }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 text-sm prose prose-slate max-w-none">
+  <header class="no-print sticky top-0 bg-white/90 backdrop-blur border-b border-slate-200 px-4 py-3">
+    <a href="personal-kb.html" class="font-semibold text-indigo-700 hover:underline">← 个人知识库</a>
+    <span class="mx-2 text-slate-300">·</span>
+    <a href="demo-ai-support.html" class="text-indigo-600 hover:underline text-xs">客服 demo</a>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-12 bg-white md:my-8 md:rounded-2xl md:shadow-sm">
+    <h1 class="text-2xl font-black not-prose">智能客服 · 置信度 / 阈值 / 转人工</h1>
+    <p class="text-xs text-slate-500 mt-2 not-prose">投智能客服岗前 5 分钟扫 · 面完写文末复盘</p>
+
+    <section class="mt-8 not-prose">
+      <h2 class="text-sm font-bold text-indigo-800">一、核心口播（20 秒）</h2>
+      <blockquote class="mt-3 p-4 rounded-xl bg-indigo-50 border border-indigo-100 text-slate-700 leading-8">
+        我们不会只看模型「低置信度」就一刀切，因为「低」要定义。我作为 PM 会和运营、算法定 <strong>阈值</strong>：支付场景更严，玩法可以略松；再配合 <strong>支付类强制转人工</strong>，避免 bot 承诺到账。上线后看 <strong>解决率、转人工率、误答 badcase</strong>，再迭代阈值和知识库。
+      </blockquote>
+    </section>
+
+    <section class="mt-8 not-prose">
+      <h2 class="text-sm font-bold text-indigo-800">二、演示口播（+ demo 30 秒）</h2>
+      <p class="mt-2 leading-7 text-slate-700">分库 + 低于阈值转人工；操作：支付库 →「充值没到账」→ 看检索日志 → 阈值拉 90% 再问 → 转人工按钮。</p>
+    </section>
+
+    <section class="mt-8 not-prose">
+      <h2 class="text-sm font-bold text-indigo-800">三、讲透版（60 秒）</h2>
+      <p class="mt-2 leading-7 text-slate-700">置信度=把握分数；阈值=业务定的线（如 70%）；硬规则=支付类强制转人工；迭代=解决率/转人工/badcase。结果：解决率 ~80%（基线 ~3%），转人工 ~97%→~20%。</p>
+    </section>
+
+    <section class="mt-8 not-prose">
+      <h2 class="text-sm font-bold text-slate-500 uppercase tracking-widest">四、QA 精选</h2>
+      <dl class="mt-4 space-y-5 text-slate-700 leading-7">
+        <div><dt class="font-bold text-indigo-900">Q1 置信度 vs 阈值？</dt><dd class="mt-1">置信度是信号；阈值是产品规则。没有阈值，「低」无法执行。</dd></div>
+        <div><dt class="font-bold text-indigo-900">Q2 为何不能只说低就转？</dt><dd class="mt-1">「低」无统一标准；阈值写清体验/成本/风险，还要配合支付强制规则。</dd></div>
+        <div><dt class="font-bold text-indigo-900">Q3 阈值高低怎么权衡？</dt><dd class="mt-1">支付偏高、玩法略低；用解决率+转人工+badcase 小流量对比。</dd></div>
+        <div><dt class="font-bold text-indigo-900">Q4 支付为何更严？</dt><dd class="mt-1">到账/退款误答成本高；支付库隔离+更严阈值+强制 handoff。</dd></div>
+        <div><dt class="font-bold text-indigo-900">Q5 还有哪些手段？</dt><dd class="mt-1">分库、敏感词、低于阈值转人工、支付强制队列、坐席上下文、badcase 回流。</dd></div>
+        <div><dt class="font-bold text-indigo-900">Q7 阈值具体多少？</dt><dd class="mt-1">demo 用 70% 示意；线上分场景配置，讲方法不编实验。</dd></div>
+      </dl>
+      <p class="mt-4 text-xs text-slate-500">完整 Q6/Q8/Q9 见 Cursor：<code>career/evidence/interview-qa-cs-handoff.md</code></p>
+    </section>
+
+    <section class="mt-8 p-4 rounded-xl border border-dashed border-slate-200 not-prose">
+      <h2 class="text-sm font-bold">七、面试后复盘</h2>
+      <p class="mt-2 text-slate-500 text-xs">日期 · 公司岗位 · 问了什么 · 答好的 · 下一句要改的（在 Cursor md 里记）</p>
+    </section>
+  </main>
+</body>
+</html>

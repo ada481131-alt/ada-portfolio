@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>个人知识库 | Ada Liu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    @media print { .no-print { display: none !important; } }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 text-sm">
+  <header class="no-print sticky top-0 bg-white/90 backdrop-blur border-b border-slate-200 px-4 py-3 flex justify-between items-center">
+    <a href="career.html" class="font-semibold text-indigo-700 hover:underline">← 职业成长中心</a>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-12 bg-white md:my-8 md:rounded-2xl md:shadow-sm">
+    <h1 class="text-2xl md:text-3xl font-black">个人知识库</h1>
+    <p class="mt-2 text-slate-500 text-xs leading-6">课程 · 知识 · 面经 · STAR。网页可点开；细稿在 Cursor 的 <code class="bg-slate-100 px-1 rounded">career/evidence/</code> 里改。</p>
+
+    <section class="mt-8">
+      <h2 class="text-sm font-bold text-slate-500 uppercase tracking-widest">面经 · 口播 / QA</h2>
+      <ul class="mt-3 space-y-2">
+        <li><a href="interview-qa-cs-handoff.html" class="font-semibold text-indigo-700 hover:underline">客服 · 置信度 / 阈值 / 转人工</a> <span class="text-slate-400">— 20 秒口播 + 9 条 QA</span></li>
+      </ul>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-sm font-bold text-slate-500 uppercase tracking-widest">项目 · STAR · 竞品</h2>
+      <ul class="mt-3 space-y-2 leading-8">
+        <li><span class="text-slate-500">STAR 全文（Cursor）：</span> <code class="text-xs">career/evidence/star-stories.md</code></li>
+        <li><a href="comp-memo-smartico.html" class="font-semibold text-violet-700 hover:underline">Smartico 竞品 Memo</a></li>
+        <li><span class="text-slate-500">JD 对标（Cursor）：</span> <code class="text-xs">career/evidence/jd-benchmark.md</code></li>
+      </ul>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-sm font-bold text-slate-500 uppercase tracking-widest">演示 · 投递</h2>
+      <div class="mt-3 flex flex-wrap gap-2 text-xs">
+        <a href="demo-ai-support.html" class="px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200 hover:bg-indigo-100">客服 demo</a>
+        <a href="demo-agent-workbench.html" class="px-3 py-1.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200">坐席 demo</a>
+        <a href="demo-resume-assistant.html" class="px-3 py-1.5 rounded-full bg-rose-50 text-rose-800 border border-rose-200">简历助手</a>
+        <a href="demo-competitor-agent.html" class="px-3 py-1.5 rounded-full bg-violet-50 text-violet-800 border border-violet-200">竞品 Agent</a>
+        <a href="resume.html" class="px-3 py-1.5 rounded-full bg-gray-50 text-gray-800 border border-gray-200">投递简历</a>
+      </div>
+    </section>
+
+    <section class="mt-8 p-4 rounded-xl bg-slate-50 border border-slate-100 text-xs leading-7 text-slate-600">
+      <p class="font-bold text-slate-800">怎么增删改？</p>
+      <p class="mt-2">在 Cursor 编辑 <code>career/evidence/</code> 下的 .md；新建可说 <strong>知识库加一篇</strong>。改完若要上网页版，再说一声生成 .html。</p>
+    </section>
+  </main>
+</body>
+</html>

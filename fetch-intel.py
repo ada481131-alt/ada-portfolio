@@ -9,8 +9,13 @@ import re
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / "data"
+SCRIPT = Path(__file__).resolve()
+if SCRIPT.parent.name == "scripts":
+    REPO_ROOT = SCRIPT.parents[2]
+    DATA = SCRIPT.parents[1] / "data"
+else:
+    REPO_ROOT = SCRIPT.parent
+    DATA = REPO_ROOT / "career" / "data"
 
 RADAR_QUERIES = [
     ("深圳", "深圳 AI产品经理 招聘 月薪 2025 2026"),
@@ -132,14 +137,18 @@ def run_scout() -> dict:
 
 
 def write_json(path: Path, data: dict) -> None:
+    text = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    path.write_text(text, encoding="utf-8")
+    # flat copy at repo root — GitHub 网页上传不用建子文件夹
+    if path.name in ("radar-latest.json", "scout-latest.json"):
+        (REPO_ROOT / path.name).write_text(text, encoding="utf-8")
     # archive copy
     stamp = data["updated"][:10]
     kind = data["type"]
     archive = DATA.parent / ("market-radar" if kind == "radar" else "opportunity-scout") / f"{stamp}.json"
     archive.parent.mkdir(parents=True, exist_ok=True)
-    archive.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    archive.write_text(text, encoding="utf-8")
 
 
 def main() -> None:

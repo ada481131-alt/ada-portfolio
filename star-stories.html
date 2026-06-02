@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STAR 故事 · 面试 3 分钟版</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .star-block { border-left: 4px solid #6366f1; padding-left: 1rem; }
+    .star-s { border-color: #94a3b8; }
+    .star-t { border-color: #818cf8; }
+    .star-a { border-color: #4f46e5; }
+    .star-r { border-color: #059669; }
+    @media print { .no-print { display: none !important; } }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 text-sm">
+  <header class="no-print sticky top-0 bg-white/90 backdrop-blur border-b border-slate-200 px-4 py-3 flex flex-wrap gap-3 justify-between items-center">
+    <a href="personal-kb.html" class="font-semibold text-indigo-700 hover:underline">← 个人知识库</a>
+    <div class="flex flex-wrap gap-2 text-xs">
+      <a href="#story-a" class="font-semibold text-white bg-indigo-600 px-3 py-1 rounded-full">Story A 客服</a>
+      <a href="#story-b" class="px-3 py-1 rounded-full border border-slate-200 hover:bg-white">B 坐席</a>
+      <a href="#story-c" class="px-3 py-1 rounded-full border border-slate-200 hover:bg-white">C 外呼</a>
+      <a href="interview-qa-cs-handoff.html" class="px-3 py-1 rounded-full border border-indigo-200 text-indigo-800">阈值口播 QA</a>
+      <a href="demo-ai-support.html" class="px-3 py-1 rounded-full border border-indigo-200 text-indigo-800">客服 demo</a>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-12 bg-white md:my-8 md:rounded-2xl md:shadow-sm">
+    <h1 class="text-2xl font-black">STAR 故事 · 3 分钟面试版</h1>
+    <p class="mt-2 text-slate-500 text-xs leading-6">S=背景 · T=任务 · A=动作 · R=结果。细稿在 Cursor 改：<code class="bg-slate-100 px-1 rounded">career/evidence/star-stories.md</code></p>
+
+    <!-- Story A -->
+    <section id="story-a" class="mt-10 scroll-mt-24">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded">优先背 · 投智能客服</span>
+        <h2 class="text-xl font-black">Story A · AI 玩家客服</h2>
+      </div>
+
+      <div class="mt-6 space-y-5 leading-8">
+        <div class="star-block star-s p-4 rounded-r-xl bg-slate-50">
+          <p class="text-xs font-bold text-slate-500 uppercase">S · 背景</p>
+          <p class="mt-2 text-slate-800">海外游戏客户做 AI 玩家客服。上线前传统 Bot 只能兜住很少 FAQ，<strong>AI 解决率约 3%</strong>，大量转人工，坐席压力大。</p>
+        </div>
+        <div class="star-block star-t p-4 rounded-r-xl bg-indigo-50/50">
+          <p class="text-xs font-bold text-indigo-600 uppercase">T · 任务</p>
+          <p class="mt-2">我负责这条客服产品线：<strong>约 3 个月</strong>把自动化解决拉起来，<strong>转人工可控</strong>，支付/到账不能乱答。</p>
+        </div>
+        <div class="star-block star-a p-4 rounded-r-xl bg-indigo-50">
+          <p class="text-xs font-bold text-indigo-800 uppercase">A · 动作</p>
+          <ul class="mt-2 list-disc pl-5 space-y-1.5">
+            <li>FAQ 分域（支付库 / 玩法库），定 RAG 切片和转人工阈值</li>
+            <li>PRD：置信度低、敏感词、到账承诺 → 强制 handoff</li>
+            <li>评测集 + Badcase 回流，迭代 Prompt 和知识库 SOP</li>
+            <li>和坐席对齐同一套知识版本</li>
+          </ul>
+        </div>
+        <div class="star-block star-r p-4 rounded-r-xl bg-emerald-50">
+          <p class="text-xs font-bold text-emerald-800 uppercase">R · 结果</p>
+          <p class="mt-2"><strong>约 3 个月</strong>：解决率 <strong>~80%</strong>，转人工 <strong>~97% → ~20%</strong>。我是 product owner，拍清 scope、指标和跨团队节奏。</p>
+        </div>
+      </div>
+
+      <p class="mt-4 text-xs text-indigo-700">深挖转人工逻辑 → <a href="interview-qa-cs-handoff.html" class="font-semibold underline">置信度 / 阈值口播 + QA</a></p>
+    </section>
+
+    <!-- Story B -->
+    <section id="story-b" class="mt-12 pt-8 border-t border-slate-100 scroll-mt-24">
+      <h2 class="text-lg font-black">Story B · 坐席 handoff / 自研工作台</h2>
+      <p class="mt-4 leading-7 text-slate-700"><strong>S：</strong>转人工走外采坐席，和 bot 两套系统，上下文断。<strong>T：</strong>推动自研工作台，handoff 带上下文和 AI 摘要。<strong>R：</strong>自研上线，上下文完整率提升；AHT 等效率数字在收，不硬编。</p>
+    </section>
+
+    <!-- Story C -->
+    <section id="story-c" class="mt-8 scroll-mt-24">
+      <h2 class="text-lg font-black">Story C · AI 外呼</h2>
+      <p class="mt-4 leading-7 text-slate-700"><strong>S：</strong>外呼 scale，线路不稳、合规严。<strong>T：</strong>0→1 搭外呼分类/话术/意图。<strong>A：</strong>支付转客服；克隆音改 1 分钟录音降本。<strong>R：</strong>接通 30–50%；线路成本 ↓30–40%，获客单价 ↓20–30%。</p>
+      <p class="mt-2 text-xs"><a href="career.html" class="text-indigo-600">外呼 3 分钟全文</a> 见 Cursor md · 已验收 23/25</p>
+    </section>
+  </main>
+</body>
+</html>

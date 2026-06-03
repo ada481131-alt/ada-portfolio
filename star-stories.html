@@ -67,15 +67,54 @@
 
     <!-- Story B -->
     <section id="story-b" class="mt-12 pt-8 border-t border-slate-100 scroll-mt-24">
-      <h2 class="text-lg font-black">Story B · 坐席 handoff / 自研工作台</h2>
-      <p class="mt-4 leading-7 text-slate-700"><strong>S：</strong>转人工走外采坐席，和 bot 两套系统，上下文断。<strong>T：</strong>推动自研工作台，handoff 带上下文和 AI 摘要。<strong>R：</strong>自研上线，上下文完整率提升；AHT 等效率数字在收，不硬编。</p>
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">今日主攻 · 坐席</span>
+        <h2 class="text-xl font-black">Story B · 坐席 handoff / 自研工作台</h2>
+      </div>
+
+      <div class="mt-6 space-y-5 leading-8">
+        <div class="star-block star-s p-4 rounded-r-xl bg-slate-50">
+          <p class="text-xs font-bold text-slate-500 uppercase">S · 背景</p>
+          <p class="mt-2 text-slate-800">客服 AI 解决率上来后转人工量仍大，会话走 <strong>外采第三方坐席</strong>，和自研 bot、知识库两套系统。坐席看不到玩家前面跟 bot 聊了什么，支付/合规上下文断，复盘培训都费劲。</p>
+        </div>
+        <div class="star-block star-t p-4 rounded-r-xl bg-amber-50/50">
+          <p class="text-xs font-bold text-amber-800 uppercase">T · 任务</p>
+          <p class="mt-2">推动 <strong>坐席工作台自研</strong>，和 AI 客服、外呼同平台；handoff 带 <strong>完整上下文 + AI 摘要</strong>，先保链路，再收效率指标。</p>
+        </div>
+        <div class="star-block star-a p-4 rounded-r-xl bg-amber-50">
+          <p class="text-xs font-bold text-amber-900 uppercase">A · 动作</p>
+          <ul class="mt-2 list-disc pl-5 space-y-1.5">
+            <li>MVP：实时会话、历史、监控、敏感词、<strong>支付队列</strong></li>
+            <li>自研周期长，按模块分批验收，<strong>优先 handoff 链路</strong></li>
+            <li>转人工屏必现：意向标签、合规 disclaimer、bot 过度承诺</li>
+            <li>运营培训 SOP，和 Story A 知识版本一致</li>
+          </ul>
+        </div>
+        <div class="star-block star-r p-4 rounded-r-xl bg-emerald-50">
+          <p class="text-xs font-bold text-emerald-800 uppercase">R · 结果</p>
+          <p class="mt-2">外采切到 <strong>自研工作台上线</strong>；handoff <strong>上下文完整率明显提升</strong>（坐席少反复问玩家）。AHT 等效率数字在收，<strong>不硬编</strong>。</p>
+        </div>
+      </div>
+
+      <div class="mt-5 p-4 rounded-xl bg-amber-50 border border-amber-200">
+        <p class="text-xs font-bold text-amber-900 uppercase">30 秒口播</p>
+        <p class="mt-2 text-slate-800 leading-7">「客服起来后转人工还是走外采，上下文断。我推自研坐席工作台，和 bot 同平台，handoff 带完整记录和 AI 摘要。先保支付队列和合规信息上屏，分批上线。自研替换外采后，上下文完整率明显好了。」</p>
+      </div>
+
+      <p class="mt-4 text-xs text-amber-800">体验 handoff → <a href="demo-agent-workbench.html" class="font-semibold underline">坐席工作台 demo</a></p>
     </section>
 
     <!-- Story C -->
     <section id="story-c" class="mt-8 scroll-mt-24">
-      <h2 class="text-lg font-black">Story C · AI 外呼</h2>
-      <p class="mt-4 leading-7 text-slate-700"><strong>S：</strong>外呼 scale，线路不稳、合规严。<strong>T：</strong>0→1 搭外呼分类/话术/意图。<strong>A：</strong>支付转客服；克隆音改 1 分钟录音降本。<strong>R：</strong>接通 30–50%；线路成本 ↓30–40%，获客单价 ↓20–30%。</p>
-      <p class="mt-2 text-xs"><a href="career.html" class="text-indigo-600">外呼 3 分钟全文</a> 见 Cursor md · 已验收 23/25</p>
+      <h2 class="text-lg font-black">Story C · AI 外呼（拉新 / 拉回 / 活动通知）</h2>
+      <p class="mt-2 text-xs text-violet-700 font-semibold">仅营销触达 · 不答其他 · 不转人工</p>
+      <div class="mt-4 space-y-4 leading-7 text-slate-700">
+        <p><strong>S：</strong>外呼做拉新、流失拉回、活动优惠通知，不是客服电话。</p>
+        <p><strong>T：</strong>0→1 搭分类与活动脚本；<strong>只播预录脚本</strong>。</p>
+        <p><strong>A：</strong>市场/分层脚本 · 过滤下线活动 · <strong>不解答、不 handoff</strong> · 克隆改 1 分钟预录降本。</p>
+        <p><strong>R：</strong>接通 30–50%；线路成本 ↓30–40%，获客单价 ↓20–30%。</p>
+      </div>
+      <p class="mt-4 text-xs text-indigo-700">全文 + 30 秒版 → Cursor <code class="bg-slate-100 px-1 rounded">star-stories.md</code> Story C</p>
     </section>
   </main>
 </body>

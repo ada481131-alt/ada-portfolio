@@ -55,11 +55,11 @@
       "status": "pending",
       "cmd": "验收 English 周练",
       "minutes": 35,
-      "prompt": "① 电脑打开 english-work-log.md，写 Progress 和 Decision 各 3～5 句英文\n② 打开 Story A 中英文对照，念 S 和 T 各 2 遍\n③ 听 10 分钟英文（播客或 YouTube，开字幕）",
-      "write_hint": "写英文的文件：career/evidence/english-work-log.md",
-      "cursor_start": "我要交 English 周练，帮我检查 english-work-log.md 并验收",
-      "read": "star-stories.html#story-a",
-      "read_label": "Story A · 中英文对照"
+      "prompt": "① 打开 english-work-log.html 在线写 Progress 和 Decision 各 3～5 句\n② 打开 Story A 中英文对照，念 S 和 T 各 2 遍\n③ 听 10 分钟英文（播客或 YouTube，开字幕）",
+      "write_hint": "不用开 md：浏览器打开 english-work-log.html 直接写",
+      "cursor_start": "验收 English 周练，我网页写好了",
+      "read": "english-work-log.html",
+      "read_label": "打开在线写作页 →",
     },
     {
       "id": "w2-6",

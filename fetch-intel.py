@@ -100,20 +100,68 @@ def dedupe(items: list[dict]) -> list[dict]:
     return out
 
 
+RADAR_KEEP_MAX = 20
+
+
+def load_existing_radar_items() -> list[dict]:
+    for path in (REPO_ROOT / "radar-latest.json", DATA / "radar-latest.json"):
+        if not path.exists():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            items = data.get("items") or []
+            if items and items[0].get("title") != "本轮无结果":
+                return items
+        except (json.JSONDecodeError, OSError):
+            continue
+    return []
+
+
+def merge_radar_items(new_items: list[dict], existing_items: list[dict]) -> list[dict]:
+    """新条目在前；旧条目保留，避免工作日次日被整批替换消失。"""
+    return dedupe((new_items or []) + (existing_items or []))[:RADAR_KEEP_MAX]
+
+
 def run_radar() -> dict:
     raw: list[dict] = []
     for region, q in RADAR_QUERIES:
         for hit in search(q, 3):
             raw.append({**hit, "region": region, "tags": ["AI PM", region]})
-    items = dedupe(raw)[:12]
+    new_items = dedupe(raw)[:12]
+    items = merge_radar_items(new_items, load_existing_radar_items())
     return {
         "type": "radar",
         "updated": now_cst(),
         "source": "github-actions",
-        "cadence": "每周一自动更新",
+        "cadence": "每天 08:00 自动更新 · 条目累计保留（最多 20 条）",
         "items": items or [{"region": "-", "title": "本轮无结果", "snippet": "下周再试或 Cursor 跑市场雷达", "url": "", "tags": []}],
         "disclaimer": "公开摘要，投递前请核实 JD 与薪资",
     }
+
+
+SCOUT_KEEP_MAX = 15
+
+
+def load_existing_scout_items() -> list[dict]:
+    for path in (REPO_ROOT / "scout-latest.json", DATA / "scout-latest.json"):
+        if not path.exists():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            items = data.get("items") or []
+            if items and items[0].get("title") != "本轮无结果":
+                return items
+        except (json.JSONDecodeError, OSError):
+            continue
+    archive = DATA.parent / "opportunity-scout" / "2026-05-29.json"
+    if archive.exists():
+        try:
+            items = json.loads(archive.read_text(encoding="utf-8")).get("items") or []
+            if items and items[0].get("title") != "本轮无结果":
+                return items
+        except (json.JSONDecodeError, OSError):
+            pass
+    return []
 
 
 def run_scout() -> dict:
@@ -125,12 +173,14 @@ def run_scout() -> dict:
                 "category": cat,
                 "suggestion": "观察",
             })
-    items = dedupe(raw)[:10]
+    new_items = dedupe(raw)[:10]
+    existing = load_existing_scout_items()
+    items = dedupe((new_items or []) + (existing or []))[:SCOUT_KEEP_MAX]
     return {
         "type": "scout",
         "updated": now_cst(),
         "source": "github-actions",
-        "cadence": "每周五自动更新",
+        "cadence": "周一 / 周三 / 周五 08:00 自动更新",
         "items": items or [{"category": "-", "title": "本轮无结果", "snippet": "Cursor 说「创业风口」补跑", "url": "", "suggestion": "观察"}],
         "disclaimer": "不构成投资建议；默认求职优先于副业",
     }

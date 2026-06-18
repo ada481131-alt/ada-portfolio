@@ -1,15 +1,15 @@
 {
   "radar": {
     "label": "高薪岗位雷达",
-    "cadence": "工作日 08:00（北京时间）· 条目累计保留",
-    "cron_utc": "0 0 * * 1-5",
-    "note": "GitHub Action 抓公开搜索摘要，与旧条目合并（最多 20 条）；精投 JD 在 Cursor 说「跑市场雷达」"
+    "cadence": "每天 08:00（北京时间）· 条目累计保留",
+    "cron_utc": "0 0 * * *",
+    "note": "GitHub Action 抓公开搜索摘要；精投 JD 在 Cursor 说「跑市场雷达」"
   },
   "scout": {
     "label": "兼职 · 创业风口",
-    "cadence": "每周五 08:00（北京时间）",
-    "cron_utc": "0 0 * * 5",
-    "note": "周五看一周风口；重大事件可在 Cursor 随时补跑"
+    "cadence": "周一 / 周三 / 周五 08:00（北京时间）",
+    "cron_utc": "0 0 * * 1,3,5",
+    "note": "比原「仅周五」更勤；重大变化可在 Cursor 说「创业风口」补跑"
   },
   "cursor_deep_dive": "Marcus 人工复核、打分、写 direction.md — 比自动摘要更准",
   "disclaimer": "自动结果为公开信息摘要，不构成求职/投资建议；投递前请自行核实"

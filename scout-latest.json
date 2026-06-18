@@ -1,8 +1,8 @@
 {
   "type": "scout",
-  "updated": "2026-05-29T14:55:59+08:00",
+  "updated": "2026-06-18T15:49:39+08:00",
   "source": "github-actions",
-  "cadence": "每周五自动更新",
+  "cadence": "周一 / 周三 / 周五 08:00 自动更新",
   "items": [
     {
       "title": "AI Funding Tracker | AI Startup Investment Roundups 2026",

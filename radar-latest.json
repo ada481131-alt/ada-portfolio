@@ -1,51 +1,75 @@
 {
   "type": "radar",
-  "updated": "2026-06-01T10:55:00+08:00",
-  "source": "cursor",
-  "cadence": "工作日 08:00 自动更新 · 条目累计保留（最多 20 条）",
+  "updated": "2026-06-18T15:49:37+08:00",
+  "source": "github-actions",
+  "cadence": "每天 08:00 自动更新 · 条目累计保留（最多 20 条）",
   "items": [
     {
       "region": "深圳",
       "title": "金蝶 · AI产品经理（南山）",
       "snippet": "30-60k·14薪 · 5-10年 · AI原生产品、商业化、生成式大模型实操。跳档现金段。",
       "url": "https://www.liepin.com/job/1975566839.shtml",
-      "tags": ["AI PM", "深圳", "D"]
+      "tags": [
+        "AI PM",
+        "深圳",
+        "D"
+      ]
     },
     {
       "region": "深圳",
       "title": "智能客服 AI 产品经理（福田）",
       "snippet": "20-40k·15薪 · 与客服/RAG/评测叙事高度重合，建议优先对标写 JD。",
       "url": "https://www.liepin.com/job/1975274903.shtml",
-      "tags": ["AI PM", "深圳", "A"]
+      "tags": [
+        "AI PM",
+        "深圳",
+        "A"
+      ]
     },
     {
       "region": "深圳",
       "title": "高级 AI 产品经理（科技园 BOSS 合集）",
       "snippet": "多条 40-60K·15薪、25-50K 档；筛选匹配≥75 再聊。",
       "url": "https://www.zhipin.com/zhaopin/1401eedcd07cb80f0nZ82dW0EA~~/",
-      "tags": ["AI PM", "深圳", "D"]
+      "tags": [
+        "AI PM",
+        "深圳",
+        "D"
+      ]
     },
     {
       "region": "远程",
       "title": "Insider One · AI PM B2B SaaS（远程）",
       "snippet": "LLM/RAG/Agent/评测 · 3年+ B2B SaaS · 与现司技能栈接近，需英语。",
       "url": "https://euremotejobs.com/job/ai-product-manager-b2b-saas-martech-remote/",
-      "tags": ["AI PM", "远程", "B"]
+      "tags": [
+        "AI PM",
+        "远程",
+        "B"
+      ]
     },
     {
       "region": "远程",
       "title": "Hostaway · Staff PM AI（EMEA 远程）",
       "snippet": "7年+ · LLM/agentic/评测纪律 · 冲刺位，6-8月可先观望。",
       "url": "https://inclusivelyremote.com/job/staff-product-manager-ai-100-remote-emea/",
-      "tags": ["AI PM", "远程", "E"]
+      "tags": [
+        "AI PM",
+        "远程",
+        "E"
+      ]
     },
     {
       "region": "新加坡",
       "title": "新加坡 AI PM 市场（调研）",
       "snippet": "2026 调研：AI PM 总包中位约 USD 250K 档（含 bonus/equity），需 EP+英语；Jobstreet/Glassdoor 岗位量大。",
       "url": "https://sg.jobstreet.com/ai-product-manager-jobs",
-      "tags": ["AI PM", "新加坡", "E"]
+      "tags": [
+        "AI PM",
+        "新加坡",
+        "E"
+      ]
     }
   ],
-  "disclaimer": "公开摘要，投递前请核实 JD 与薪资；精投以本报告+jd-benchmark为准"
+  "disclaimer": "公开摘要，投递前请核实 JD 与薪资"
 }

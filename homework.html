@@ -11,16 +11,24 @@
     .step-card.active { border-left-color: #f43f5e; }
     .step-card.done { border-left-color: #10b981; opacity: .85; }
     #focus-prompt { white-space: pre-line; }
+    .page-wrap { width: 100%; max-width: 36rem; margin-left: auto; margin-right: auto; padding-left: 1rem; padding-right: 1rem; }
+    @media (min-width: 768px) {
+      .page-wrap { max-width: 48rem; padding-left: 1.5rem; padding-right: 1.5rem; }
+    }
+    @media (min-width: 1024px) {
+      .page-wrap { max-width: 64rem; }
+      .homework-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen pb-8">
 
   <header class="bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-10">
-    <div class="max-w-md mx-auto flex justify-between items-center">
+    <div class="page-wrap flex justify-between items-center">
       <a href="career.html" class="text-sm text-indigo-600">← 成长中心</a>
-      <span id="week-label" class="text-xs text-slate-400"></span>
+      <span id="week-label" class="text-xs text-slate-400 text-right"></span>
     </div>
-    <div id="progress-wrap" class="max-w-md mx-auto mt-2 hidden">
+    <div id="progress-wrap" class="page-wrap mt-2 hidden">
       <div class="flex justify-between text-[11px] text-slate-500 mb-1">
         <span id="progress-text"></span>
         <span id="deadline-text"></span>
@@ -31,31 +39,33 @@
     </div>
   </header>
 
-  <main class="max-w-md mx-auto px-4 pt-5">
+  <main class="page-wrap pt-5 md:pt-8 pb-12">
 
-    <div class="mb-5 bg-indigo-50 border border-indigo-200 rounded-2xl p-4">
-      <p class="text-xs font-bold text-indigo-800">📌 作业唯一入口（收藏这个页面）</p>
-      <p class="mt-2 text-sm text-indigo-950 leading-6">
-        <strong>手机：</strong>看黄框题目 → 电脑写 → 点红色按钮复制一句话 → 到 Cursor 粘贴发送 = 交作业
+    <div class="mb-6 bg-indigo-50 border border-indigo-200 rounded-2xl p-4 md:p-5">
+      <p class="text-xs font-bold text-indigo-800">📌 作业入口（电脑 / 手机自适应）</p>
+      <p class="mt-2 text-sm md:text-base text-indigo-950 leading-7">
+        看题 → Cursor 写 → 复制发送 = 交作业
       </p>
-      <p class="mt-2 text-[11px] text-indigo-600 break-all">ada481131-alt.github.io/ada-portfolio/homework.html</p>
     </div>
 
-    <section id="focus-block" class="hidden">
-      <!-- 题面直接在这，不用跳转 -->
+    <section id="focus-block" class="hidden homework-grid">
+      <div>
       <p class="text-xs font-bold text-rose-600">当前任务</p>
-      <h1 id="focus-title" class="mt-1 text-xl font-black leading-snug"></h1>
+      <h1 id="focus-title" class="mt-1 text-xl md:text-2xl font-black leading-snug"></h1>
 
-      <div class="mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-4">
+      <div class="mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-4 md:p-5">
         <p class="text-[11px] font-bold text-amber-700 uppercase tracking-wide">题目</p>
-        <p id="focus-prompt" class="mt-2 text-sm text-amber-950 leading-7"></p>
+        <p id="focus-prompt" class="mt-2 text-sm md:text-base text-amber-950 leading-7"></p>
         <p id="focus-vocab" class="mt-3 text-xs text-amber-800 leading-5 hidden"></p>
       </div>
 
-      <p id="focus-time" class="mt-3 text-xs text-slate-400"></p>
+      <p id="focus-time" class="mt-3 text-xs md:text-sm text-slate-400"></p>
+      <a id="step1-read-top" href="#" class="hidden mt-3 inline-block text-sm font-semibold text-indigo-600 underline"></a>
+      </div>
 
+      <div>
       <!-- 三步流程 -->
-      <div class="mt-6 space-y-5">
+      <div class="mt-0 md:mt-0 space-y-5">
 
         <!-- Step 1 -->
         <div class="step-card done">
@@ -84,6 +94,7 @@
           </button>
           <p id="cmd-preview" class="mt-2 text-center text-xs text-slate-500 font-mono"></p>
         </div>
+      </div>
       </div>
     </section>
 
@@ -132,12 +143,17 @@
       }
 
       const readLink = document.getElementById("step1-read");
+      const readTop = document.getElementById("step1-read-top");
       if (t.read) {
         readLink.href = t.read;
         readLink.textContent = t.read_label || "补充材料 →";
         readLink.classList.remove("hidden");
+        readTop.href = t.read;
+        readTop.textContent = t.read_label || "打开阅读材料 →";
+        readTop.classList.remove("hidden");
       } else {
         readLink.classList.add("hidden");
+        readTop.classList.add("hidden");
       }
 
       document.getElementById("step2-hint").textContent = t.write_hint || "在 Cursor 里完成。";

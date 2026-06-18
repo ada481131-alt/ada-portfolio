@@ -32,7 +32,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install deps
-        run: pip install -r career/scripts/requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Determine mode
         id: mode
@@ -46,7 +46,7 @@ jobs:
           fi
 
       - name: Fetch intel
-        run: python career/scripts/fetch-intel.py "${{ steps.mode.outputs.value }}"
+        run: python fetch-intel.py "${{ steps.mode.outputs.value }}"
 
       - name: Commit and push
         run: |

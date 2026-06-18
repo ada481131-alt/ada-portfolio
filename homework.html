@@ -184,19 +184,21 @@
         document.getElementById("week-label").textContent = "第 2 周 · 补交";
         document.getElementById("focus-title").textContent = "English 工作语言 · 周练";
         document.getElementById("focus-prompt").textContent =
-          "① 在 english-work-log.md 写 Progress + Decision 各 3～5 句\n" +
+          "① 打开 english-work-log.html 在线写 Progress 和 Decision 各 3～5 句\n" +
           "② star-stories 中英文对照，念 Story A 的 S+T 各 2 遍\n" +
           "③ 听英文 PM 10 分钟\n" +
           "④ 回 Cursor 说：验收 English 周练";
         document.getElementById("focus-time").textContent = "约 35 分钟 · 端午前收工";
         document.getElementById("step2-hint").textContent =
-          "Cursor 里打开 english-work-log.md 写英文；再打开 star-stories 念 S+T。";
+          "打开 english-work-log.html 在线写，不用 md。";
         document.getElementById("btn-start").classList.remove("hidden");
         document.getElementById("btn-start").dataset.text =
-          "我要交 English 周练，帮我检查 english-work-log.md 并验收";
+          "验收 English 周练，我网页写好了";
         document.getElementById("step2-skip").classList.add("hidden");
         document.getElementById("btn-submit").dataset.cmd = "验收 English 周练";
         document.getElementById("cmd-preview").textContent = "「验收 English 周练」";
+        const fbRead = document.getElementById("step1-read-top");
+        if (fbRead) { fbRead.href = "english-work-log.html"; fbRead.textContent = "打开在线写作页 →"; fbRead.classList.remove("hidden"); }
         return;
       }
 

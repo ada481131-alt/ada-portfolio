@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>本周作业 · Ada</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, "PingFang SC", sans-serif; }
+    .step-card { border-left: 3px solid #e2e8f0; padding-left: 1rem; }
+    .step-card.active { border-left-color: #f43f5e; }
+    .step-card.done { border-left-color: #10b981; opacity: .85; }
+    #focus-prompt { white-space: pre-line; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-8">
+
+  <header class="bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-10">
+    <div class="max-w-md mx-auto flex justify-between items-center">
+      <a href="career.html" class="text-sm text-indigo-600">← 成长中心</a>
+      <span id="week-label" class="text-xs text-slate-400"></span>
+    </div>
+    <div id="progress-wrap" class="max-w-md mx-auto mt-2 hidden">
+      <div class="flex justify-between text-[11px] text-slate-500 mb-1">
+        <span id="progress-text"></span>
+        <span id="deadline-text"></span>
+      </div>
+      <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+        <div id="progress-bar" class="h-full bg-emerald-500 rounded-full" style="width:0"></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto px-4 pt-5">
+
+    <div class="mb-5 bg-indigo-50 border border-indigo-200 rounded-2xl p-4">
+      <p class="text-xs font-bold text-indigo-800">📌 作业唯一入口（收藏这个页面）</p>
+      <p class="mt-2 text-sm text-indigo-950 leading-6">
+        <strong>手机：</strong>看黄框题目 → 电脑写 → 点红色按钮复制一句话 → 到 Cursor 粘贴发送 = 交作业
+      </p>
+      <p class="mt-2 text-[11px] text-indigo-600 break-all">ada481131-alt.github.io/ada-portfolio/homework.html</p>
+    </div>
+
+    <section id="focus-block" class="hidden">
+      <!-- 题面直接在这，不用跳转 -->
+      <p class="text-xs font-bold text-rose-600">当前任务</p>
+      <h1 id="focus-title" class="mt-1 text-xl font-black leading-snug"></h1>
+
+      <div class="mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-4">
+        <p class="text-[11px] font-bold text-amber-700 uppercase tracking-wide">题目</p>
+        <p id="focus-prompt" class="mt-2 text-sm text-amber-950 leading-7"></p>
+        <p id="focus-vocab" class="mt-3 text-xs text-amber-800 leading-5 hidden"></p>
+      </div>
+
+      <p id="focus-time" class="mt-3 text-xs text-slate-400"></p>
+
+      <!-- 三步流程 -->
+      <div class="mt-6 space-y-5">
+
+        <!-- Step 1 -->
+        <div class="step-card done">
+          <p class="text-xs font-bold text-emerald-600">第 1 步 · 看题</p>
+          <p class="mt-1 text-sm text-slate-600">上面黄框就是题目，不用去别的页面找。</p>
+          <a id="step1-read" href="#" class="hidden mt-2 inline-block text-xs font-semibold text-indigo-600 underline"></a>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card active">
+          <p class="text-xs font-bold text-rose-600">第 2 步 · 在电脑上完成</p>
+          <p id="step2-hint" class="mt-1 text-sm text-slate-600 leading-6"></p>
+          <p class="mt-2 text-[11px] text-slate-500">打开 Mac 上的 <strong>Cursor</strong>（像聊天软件一样）</p>
+          <button type="button" id="btn-start" class="hidden mt-3 w-full text-sm font-bold bg-indigo-600 text-white py-3.5 rounded-xl">
+            复制「开始写」这句话
+          </button>
+          <p id="step2-skip" class="hidden mt-2 text-xs text-slate-400">这项不用写文件，练完直接第 3 步。</p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card">
+          <p class="text-xs font-bold text-slate-500">第 3 步 · 交作业（像发微信一样）</p>
+          <p class="mt-1 text-sm text-slate-600">做完 → 点下面按钮 → 打开 Cursor → 粘贴 → 回车发送 → 等打分</p>
+          <button type="button" id="btn-submit" class="mt-3 w-full text-sm font-bold bg-rose-600 text-white py-3.5 rounded-xl">
+            复制交作业这句话
+          </button>
+          <p id="cmd-preview" class="mt-2 text-center text-xs text-slate-500 font-mono"></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="done-block" class="hidden text-center py-16">
+      <p class="text-4xl">🎉</p>
+      <p class="mt-3 text-xl font-black">本周主线完成</p>
+    </section>
+
+    <div class="mt-8 space-y-2">
+      <details id="next-details" class="hidden bg-white rounded-xl px-4 py-3 border border-slate-200">
+        <summary class="text-sm font-medium text-slate-600 cursor-pointer">下一项：<span id="next-summary"></span></summary>
+        <p id="next-preview" class="mt-2 text-xs text-slate-500 leading-5"></p>
+      </details>
+
+      <details class="bg-white rounded-xl px-4 py-3 border border-slate-200">
+        <summary class="text-sm font-medium text-slate-600 cursor-pointer">已完成 / 可选项</summary>
+        <ul id="done-list" class="mt-2 space-y-1 text-sm text-slate-500"></ul>
+        <ul id="optional-list" class="mt-2 space-y-1 text-sm text-slate-400"></ul>
+      </details>
+    </div>
+  </main>
+
+  <p id="toast" class="fixed top-20 inset-x-4 mx-auto max-w-sm text-center bg-slate-900 text-white text-sm px-4 py-3 rounded-2xl hidden z-20 shadow-lg leading-6"></p>
+
+  <script>
+    const BASE = location.pathname.replace(/\/[^/]*$/, "/");
+
+    function esc(s) {
+      return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    }
+
+    function isMainline(t) { return !t.optional; }
+
+    function showFocus(t) {
+      document.getElementById("focus-block").classList.remove("hidden");
+      document.getElementById("focus-title").textContent = t.title;
+      document.getElementById("focus-prompt").textContent = t.prompt || t.what || "";
+      document.getElementById("focus-time").textContent = t.minutes ? "约 " + t.minutes + " 分钟 · " + (t.write_hint || "") : (t.write_hint || "");
+
+      const vocabEl = document.getElementById("focus-vocab");
+      if (t.vocab && t.vocab.length) {
+        vocabEl.textContent = "必背词：" + t.vocab.join(" · ");
+        vocabEl.classList.remove("hidden");
+      } else {
+        vocabEl.classList.add("hidden");
+      }
+
+      const readLink = document.getElementById("step1-read");
+      if (t.read) {
+        readLink.href = t.read;
+        readLink.textContent = t.read_label || "补充材料 →";
+        readLink.classList.remove("hidden");
+      } else {
+        readLink.classList.add("hidden");
+      }
+
+      document.getElementById("step2-hint").textContent = t.write_hint || "在 Cursor 里完成。";
+
+      const startBtn = document.getElementById("btn-start");
+      const skipHint = document.getElementById("step2-skip");
+      if (t.cursor_start) {
+        startBtn.classList.remove("hidden");
+        startBtn.dataset.text = t.cursor_start;
+        skipHint.classList.add("hidden");
+      } else {
+        startBtn.classList.add("hidden");
+        skipHint.classList.remove("hidden");
+      }
+
+      document.getElementById("btn-submit").dataset.cmd = t.cmd;
+      document.getElementById("cmd-preview").textContent = "「" + t.cmd + "」";
+    }
+
+    async function loadHomework() {
+      let data;
+      try {
+        const r = await fetch(BASE + "homework-latest.json?t=" + Date.now());
+        if (!r.ok) throw new Error("missing");
+        data = await r.json();
+      } catch {
+        document.getElementById("focus-block").classList.remove("hidden");
+        document.getElementById("week-label").textContent = "第 2 周 · 补交";
+        document.getElementById("focus-title").textContent = "English 工作语言 · 周练";
+        document.getElementById("focus-prompt").textContent =
+          "① 在 english-work-log.md 写 Progress + Decision 各 3～5 句\n" +
+          "② star-stories 中英文对照，念 Story A 的 S+T 各 2 遍\n" +
+          "③ 听英文 PM 10 分钟\n" +
+          "④ 回 Cursor 说：验收 English 周练";
+        document.getElementById("focus-time").textContent = "约 35 分钟 · 端午前收工";
+        document.getElementById("step2-hint").textContent =
+          "Cursor 里打开 english-work-log.md 写英文；再打开 star-stories 念 S+T。";
+        document.getElementById("btn-start").classList.remove("hidden");
+        document.getElementById("btn-start").dataset.text =
+          "我要交 English 周练，帮我检查 english-work-log.md 并验收";
+        document.getElementById("step2-skip").classList.add("hidden");
+        document.getElementById("btn-submit").dataset.cmd = "验收 English 周练";
+        document.getElementById("cmd-preview").textContent = "「验收 English 周练」";
+        return;
+      }
+
+      document.getElementById("week-label").textContent = data.week || "";
+      document.getElementById("deadline-text").textContent = data.deadline || "";
+
+      const all = data.tasks || [];
+      const done = all.filter((t) => t.status === "done");
+      const pending = all.filter((t) => t.status !== "done");
+      const mainPending = pending.filter(isMainline);
+      const optionalPending = pending.filter((t) => t.optional);
+      const mainAll = all.filter(isMainline);
+      const mainDone = mainAll.filter((t) => t.status === "done");
+      const next = mainPending[0] || optionalPending[0];
+
+      if (mainAll.length) {
+        document.getElementById("progress-wrap").classList.remove("hidden");
+        const pct = Math.round((mainDone.length / mainAll.length) * 100);
+        document.getElementById("progress-bar").style.width = pct + "%";
+        document.getElementById("progress-text").textContent = "主线 " + mainDone.length + "/" + mainAll.length;
+      }
+
+      if (!next) {
+        document.getElementById("done-block").classList.remove("hidden");
+        document.getElementById("progress-bar").style.width = "100%";
+      } else {
+        showFocus(next);
+        const rest = mainPending.filter((t) => t.id !== next.id);
+        if (rest[0]) {
+          document.getElementById("next-details").classList.remove("hidden");
+          document.getElementById("next-summary").textContent = rest[0].title;
+          document.getElementById("next-preview").textContent = rest[0].prompt || "";
+        }
+      }
+
+      document.getElementById("done-list").innerHTML = done.map((t) =>
+        `<li>✓ ${esc(t.title)} <span class="text-emerald-600">${esc(t.score || "")}</span></li>`
+      ).join("") || "";
+
+      document.getElementById("optional-list").innerHTML = optionalPending.map((t) =>
+        `<li>○ ${esc(t.title)}（可选）</li>`
+      ).join("");
+    }
+
+    async function copyText(text, msg) {
+      if (!text) return;
+      try { await navigator.clipboard.writeText(text); } catch {
+        const ta = document.createElement("textarea");
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); ta.remove();
+      }
+      const toast = document.getElementById("toast");
+      toast.textContent = msg || ("已复制「" + text + "」");
+      toast.classList.remove("hidden");
+      setTimeout(() => toast.classList.add("hidden"), 3000);
+    }
+
+    document.getElementById("btn-start").addEventListener("click", (e) => {
+      copyText(e.currentTarget.dataset.text, "已复制 → 打开 Cursor → 粘贴发送 → 开始写");
+    });
+    document.getElementById("btn-submit").addEventListener("click", (e) => {
+      copyText(e.currentTarget.dataset.cmd, "已复制 → 打开 Cursor → 粘贴发送 → 交作业");
+    });
+
+    loadHomework();
+  </script>
+</body>
+</html>

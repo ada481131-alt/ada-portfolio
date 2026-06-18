@@ -2,7 +2,7 @@
   "type": "radar",
   "updated": "2026-06-01T10:55:00+08:00",
   "source": "cursor",
-  "cadence": "Cursor 深度复核 · 2026-06-01",
+  "cadence": "工作日 08:00 自动更新 · 条目累计保留（最多 20 条）",
   "items": [
     {
       "region": "深圳",

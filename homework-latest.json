@@ -1,0 +1,89 @@
+{
+  "week": "第 2 周 · 6/8 — 6/14（补交 English 周练）",
+  "updated": "2026-06-18",
+  "deadline": "端午前收工 · 假后不再追",
+  "tasks": [
+    {
+      "id": "w2-1",
+      "title": "Story B 坐席 STAR",
+      "status": "done",
+      "score": "20/25",
+      "cmd": "验收坐席"
+    },
+    {
+      "id": "w2-2",
+      "title": "Story A 客服 STAR",
+      "status": "done",
+      "score": "24/25",
+      "cmd": "验收客服"
+    },
+    {
+      "id": "w2-4",
+      "title": "外呼 bullet 进简历",
+      "status": "done",
+      "cmd": "确认更新简历"
+    },
+    {
+      "id": "w2-t1",
+      "title": "产品判断题 · 转人工阈值",
+      "status": "done",
+      "score": "8/10",
+      "cmd": "验收 Product sense",
+      "minutes": 20,
+      "prompt": "AI 客服里，转人工阈值从 70% 调到 85%，你会预期哪两个指标怎么变？为什么支付场景和玩法场景可能用不同阈值？",
+      "write_hint": "在 Cursor 写 5～8 句就行，说你的判断，别抄参考答案。",
+      "cursor_start": "我要做 product sense 题1，帮我把答案写进 career/evidence/top-pm-product-sense.md 的「你的回答」区",
+      "read": null
+    },
+    {
+      "id": "w2-e1",
+      "title": "英文口播 · Story A 客服",
+      "status": "done",
+      "score": "8/10",
+      "cmd": "验收英文",
+      "minutes": 15,
+      "prompt": "用英文讲 Story A（AI 客服 STAR），90 秒内。简单句 + 数字即可，CET-4 水平够用。",
+      "write_hint": "先对着中文 Story A 熟悉，再念英文。卡壳正常，多念几遍。",
+      "cursor_start": "我要练 Story A 英文 90 秒，帮我在 career/evidence/english-pm-scripts.md 改「你的英文版」",
+      "read": "star-stories.html#story-a",
+      "read_label": "打开 Story A · 点「中英文对照」",
+      "vocab": ["resolution rate 解决率", "handoff 转人工", "threshold 阈值", "badcase 错例", "rollout rollout"]
+    },
+    {
+      "id": "w2-en-w",
+      "title": "English 工作语言 · 周练",
+      "status": "pending",
+      "cmd": "验收 English 周练",
+      "minutes": 35,
+      "prompt": "① 电脑打开 english-work-log.md，写 Progress 和 Decision 各 3～5 句英文\n② 打开 Story A 中英文对照，念 S 和 T 各 2 遍\n③ 听 10 分钟英文（播客或 YouTube，开字幕）",
+      "write_hint": "写英文的文件：career/evidence/english-work-log.md",
+      "cursor_start": "我要交 English 周练，帮我检查 english-work-log.md 并验收",
+      "read": "star-stories.html#story-a",
+      "read_label": "Story A · 中英文对照"
+    },
+    {
+      "id": "w2-6",
+      "title": "index 上线",
+      "status": "pending",
+      "optional": true,
+      "cmd": "确认上线 index.html",
+      "minutes": 5,
+      "prompt": "本地 index 已改好标题和技能栈。打开看看满意不满意，满意就上线。",
+      "write_hint": "满意再说口令，Marcus 会告诉你只传哪个文件。",
+      "cursor_start": null,
+      "read": "index.html",
+      "read_label": "预览作品集"
+    },
+    {
+      "id": "w2-5",
+      "title": "本周打包验收",
+      "status": "pending",
+      "optional": true,
+      "cmd": "本周验收",
+      "minutes": 10,
+      "prompt": "上面主线都做完（或你决定跳过）后，让 Marcus 当周打包打分。",
+      "write_hint": null,
+      "cursor_start": null
+    }
+  ]
+}

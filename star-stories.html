@@ -13,6 +13,13 @@
     .star-a { border-color: #4f46e5; }
     .star-r { border-color: #059669; }
     @media print { .no-print { display: none !important; } }
+    .bilingual-on .bilingual-en { display: block !important; }
+    .bilingual-on .star-dual { display: grid; grid-template-columns: 1fr; gap: 0.75rem; }
+    @media (min-width: 768px) {
+      .bilingual-on .star-dual { grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .bilingual-en { border-left: 2px solid #c7d2fe; padding-left: 0.75rem; }
+    }
+    .bilingual-en { display: none; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 text-sm">
@@ -33,32 +40,91 @@
 
     <!-- Story A -->
     <section id="story-a" class="mt-10 scroll-mt-24">
-      <div class="flex flex-wrap items-center gap-2">
-        <span class="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded">优先背 · 投智能客服</span>
-        <h2 class="text-xl font-black">Story A · AI 玩家客服</h2>
+      <div class="flex flex-wrap items-center gap-2 justify-between">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded">优先背 · 投智能客服</span>
+          <h2 class="text-xl font-black">Story A · AI 玩家客服</h2>
+        </div>
+        <button type="button" id="btn-bilingual-a" class="no-print text-xs font-bold border-2 border-indigo-200 text-indigo-700 px-3 py-1.5 rounded-full hover:bg-indigo-50">
+          中英文对照
+        </button>
       </div>
+      <p id="bilingual-hint-a" class="hidden mt-2 text-xs text-indigo-600">左侧中文 · 右侧英文 90 秒稿 · 验收在 Cursor 说 <strong>验收英文</strong></p>
 
-      <div class="mt-6 space-y-5 leading-8">
+      <details class="mt-4 bilingual-en rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs">
+        <summary class="font-bold cursor-pointer text-slate-700">PM 词汇 · Story A（点开背）</summary>
+        <p class="mt-2 leading-6 text-slate-600">resolution rate 解决率 · handoff 转人工 · threshold 阈值 · badcase 错例 · compliance 合规 · tradeoff 取舍 · rollout  rollout · product owner · scope · baseline</p>
+      </details>
+
+      <div id="story-a-body" class="mt-6 space-y-5 leading-8">
         <div class="star-block star-s p-4 rounded-r-xl bg-slate-50">
-          <p class="text-xs font-bold text-slate-500 uppercase">S · 背景</p>
-          <p class="mt-2 text-slate-800">海外游戏客户做 AI 玩家客服。上线前传统 Bot 只能兜住很少 FAQ，<strong>AI 解决率约 3%</strong>，大量转人工，坐席压力大。</p>
+          <div class="star-dual">
+            <div>
+              <p class="text-xs font-bold text-slate-500 uppercase">S · 背景</p>
+              <p class="mt-2 text-slate-800">海外游戏客户做 AI 玩家客服。上线前传统 Bot 只能兜住很少 FAQ，<strong>AI 解决率约 3%</strong>，九成以上转人工，玩家也等得久。</p>
+            </div>
+            <div class="bilingual-en">
+              <p class="text-xs font-bold text-slate-400 uppercase">S · Situation</p>
+              <p class="mt-2 text-slate-700 text-[13px] leading-7">We built AI player support for overseas gaming clients. Before launch, the old bot only solved about <strong>3%</strong> of questions. More than <strong>90%</strong> of chats went to human agents, and players waited too long.</p>
+            </div>
+          </div>
         </div>
         <div class="star-block star-t p-4 rounded-r-xl bg-indigo-50/50">
-          <p class="text-xs font-bold text-indigo-600 uppercase">T · 任务</p>
-          <p class="mt-2">我负责这条客服产品线：<strong>约 3 个月</strong>把自动化解决拉起来，<strong>转人工可控</strong>，支付/到账不能乱答。</p>
+          <div class="star-dual">
+            <div>
+              <p class="text-xs font-bold text-indigo-600 uppercase">T · 任务</p>
+              <p class="mt-2">我负责这条客服线：<strong>约 3 个月</strong>把自动解决拉起来，<strong>转人工可控</strong>，支付/到账不能乱答。</p>
+            </div>
+            <div class="bilingual-en">
+              <p class="text-xs font-bold text-indigo-400 uppercase">T · Task</p>
+              <p class="mt-2 text-slate-700 text-[13px] leading-7">I was the <strong>product owner</strong> for this line. In about <strong>three months</strong>, we needed a higher <strong>resolution rate</strong>, <strong>controlled handoff</strong>, and <strong>compliance</strong> on payment questions — no wrong promises.</p>
+            </div>
+          </div>
         </div>
         <div class="star-block star-a p-4 rounded-r-xl bg-indigo-50">
-          <p class="text-xs font-bold text-indigo-800 uppercase">A · 动作</p>
-          <ul class="mt-2 list-disc pl-5 space-y-1.5">
-            <li>FAQ 分域（支付库 / 玩法库），定 RAG 切片和转人工阈值</li>
-            <li>PRD：置信度低、敏感词、到账承诺 → 强制 handoff</li>
-            <li>评测集 + Badcase 回流，迭代 Prompt 和知识库 SOP</li>
-            <li>和坐席对齐同一套知识版本</li>
-          </ul>
+          <div class="star-dual">
+            <div>
+              <p class="text-xs font-bold text-indigo-800 uppercase">A · 动作</p>
+              <ul class="mt-2 list-disc pl-5 space-y-1.5">
+                <li>FAQ 分域（支付库 / 玩法库），支付场景 <strong>threshold</strong> 更严</li>
+                <li>PRD：置信度低、敏感词、到账承诺 → 强制 handoff</li>
+                <li>评测集 + <strong>badcase</strong> 回流，迭代 Prompt 和知识库</li>
+                <li>和坐席同一套知识版本</li>
+                <li>先打透 <strong>3 个核心市场</strong>，没有一上来铺 30 语言</li>
+              </ul>
+            </div>
+            <div class="bilingual-en">
+              <p class="text-xs font-bold text-indigo-400 uppercase">A · Action</p>
+              <ul class="mt-2 list-disc pl-5 space-y-1.5 text-[13px] leading-7 text-slate-700">
+                <li>Split FAQs into <strong>payment</strong> and <strong>gameplay</strong> libraries; stricter <strong>handoff thresholds</strong> for payments</li>
+                <li>PRD: low confidence, sensitive words, or payout promises → <strong>forced handoff</strong></li>
+                <li>Built an <strong>eval set</strong> and <strong>badcase</strong> loop for prompts and the knowledge base</li>
+                <li>Agents used the <strong>same knowledge version</strong> as the bot</li>
+                <li><strong>Roll out</strong> to <strong>three core markets first</strong>, not 30 languages — a <strong>tradeoff</strong> on speed vs quality</li>
+              </ul>
+            </div>
+          </div>
         </div>
         <div class="star-block star-r p-4 rounded-r-xl bg-emerald-50">
-          <p class="text-xs font-bold text-emerald-800 uppercase">R · 结果</p>
-          <p class="mt-2"><strong>约 3 个月</strong>：解决率 <strong>~80%</strong>，转人工 <strong>~97% → ~20%</strong>。我是 product owner，拍清 scope、指标和跨团队节奏。</p>
+          <div class="star-dual">
+            <div>
+              <p class="text-xs font-bold text-emerald-800 uppercase">R · 结果</p>
+              <p class="mt-2"><strong>约 3 个月</strong>：解决率 <strong>~80%</strong>，转人工 <strong>~97% → ~20%</strong>（同一批核心 FAQ、上线前后对比）。我是 product owner，拍清 scope、指标和跨团队节奏。</p>
+            </div>
+            <div class="bilingual-en">
+              <p class="text-xs font-bold text-emerald-600 uppercase">R · Result</p>
+              <p class="mt-2 text-slate-700 text-[13px] leading-7">In about three months, <strong>resolution rate reached ~80%</strong>, and <strong>handoff dropped from ~97% to ~20%</strong> (same core FAQ set, before/after). I drove <strong>scope</strong>, metrics, and cross-team delivery.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-5 p-4 rounded-xl bg-indigo-50 border border-indigo-100">
+        <p class="text-xs font-bold text-indigo-900 uppercase">30 秒口播 · 中文</p>
+        <p class="mt-2 text-slate-800 leading-7 text-sm">「我们做海外游戏 AI 客服，原来 Bot 解决率只有 3%，九成多转人工。我负责 3 个月把解决率拉到八成，转人工压到两成。支付玩法分库、阈值和支付强制转人工，badcase 闭环，和坐席同一套知识。」</p>
+        <div class="bilingual-en mt-4 pt-4 border-t border-indigo-200">
+          <p class="text-xs font-bold text-indigo-400 uppercase">90 sec · English</p>
+          <p class="mt-2 text-slate-700 leading-7 text-[13px]">Read S→T→A→R on the right column aloud (~90 sec). Full script also in <code class="bg-white px-1 rounded">career/evidence/english-pm-scripts.md</code>.</p>
         </div>
       </div>
 
@@ -117,5 +183,26 @@
       <p class="mt-4 text-xs text-indigo-700">全文 + 30 秒版 → Cursor <code class="bg-slate-100 px-1 rounded">star-stories.md</code> Story C</p>
     </section>
   </main>
+  <script>
+    (function () {
+      const KEY = "star-stories-bilingual-a";
+      const btn = document.getElementById("btn-bilingual-a");
+      const body = document.getElementById("story-a-body");
+      const hint = document.getElementById("bilingual-hint-a");
+      function setOn(on) {
+        document.body.classList.toggle("bilingual-on", on);
+        btn.textContent = on ? "只看中文" : "中英文对照";
+        btn.classList.toggle("bg-indigo-600", on);
+        btn.classList.toggle("text-white", on);
+        btn.classList.toggle("border-indigo-600", on);
+        hint.classList.toggle("hidden", !on);
+        try { localStorage.setItem(KEY, on ? "1" : "0"); } catch (_) {}
+      }
+      btn.addEventListener("click", () => setOn(!document.body.classList.contains("bilingual-on")));
+      if (location.hash === "#story-a-en" || (function () { try { return localStorage.getItem(KEY) === "1"; } catch (_) { return false; } })()) {
+        setOn(true);
+      }
+    })();
+  </script>
 </body>
 </html>

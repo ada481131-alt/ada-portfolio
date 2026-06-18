@@ -1,9 +1,9 @@
 {
   "radar": {
     "label": "高薪岗位雷达",
-    "cadence": "每周一 08:00（北京时间）",
-    "cron_utc": "0 0 * * 1",
-    "note": "GitHub Action 抓公开搜索摘要；精投 JD 在 Cursor 说「跑市场雷达」"
+    "cadence": "工作日 08:00（北京时间）· 条目累计保留",
+    "cron_utc": "0 0 * * 1-5",
+    "note": "GitHub Action 抓公开搜索摘要，与旧条目合并（最多 20 条）；精投 JD 在 Cursor 说「跑市场雷达」"
   },
   "scout": {
     "label": "兼职 · 创业风口",

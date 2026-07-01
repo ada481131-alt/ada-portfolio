@@ -1,6 +1,6 @@
 {
   "type": "radar",
-  "updated": "2026-06-30T11:30:19+08:00",
+  "updated": "2026-07-01T11:38:50+08:00",
   "source": "github-actions",
   "cadence": "每天 08:00 自动更新 · 条目累计保留（最多 20 条）",
   "items": [

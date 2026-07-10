@@ -1,6 +1,6 @@
 {
   "type": "scout",
-  "updated": "2026-07-08T09:47:25+08:00",
+  "updated": "2026-07-10T09:56:54+08:00",
   "source": "github-actions",
   "cadence": "周一 / 周三 / 周五 08:00 自动更新",
   "items": [

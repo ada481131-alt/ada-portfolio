@@ -1,9 +1,16 @@
 {
   "type": "scout",
-  "updated": "2026-08-14T09:04:54+08:00",
+  "updated": "2026-08-17T08:42:26+08:00",
   "source": "github-actions",
   "cadence": "周一 / 周三 / 周五 08:00 自动更新",
   "items": [
+    {
+      "title": "网络抓取失败",
+      "snippet": "<urlopen error timed out>",
+      "url": "",
+      "category": "AI SaaS",
+      "suggestion": "观察"
+    },
     {
       "title": "AI Funding Tracker | AI Startup Investment Roundups 2026",
       "snippet": "Jeff Bezos&#x27; stealth AI startup, known internally as Project Prometheus, entered talks for a $10 billion funding round at a $38 billion valuation, with JPMorgan and BlackRock named as new investors, according to the Financial Times. The company launched in November 2025 with ",
